@@ -89,7 +89,7 @@
             document.getElementById('dateText').innerText = now.toLocaleDateString(translations[currentLang].langCode, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
             document.getElementById('clockText').innerText = now.toLocaleTimeString(translations[currentLang].langCode, { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
             
-            // اصلاح هوشمند تم برای امارات: روشن بین 6 صبح تا 7 شب
+            // رفع مشکل تم ظهر: روشن بین 6 صبح تا 7 شب
             if (!localStorage.getItem('manualTheme')) {
                 const hour = now.getHours();
                 if (hour >= 6 && hour < 19) document.body.classList.add('light'); 
@@ -138,7 +138,11 @@
             li.innerHTML = `<span>${input.value}</span><span onclick="this.parentElement.remove()" style="cursor:pointer; color:#ef4444; font-weight:bold">✕</span>`; 
             document.getElementById('taskList').appendChild(li); input.value = ''; 
         }
-        function toggleThemeManually() { localStorage.setItem('manualTheme', 'true'); document.body.classList.toggle('light'); }
+        function toggleThemeManually() { 
+            // با کلیک دستی، انتخاب شما در حافظه ذخیره می‌شود
+            localStorage.setItem('manualTheme', 'true'); 
+            document.body.classList.toggle('light'); 
+        }
         setInterval(updateClockAndDate, 1000); updateClockAndDate();
     </script>
 </body>
