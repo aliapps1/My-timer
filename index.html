@@ -16,7 +16,7 @@
         .clock-display { font-size: 1.1rem; font-weight: bold; margin-bottom: 10px; color: var(--text); opacity: 0.7; }
         .time { font-size: 4.5rem; font-weight: 800; margin: 0.5rem 0; color: var(--primary); font-family: monospace; text-align: center; }
         .modes { display: flex; flex-wrap: wrap; justify-content: center; margin: 15px 0; gap: 8px; }
-        .modes button { background: #334155; font-size: 0.7rem; padding: 8px 12px; color: white; border: none; border-radius: 10px; cursor: pointer; min-width: 60px; }
+        .modes button { background: #334155; font-size: 0.75rem; padding: 8px 12px; color: white; border: none; border-radius: 10px; cursor: pointer; min-width: 62px; }
         .modes button.active { background: var(--primary); color: #0f172a; font-weight: bold; }
         .main-btn { width: 100%; padding: 1rem; border: none; border-radius: 15px; cursor: pointer; font-weight: bold; background: var(--primary); color: #0f172a; font-size: 1.2rem; }
         .reset-btn { background: none; border: none; color: #64748b; cursor: pointer; margin-top: 10px; font-size: 0.9rem; text-decoration: underline; width: 100%; text-align: center; }
@@ -69,7 +69,7 @@
         const translations = {
             fa: { title: "تایمر تمرکز", start: "شروع", stop: "توقف", reset: "بازنشانی", rounds: "دورهای تمرکز: ", taskPh: "کار جدید...", dir: "rtl", langCode: 'fa-IR', m5:"۵ د", m15:"۱۵ د", m25:"۲۵ د", m40:"۴۰ د", m60:"۶۰ د" },
             en: { title: "Focus Timer", start: "Start", stop: "Stop", reset: "Reset", rounds: "Focus Rounds: ", taskPh: "New task...", dir: "ltr", langCode: 'en-US', m5:"5m", m15:"15m", m25:"25m", m40:"40m", m60:"60m" },
-            ar: { title: "مؤقت التركيز", start: "بدء", stop: "إيقاف", reset: "إعادة ضبط", rounds: "دورات التركيز: ", taskPh: "مهمة جديدة...", dir: "rtl", langCode: 'ar-SA', m5:"۵ د", m15:"۱۵ د", m25:"۲۵ د", m40:"۴۰ د", m60:"۶۰ د" }
+            ar: { title: "مؤقت التركيز", start: "بدء", stop: "إيقاف", reset: "إعادة ضبط", rounds: "دورات التركيز: ", taskPh: "مهمة جديدة...", dir: "rtl", langCode: 'ar-SA', m5:"٥ د", m15:"١٥ د", m25:"٢٥ د", m40:"٤٠ د", m60:"٦٠ د" }
         };
 
         let timeLeft = 1500, timerId = null, currentLang = 'fa', rounds = 0, isMuted = false;
@@ -118,6 +118,7 @@
             const times = {m5:300, m15:900, m25:1500, m40:2400, m60:3600};
             timeLeft = times[activeBtn.id]; updateDisplay(); document.getElementById('mainBtn').innerText = translations[currentLang].start; }
         function addTask() { const input = document.getElementById('taskInput'); if (!input.value) return; const li = document.createElement('li'); li.innerHTML = `<span>${input.value}</span><span onclick="this.parentElement.remove()" style="cursor:pointer; color:#ef4444">✕</span>`; document.getElementById('taskList').appendChild(li); input.value = ''; }
+        function toggleThemeManually() { document.body.classList.toggle('light'); }
         setInterval(updateClockAndDate, 1000); updateClockAndDate();
     </script>
 </body>
