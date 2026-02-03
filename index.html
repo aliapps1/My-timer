@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Focus Timer | تایمر تمرکز | مؤقت التركيز</title>
-    <meta name="description" content="Smart Multilingual Focus Timer with Dark/Light mode and Task List.">
-    <meta property="og:title" content="Focus Timer Pro - Smart Study Tool">
-    <meta property="og:description" content="تایمر هوشمند تمرکز | مؤقت التركيز الذكي | Professional Work & Study Tool">
+    
+    <title>Focus Timer Pro | ۳ زبانه - ۶ زمانه</title>
+    <meta name="description" content="تایمر هوشمند ۶ زمانه با پشتیبانی از ۳ زبان (FA, EN, AR) و تم خودکار.">
+    <meta property="og:title" content="Focus Timer Pro | تایمر ۳ زبانه هوشمند">
+    <meta property="og:description" content="دارای ۶ بازه زمانی تمرکز | پشتیبانی از ۳ زبان | تم خودکار شب و روز">
     <meta property="og:type" content="website">
+    
     <link rel="icon" href="icon.png">
     <link rel="apple-touch-icon" href="icon.png">
     <style>
@@ -87,7 +89,7 @@
             document.getElementById('dateText').innerText = now.toLocaleDateString(translations[currentLang].langCode, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
             document.getElementById('clockText').innerText = now.toLocaleTimeString(translations[currentLang].langCode, { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
             
-            // اصلاح شده برای امارات: روشن بین 6 صبح تا 7 شب
+            // اصلاح هوشمند تم برای امارات: روشن بین 6 صبح تا 7 شب
             if (!localStorage.getItem('manualTheme')) {
                 const hour = now.getHours();
                 if (hour >= 6 && hour < 19) document.body.classList.add('light'); 
@@ -141,4 +143,3 @@
     </script>
 </body>
 </html>
-
