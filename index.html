@@ -3,13 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
     <title>Focus Timer Pro | ۳ زبانه - ۶ زمانه</title>
     <meta name="description" content="تایمر هوشمند ۶ زمانه با پشتیبانی از ۳ زبان (FA, EN, AR) و تم خودکار.">
     <meta property="og:title" content="Focus Timer Pro | تایمر ۳ زبانه هوشمند">
     <meta property="og:description" content="دارای ۶ بازه زمانی تمرکز | پشتیبانی از ۳ زبان | تم خودکار شب و روز">
     <meta property="og:type" content="website">
-    
     <link rel="icon" href="icon.png">
     <link rel="apple-touch-icon" href="icon.png">
     <style>
@@ -27,9 +25,13 @@
         .modes button.active { background: var(--primary); color: #0f172a; font-weight: bold; border-color: var(--primary); }
         .main-btn { width: 100%; padding: 1.2rem; border: none; border-radius: 18px; cursor: pointer; font-weight: 800; background: var(--primary); color: #0f172a; font-size: 1.3rem; margin-top: 10px; box-shadow: 0 10px 15px -3px rgba(34, 211, 238, 0.3); }
         .reset-btn { background: none; border: none; color: #64748b; cursor: pointer; margin-top: 15px; font-size: 0.95rem; text-decoration: underline; width: 100%; }
-        .lang-btns { position: absolute; top: -55px; left: 10px; display: flex; gap: 8px; }
+        
+        /* اصلاح بخش دکمه‌های زبان برای ثابت ماندن در همه حالت‌ها */
+        .lang-btns { position: absolute; top: -55px; left: 10px; display: flex; gap: 8px; direction: ltr !important; }
         .lang-btns button { font-size: 12px; font-weight: bold; padding: 8px 12px; background: var(--card); color: var(--text); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer; }
-        .top-controls { position: absolute; top: -55px; right: 10px; display: flex; gap: 10px; align-items: center; }
+        
+        /* دکمه‌های کنترل بالا (سمت راست) */
+        .top-controls { position: absolute; top: -55px; right: 10px; display: flex; gap: 10px; align-items: center; direction: ltr !important; }
         .icon-btn { font-size: 22px; cursor: pointer; background: none; border: none; padding: 0; display: flex; align-items: center; justify-content: center; }
         .donate-btn { background: var(--gold) !important; padding: 6px 10px !important; border-radius: 10px !important; text-decoration: none; font-size: 18px; box-shadow: 0 4px 10px rgba(255, 221, 0, 0.3); transition: 0.3s; }
         hr { border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0; }
@@ -88,7 +90,6 @@
             const now = new Date();
             document.getElementById('dateText').innerText = now.toLocaleDateString(translations[currentLang].langCode, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
             document.getElementById('clockText').innerText = now.toLocaleTimeString(translations[currentLang].langCode, { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-            
             const hour = now.getHours();
             if (!localStorage.getItem('manualTheme')) {
                 if (hour >= 6 && hour < 19) document.body.classList.add('light'); 
@@ -104,7 +105,7 @@
             document.getElementById('lbl-rounds').innerText = t.rounds + rounds;
             document.getElementById('taskInput').placeholder = t.taskPh;
             ['m5','m15','m25','m40','m60','m90'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = t[id]; });
-            document.getElementById('mainBtn').innerText = timerId ? t.stop : t.start;
+            document.getElementById('mainBtn').innerText = timerId ? t.stop : (timeLeft < 1500 ? (currentLang==='en'?"Continue":"ادامه") : t.start);
             const card = document.getElementById('mainCard');
             lang === 'en' ? card.classList.add('ltr-mode') : card.classList.remove('ltr-mode');
             updateClockAndDate();
@@ -123,7 +124,6 @@
             }
         }
 
-        // صدای هشدار ۱۰ ثانیه‌ای حرفه‌ای
         function playSound() {
             if (isMuted) return;
             const alarmDuration = 10; 
@@ -149,33 +149,11 @@
         function toggleSound() { isMuted = !isMuted; document.getElementById('soundBtn').innerText = isMuted ? '🔇' : '🔊'; }
         function setTime(s, btn) { resetTimer(); timeLeft = s; updateDisplay(); document.querySelectorAll('.modes button').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
         function updateDisplay() { const m = Math.floor(timeLeft / 60), s = timeLeft % 60; document.getElementById('display').innerText = `${m}:${s < 10 ? '0' : ''}${s}`; }
+        function resetTimer() { clearInterval(timerId); timerId = null; const activeBtn = document.querySelector('.modes button.active'); const times = {m5:300, m15:900, m25:1500, m40:2400, m60:3600, m90:5400}; timeLeft = times[activeBtn.id]; updateDisplay(); document.getElementById('mainBtn').innerText = translations[currentLang].start; }
+        function addTask() { const input = document.getElementById('taskInput'); if (!input.value) return; const li = document.createElement('li'); li.style = "background:rgba(255,255,255,0.05); margin-bottom:8px; padding:12px; border-radius:12px; display:flex; justify-content:space-between; align-items:center; border:1px solid rgba(255,255,255,0.05)"; li.innerHTML = `<span>${input.value}</span><span onclick="this.parentElement.remove()" style="cursor:pointer; color:#ef4444; font-weight:bold">✕</span>`; document.getElementById('taskList').appendChild(li); input.value = ''; }
+        function toggleThemeManually() { localStorage.setItem('manualTheme', 'true'); document.body.classList.toggle('light'); }
         
-        function resetTimer() { 
-            clearInterval(timerId); timerId = null; 
-            const activeBtn = document.querySelector('.modes button.active'); 
-            const times = {m5:300, m15:900, m25:1500, m40:2400, m60:3600, m90:5400};
-            timeLeft = times[activeBtn.id]; updateDisplay(); 
-            document.getElementById('mainBtn').innerText = translations[currentLang].start; 
-        }
-
-        function addTask() { 
-            const input = document.getElementById('taskInput'); if (!input.value) return; 
-            const li = document.createElement('li'); 
-            li.style = "background:rgba(255,255,255,0.05); margin-bottom:8px; padding:12px; border-radius:12px; display:flex; justify-content:space-between; align-items:center; border:1px solid rgba(255,255,255,0.05)";
-            li.innerHTML = `<span>${input.value}</span><span onclick="this.parentElement.remove()" style="cursor:pointer; color:#ef4444; font-weight:bold">✕</span>`; 
-            document.getElementById('taskList').appendChild(li); input.value = ''; 
-        }
-
-        function toggleThemeManually() { 
-            localStorage.setItem('manualTheme', 'true'); 
-            document.body.classList.toggle('light'); 
-        }
-
-        // پاکسازی خودکار حافظه تم در هر بار لود برای اطمینان از صحت عملکرد در روز
-        if(new Date().getHours() < 19 && new Date().getHours() >= 6) {
-             localStorage.removeItem('manualTheme');
-        }
-
+        if(new Date().getHours() < 19 && new Date().getHours() >= 6) { localStorage.removeItem('manualTheme'); }
         setInterval(updateClockAndDate, 1000); updateClockAndDate();
     </script>
 </body>
