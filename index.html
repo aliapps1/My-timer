@@ -13,21 +13,29 @@
         .lang-btns button { padding: 8px 12px; background: var(--card); color: var(--text); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 12px; }
         .top-controls { position: absolute; top: -55px; right: 10px; display: flex; gap: 10px; direction: ltr !important; }
         .ltr-mode { text-align: left !important; }
-        .ltr-mode .time, .ltr-mode .modes button { font-family: 'Arial', sans-serif !important; }
+        .ltr-mode .time, .ltr-mode .modes button, .ltr-mode .clock-display { font-family: 'Arial', sans-serif !important; }
         .time { font-size: 5rem; font-weight: 800; margin: 10px 0; color: var(--primary); text-align: center; font-family: monospace; }
         .modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 15px 0; }
         .modes button { background: rgba(51, 65, 85, 0.5); padding: 10px; color: white; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; font-size: 0.85rem; }
         .light .modes button { background: #e2e8f0; color: #475569; }
         .modes button.active { background: var(--primary); color: #0f172a; font-weight: bold; }
         .main-btn { width: 100%; padding: 1.2rem; border-radius: 18px; cursor: pointer; font-weight: 800; background: var(--primary); color: #0f172a; font-size: 1.3rem; border:none; }
+        .visitor-section { text-align: center; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; }
     </style>
 </head>
 <body>
     <div class="card" id="mainCard">
-        <div class="lang-btns"><button onclick="changeLang('en')">EN</button><button onclick="changeLang('ar')">AR</button><button onclick="changeLang('fa')">FA</button></div>
-        <div class="top-controls"><button id="soundBtn" onclick="toggleSound()" style="background:none; border:none; font-size:22px; cursor:pointer;">🔊</button><div onclick="toggleThemeManually()" style="font-size:22px; cursor:pointer;">🌓</div></div>
+        <div class="lang-btns">
+            <button onclick="changeLang('en')">EN</button>
+            <button onclick="changeLang('ar')">AR</button>
+            <button onclick="changeLang('fa')">FA</button>
+        </div>
+        <div class="top-controls">
+            <button id="soundBtn" onclick="toggleSound()" style="background:none; border:none; font-size:22px; cursor:pointer;">🔊</button>
+            <div onclick="toggleThemeManually()" style="font-size:22px; cursor:pointer;">🌓</div>
+        </div>
         <div id="dateText" style="color:var(--primary); font-size:0.85rem;"></div>
-        <div id="clockText" style="font-size:1.2rem; opacity:0.8; margin-bottom:15px;"></div>
+        <div id="clockText" class="clock-display" style="font-size:1.2rem; opacity:0.8; margin-bottom:15px;"></div>
         <h2 id="lbl-title">تایمر تمرکز</h2>
         <div class="modes">
             <button id="m5" onclick="setTime(300, this)">۵ د</button>
@@ -39,11 +47,10 @@
         </div>
         <div class="time" id="display">25:00</div>
         <button class="main-btn" id="mainBtn" onclick="toggleTimer()">شروع</button>
-        <p id="lbl-rounds" style="text-align:center; margin-top:15px; font-size: 0.9rem;">دورهای تمرکز: 0</p>
-
-        <div style="text-align: center; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
-            <img src="https://counter.aditya.live/v1/github/aliapps1-timer?color=22d3ee&style=flat" alt="Views" style="height: 20px;">
-            <div style="font-size: 9px; opacity: 0.4; margin-top: 5px; letter-spacing: 1px;">TOTAL VISITS</div>
+        <p id="lbl-rounds" style="text-align:center; margin-top:15px;">دورهای تمرکز: 0</p>
+        
+        <div class="visitor-section">
+            <img src="https://komarev.com/ghpvc/?username=aliapps1-timer&color=22d3ee&style=flat-square&label=VISITS" alt="Visitors">
         </div>
     </div>
 
