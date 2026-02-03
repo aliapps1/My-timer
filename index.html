@@ -3,19 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Focus Timer Pro | v2.0</title>
+    <title>Focus Timer Pro</title>
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --primary: #22d3ee; }
         .light { --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --primary: #0891b2; }
         body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; transition: 0.5s; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }
         .card { background: var(--card); padding: 1.5rem; border-radius: 2.5rem; width: 100%; max-width: 360px; position: relative; text-align: right; border: 1px solid rgba(255,255,255,0.1); }
         
-        /* ثابت کردن جهت دکمه‌های بالا */
         .lang-btns { position: absolute; top: -55px; left: 10px; display: flex; gap: 8px; direction: ltr !important; }
         .lang-btns button { padding: 8px 12px; background: var(--card); color: var(--text); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 12px; }
         .top-controls { position: absolute; top: -55px; right: 10px; display: flex; gap: 10px; direction: ltr !important; }
 
-        /* استایل اعداد برای حالت انگلیسی */
         .ltr-mode { text-align: left !important; }
         .ltr-mode .time, .ltr-mode .modes button, .ltr-mode .clock-display { font-family: 'Arial', sans-serif !important; }
 
@@ -24,7 +22,6 @@
         .modes button { background: rgba(51, 65, 85, 0.5); padding: 10px; color: white; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; font-size: 0.85rem; }
         .light .modes button { background: #e2e8f0; color: #475569; }
         .modes button.active { background: var(--primary); color: #0f172a; font-weight: bold; }
-        
         .main-btn { width: 100%; padding: 1.2rem; border-radius: 18px; cursor: pointer; font-weight: 800; background: var(--primary); color: #0f172a; font-size: 1.3rem; border:none; }
     </style>
 </head>
@@ -58,7 +55,6 @@
     <script>
         let duration = 1500, endTime = null, timerId = null, currentLang = 'fa', rounds = 0, isMuted = false;
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
         const translations = {
             fa: { title: "تایمر تمرکز", start: "شروع", stop: "توقف", cont: "ادامه", msg: "زمان تمام شد!", rounds: "دورهای تمرکز: ", m:["۵ د","۱۵ د","۲۵ د","۴۰ د","۶۰ د","۹۰ د"], dir: "rtl", lang: 'fa-IR' },
             en: { title: "Focus Timer", start: "Start", stop: "Stop", cont: "Continue", msg: "Time is up!", rounds: "Focus Rounds: ", m:["5m","15m","25m","40m","60m","90m"], dir: "ltr", lang: 'en-US' },
@@ -81,20 +77,18 @@
             document.body.dir = t.dir;
             document.getElementById('lbl-title').innerText = t.title;
             document.getElementById('lbl-rounds').innerText = t.rounds + (currentLang === 'en' ? rounds : rounds.toLocaleString(t.lang));
-            const modeBtns = document.querySelectorAll('.modes button');
-            modeBtns.forEach((btn, index) => { btn.innerText = t.m[index]; });
+            document.querySelectorAll('.modes button').forEach((btn, i) => { btn.innerText = t.m[i]; });
             const btn = document.getElementById('mainBtn');
             if(!timerId) btn.innerText = duration < (parseInt(document.querySelector('.modes button.active').innerText)*60) ? t.cont : t.start;
             else btn.innerText = t.stop;
-            const card = document.getElementById('mainCard');
-            lang === 'en' ? card.classList.add('ltr-mode') : card.classList.remove('ltr-mode');
+            lang === 'en' ? document.getElementById('mainCard').classList.add('ltr-mode') : document.getElementById('mainCard').classList.remove('ltr-mode');
             updateDisplay(duration);
         }
 
         function updateDisplay(seconds) {
             const m = Math.floor(seconds / 60), s = seconds % 60;
-            const timeString = `${m}:${s < 10 ? '0' : ''}${s}`;
-            document.getElementById('display').innerText = currentLang === 'en' ? timeString : timeString.toLocaleString(translations[currentLang].lang);
+            const timeStr = `${m}:${s < 10 ? '0' : ''}${s}`;
+            document.getElementById('display').innerText = currentLang === 'en' ? timeStr : timeStr.toLocaleString(translations[currentLang].lang);
         }
 
         function toggleTimer() {
@@ -108,9 +102,9 @@
                 endTime = Date.now() + (duration * 1000);
                 btn.innerText = translations[currentLang].stop;
                 timerId = setInterval(() => {
-                    const remaining = Math.max(0, Math.ceil((endTime - Date.now()) / 1000));
-                    updateDisplay(remaining);
-                    if (remaining <= 0) {
+                    const rem = Math.max(0, Math.ceil((endTime - Date.now()) / 1000));
+                    updateDisplay(rem);
+                    if (rem <= 0) {
                         clearInterval(timerId); timerId = null;
                         rounds++; playSound(); resetAfterFinish();
                         setTimeout(() => { alert(translations[currentLang].msg); }, 100);
