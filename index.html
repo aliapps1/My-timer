@@ -7,11 +7,10 @@
     <link rel="icon" href="icon.png">
     <link rel="apple-touch-icon" href="icon.png">
     <style>
-        :root { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --primary: #22d3ee; }
+        :root { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --primary: #22d3ee; --gold: #FFDD00; }
         .light { --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --primary: #0891b2; }
         body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; transition: 0.5s; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }
         .card { background: var(--card); padding: 1.5rem; border-radius: 2.5rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); width: 100%; max-width: 360px; border: 1px solid rgba(255,255,255,0.1); position: relative; text-align: right; }
-        .light .card { border: 1px solid rgba(0,0,0,0.05); }
         .ltr-mode { text-align: left !important; }
         .date-display { font-size: 0.85rem; color: var(--primary); margin-bottom: 2px; font-weight: 500; }
         .clock-display { font-size: 1.2rem; font-weight: 800; margin-bottom: 15px; opacity: 0.8; letter-spacing: 1px; }
@@ -23,13 +22,14 @@
         .main-btn { width: 100%; padding: 1.2rem; border: none; border-radius: 18px; cursor: pointer; font-weight: 800; background: var(--primary); color: #0f172a; font-size: 1.3rem; margin-top: 10px; box-shadow: 0 10px 15px -3px rgba(34, 211, 238, 0.3); }
         .reset-btn { background: none; border: none; color: #64748b; cursor: pointer; margin-top: 15px; font-size: 0.95rem; text-decoration: underline; width: 100%; }
         .lang-btns { position: absolute; top: -55px; left: 10px; display: flex; gap: 8px; }
-        .lang-btns button { font-size: 12px; font-weight: bold; padding: 8px 12px; background: var(--card); color: var(--text); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .top-controls { position: absolute; top: -55px; right: 10px; display: flex; gap: 12px; align-items: center; }
-        .icon-btn { font-size: 24px; cursor: pointer; background: none; border: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
+        .lang-btns button { font-size: 12px; font-weight: bold; padding: 8px 12px; background: var(--card); color: var(--text); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer; }
+        .top-controls { position: absolute; top: -55px; right: 10px; display: flex; gap: 10px; align-items: center; }
+        .icon-btn { font-size: 22px; cursor: pointer; background: none; border: none; padding: 0; display: flex; align-items: center; justify-content: center; }
+        .donate-btn { background: var(--gold) !important; padding: 6px 10px !important; border-radius: 10px !important; text-decoration: none; font-size: 18px; box-shadow: 0 4px 10px rgba(255, 221, 0, 0.3); transition: 0.3s; }
+        .donate-btn:hover { transform: scale(1.1); }
         hr { border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0; }
         .task-input-group { display: flex; gap: 8px; margin-top: 15px; }
-        input { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(15, 23, 42, 0.5); color: white; font-size: 0.9rem; }
-        .light input { background: #f1f5f9; color: #0f172a; border-color: #cbd5e1; }
+        input { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(15, 23, 42, 0.5); color: white; }
         .add-btn { background: var(--primary); border: none; padding: 0 18px; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 1.2rem; }
     </style>
 </head>
@@ -41,6 +41,7 @@
             <button onclick="changeLang('ar')">AR</button>
         </div>
         <div class="top-controls">
+            <a href="#" target="_blank" class="icon-btn donate-btn" title="Support Me">☕</a>
             <button class="icon-btn" id="soundBtn" onclick="toggleSound()">🔊</button>
             <div class="icon-btn" onclick="toggleThemeManually()">🌓</div>
         </div>
