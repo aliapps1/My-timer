@@ -39,23 +39,19 @@
             <button onclick="changeLang('ar')">AR</button>
         </div>
         <div class="top-controls">
-            <button class="icon-btn" id="soundBtn" onclick="toggleSound()">🔇</button>
+            <button class="icon-btn" id="soundBtn" onclick="toggleSound()">🔊</button>
             <div class="icon-btn" onclick="document.body.classList.toggle('light')">🌓</div>
         </div>
-
         <div class="date-display" id="dateText"></div>
         <h2 id="lbl-title" style="margin: 0;">تایمر تمرکز</h2>
-        
         <div class="modes">
             <button id="m5" onclick="setTime(300, this)">۵ دقیقه</button>
             <button id="m25" class="active" onclick="setTime(1500, this)">۲۵ دقیقه</button>
             <button id="m50" onclick="setTime(3000, this)">۵۰ دقیقه</button>
         </div>
-
         <div class="time" id="display">25:00</div>
         <button class="main-btn" id="mainBtn" onclick="toggleTimer()">شروع</button>
         <button class="reset-btn" id="lbl-reset" onclick="resetTimer()">بازنشانی</button>
-
         <hr>
         <p style="margin: 0; font-size: 0.8rem; opacity: 0.7;" id="lbl-rounds">دورهای تمرکز: 0</p>
         <div class="task-input-group">
@@ -67,13 +63,25 @@
 
     <script>
         const translations = {
-            fa: { title: "تایمر تمرکز", start: "شروع", stop: "توقف", reset: "بازنشانی", rounds: "دورهای تمرکز: ", taskPh: "کار جدید...", dir: "rtl", langCode: 'fa-IR' },
-            en: { title: "Focus Timer", start: "Start", stop: "Stop", reset: "Reset", rounds: "Focus Rounds: ", taskPh: "New task...", dir: "ltr", langCode: 'en-US' },
-            ar: { title: "مؤقت التركيز", start: "بدء", stop: "إيقاف", reset: "إعادة ضبط", rounds: "دورات التركيز: ", taskPh: "مهمة جديدة...", dir: "rtl", langCode: 'ar-SA' }
+            fa: { title: "تایمر تمرکز", start: "شروع", stop: "توقف", reset: "بازنشانی", rounds: "دورهای تمرکز: ", taskPh: "کار جدید...", dir: "rtl", langCode: 'fa-IR', m5:"۵ دقیقه", m25:"۲۵ دقیقه", m50:"۵۰ دقیقه" },
+            en: { title: "Focus Timer", start: "Start", stop: "Stop", reset: "Reset", rounds: "Focus Rounds: ", taskPh: "New task...", dir: "ltr", langCode: 'en-US', m5:"5 Min", m25:"25 Min", m50:"50 Min" },
+            ar: { title: "مؤقت التركيز", start: "بدء", stop: "إيقاف", reset: "إعادة ضبط", rounds: "دورات التركيز: ", taskPh: "مهمة جديدة...", dir: "rtl", langCode: 'ar-SA', m5:"۵ دقائق", m25:"۲۵ دقيقة", m50:"۵۰ دقيقة" }
         };
 
-        let timeLeft = 1500, timerId = null, currentLang = 'fa', rounds = 0, isMuted = true;
-        const beep = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+        let timeLeft = 1500, timerId = null, currentLang = 'fa', rounds = 0, isMuted = false;
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound() {
+            if (isMuted) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.type = 'sine'; osc.frequency.value = 880;
+            gain.gain.setValueAtTime(0, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.5, audioCtx.currentTime + 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1);
+            osc.start(); osc.stop(audioCtx.currentTime + 1);
+        }
 
         function toggleSound() {
             isMuted = !isMuted;
@@ -86,62 +94,38 @@
         }
 
         function changeLang(lang) {
-            currentLang = lang;
-            const t = translations[lang];
+            currentLang = lang; const t = translations[lang];
             document.body.dir = t.dir;
             document.getElementById('lbl-title').innerText = t.title;
             document.getElementById('lbl-reset').innerText = t.reset;
             document.getElementById('lbl-rounds').innerText = t.rounds + rounds;
             document.getElementById('taskInput').placeholder = t.taskPh;
             document.getElementById('mainBtn').innerText = timerId ? t.stop : t.start;
+            document.getElementById('m5').innerText = t.m5;
+            document.getElementById('m25').innerText = t.m25;
+            document.getElementById('m50').innerText = t.m50;
             const card = document.getElementById('mainCard');
             lang === 'en' ? card.classList.add('ltr-mode') : card.classList.remove('ltr-mode');
             updateDate();
         }
 
-        function setTime(s, btn) {
-            resetTimer(); timeLeft = s; updateDisplay();
-            document.querySelectorAll('.modes button').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-        }
-
-        function updateDisplay() {
-            const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
-            document.getElementById('display').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
-        }
-
         function toggleTimer() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
             const btn = document.getElementById('mainBtn');
-            if (timerId) { clearInterval(timerId); timerId = null; btn.innerText = "ادامه"; }
+            if (timerId) { clearInterval(timerId); timerId = null; btn.innerText = currentLang==='en'?"Continue":"ادامه"; }
             else {
                 btn.innerText = translations[currentLang].stop;
                 timerId = setInterval(() => {
                     if (timeLeft > 0) { timeLeft--; updateDisplay(); }
-                    else { 
-                        clearInterval(timerId); timerId = null; rounds++; 
-                        if(!isMuted) beep.play();
-                        changeLang(currentLang); alert("Done!"); 
-                    }
+                    else { clearInterval(timerId); timerId = null; rounds++; playSound(); changeLang(currentLang); alert("Time is up!"); }
                 }, 1000);
             }
         }
 
-        function resetTimer() {
-            clearInterval(timerId); timerId = null;
-            const activeBtn = document.querySelector('.modes button.active');
-            timeLeft = activeBtn.id === 'm5' ? 300 : (activeBtn.id === 'm50' ? 3000 : 1500);
-            updateDisplay();
-            document.getElementById('mainBtn').innerText = translations[currentLang].start;
-        }
-
-        function addTask() {
-            const input = document.getElementById('taskInput');
-            if (!input.value) return;
-            const li = document.createElement('li');
-            li.innerHTML = `<span>${input.value}</span><span onclick="this.parentElement.remove()" style="cursor:pointer; color:#ef4444">✕</span>`;
-            document.getElementById('taskList').appendChild(li);
-            input.value = '';
-        }
+        function setTime(s, btn) { resetTimer(); timeLeft = s; updateDisplay(); document.querySelectorAll('.modes button').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
+        function updateDisplay() { const m = Math.floor(timeLeft / 60), s = timeLeft % 60; document.getElementById('display').innerText = `${m}:${s < 10 ? '0' : ''}${s}`; }
+        function resetTimer() { clearInterval(timerId); timerId = null; const activeBtn = document.querySelector('.modes button.active'); timeLeft = activeBtn.id === 'm5' ? 300 : (activeBtn.id === 'm50' ? 3000 : 1500); updateDisplay(); document.getElementById('mainBtn').innerText = translations[currentLang].start; }
+        function addTask() { const input = document.getElementById('taskInput'); if (!input.value) return; const li = document.createElement('li'); li.innerHTML = `<span>${input.value}</span><span onclick="this.parentElement.remove()" style="cursor:pointer; color:#ef4444">✕</span>`; document.getElementById('taskList').appendChild(li); input.value = ''; }
         updateDate();
     </script>
 </body>
