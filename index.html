@@ -1,1 +1,70 @@
-<h1>سلام، سایت بالا آمد!</h1>
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تایمر هوشمند</title>
+    <style>
+        body { background: #0f172a; color: white; font-family: system-ui; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .card { background: #1e293b; padding: 2rem; border-radius: 1.5rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); text-align: center; border: 1px solid #334155; width: 300px; }
+        .time { font-size: 4rem; font-weight: 800; margin: 1.5rem 0; color: #22d3ee; font-variant-numeric: tabular-nums; }
+        button { width: 100%; padding: 0.75rem; font-size: 1.25rem; font-weight: 600; border: none; border-radius: 0.75rem; cursor: pointer; transition: 0.2s; background: #22d3ee; color: #0891b2; }
+        button:active { transform: scale(0.95); }
+        .reset { background: transparent; color: #94a3b8; margin-top: 1rem; font-size: 0.9rem; text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div style="color: #94a3b8; font-weight: 500;">تایمر تمرکز</div>
+        <div class="time" id="display">25:00</div>
+        <button id="mainBtn" onclick="toggleTimer()">شروع</button>
+        <button class="reset" onclick="resetTimer()">بازنشانی</button>
+    </div>
+
+    <script>
+        let timeLeft = 1500;
+        let timerId = null;
+
+        function updateDisplay() {
+            const m = Math.floor(timeLeft / 60);
+            const s = timeLeft % 60;
+            document.getElementById('display').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+
+        function toggleTimer() {
+            const btn = document.getElementById('mainBtn');
+            if (timerId) {
+                clearInterval(timerId);
+                timerId = null;
+                btn.innerText = 'ادامه';
+                btn.style.background = '#22d3ee';
+            } else {
+                btn.innerText = 'توقف';
+                btn.style.background = '#f87171';
+                btn.style.color = '#7f1d1d';
+                timerId = setInterval(() => {
+                    if (timeLeft > 0) {
+                        timeLeft--;
+                        updateDisplay();
+                    } else {
+                        clearInterval(timerId);
+                        alert('زمان به پایان رسید!');
+                    }
+                }, 1000);
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerId);
+            timerId = null;
+            timeLeft = 1500;
+            updateDisplay();
+            const btn = document.getElementById('mainBtn');
+            btn.innerText = 'شروع';
+            btn.style.background = '#22d3ee';
+            btn.style.color = '#0891b2';
+        }
+    </script>
+</body>
+</html>
