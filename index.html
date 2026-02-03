@@ -3,33 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Focus Timer</title>
+    <title>Focus Timer Pro</title>
     <link rel="icon" href="icon.png">
     <link rel="apple-touch-icon" href="icon.png">
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --primary: #22d3ee; }
-        .light { --bg: #f0f2f5; --card: #ffffff; --text: #1c1e21; --primary: #0891b2; }
-        body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; transition: 0.5s; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }
-        .card { background: var(--card); padding: 1.5rem; border-radius: 2rem; box-shadow: 0 20px 50px rgba(0,0,0,0.2); width: 100%; max-width: 360px; border: 1px solid #334155; position: relative; text-align: right; }
+        .light { --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --primary: #0891b2; }
+        body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; transition: 0.5s; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }
+        .card { background: var(--card); padding: 1.5rem; border-radius: 2.5rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); width: 100%; max-width: 360px; border: 1px solid rgba(255,255,255,0.1); position: relative; text-align: right; }
+        .light .card { border: 1px solid rgba(0,0,0,0.05); }
         .ltr-mode { text-align: left !important; }
-        .date-display { font-size: 0.85rem; color: var(--primary); margin-bottom: 2px; opacity: 0.9; }
-        .clock-display { font-size: 1.1rem; font-weight: bold; margin-bottom: 10px; color: var(--text); opacity: 0.7; }
-        .time { font-size: 4.5rem; font-weight: 800; margin: 0.5rem 0; color: var(--primary); font-family: monospace; text-align: center; }
-        .modes { display: flex; flex-wrap: wrap; justify-content: center; margin: 15px 0; gap: 8px; }
-        .modes button { background: #334155; font-size: 0.75rem; padding: 8px 12px; color: white; border: none; border-radius: 10px; cursor: pointer; min-width: 62px; }
-        .modes button.active { background: var(--primary); color: #0f172a; font-weight: bold; }
-        .main-btn { width: 100%; padding: 1rem; border: none; border-radius: 15px; cursor: pointer; font-weight: bold; background: var(--primary); color: #0f172a; font-size: 1.2rem; }
-        .reset-btn { background: none; border: none; color: #64748b; cursor: pointer; margin-top: 10px; font-size: 0.9rem; text-decoration: underline; width: 100%; text-align: center; }
-        .lang-btns { position: absolute; top: -50px; left: 0; display: flex; gap: 5px; }
-        .lang-btns button { font-size: 11px; padding: 6px 10px; background: #334155; color: white; border: none; border-radius: 8px; cursor: pointer; }
-        .top-controls { position: absolute; top: -50px; right: 0; display: flex; gap: 10px; align-items: center; }
-        .icon-btn { font-size: 22px; cursor: pointer; background: none; border: none; padding: 0; }
-        hr { border: 0; border-top: 1px solid #334155; margin: 15px 0; }
-        .task-input-group { display: flex; gap: 5px; margin-top: 10px; }
-        input { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: white; }
-        .add-btn { background: var(--primary); border: none; padding: 10px 15px; border-radius: 10px; cursor: pointer; font-weight: bold; }
-        ul { list-style: none; padding: 0; margin-top: 15px; }
-        li { background: #334155; margin-bottom: 5px; padding: 8px 12px; border-radius: 8px; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; }
+        .date-display { font-size: 0.85rem; color: var(--primary); margin-bottom: 2px; font-weight: 500; }
+        .clock-display { font-size: 1.2rem; font-weight: 800; margin-bottom: 15px; opacity: 0.8; letter-spacing: 1px; }
+        .time { font-size: 5rem; font-weight: 800; margin: 10px 0; color: var(--primary); font-family: 'Courier New', monospace; text-align: center; }
+        .modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 15px 0; }
+        .modes button { background: rgba(51, 65, 85, 0.5); font-size: 0.8rem; padding: 10px 5px; color: white; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; cursor: pointer; transition: 0.2s; }
+        .light .modes button { background: #e2e8f0; color: #475569; }
+        .modes button.active { background: var(--primary); color: #0f172a; font-weight: bold; border-color: var(--primary); }
+        .main-btn { width: 100%; padding: 1.2rem; border: none; border-radius: 18px; cursor: pointer; font-weight: 800; background: var(--primary); color: #0f172a; font-size: 1.3rem; margin-top: 10px; box-shadow: 0 10px 15px -3px rgba(34, 211, 238, 0.3); }
+        .reset-btn { background: none; border: none; color: #64748b; cursor: pointer; margin-top: 15px; font-size: 0.95rem; text-decoration: underline; width: 100%; }
+        .lang-btns { position: absolute; top: -55px; left: 10px; display: flex; gap: 8px; }
+        .lang-btns button { font-size: 12px; font-weight: bold; padding: 8px 12px; background: var(--card); color: var(--text); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .top-controls { position: absolute; top: -55px; right: 10px; display: flex; gap: 12px; align-items: center; }
+        .icon-btn { font-size: 24px; cursor: pointer; background: none; border: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
+        hr { border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0; }
+        .task-input-group { display: flex; gap: 8px; margin-top: 15px; }
+        input { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(15, 23, 42, 0.5); color: white; font-size: 0.9rem; }
+        .light input { background: #f1f5f9; color: #0f172a; border-color: #cbd5e1; }
+        .add-btn { background: var(--primary); border: none; padding: 0 18px; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 1.2rem; }
     </style>
 </head>
 <body>
@@ -45,31 +46,32 @@
         </div>
         <div class="date-display" id="dateText"></div>
         <div class="clock-display" id="clockText">00:00:00</div>
-        <h2 id="lbl-title" style="margin: 0;">تایمر تمرکز</h2>
+        <h2 id="lbl-title" style="margin: 0; font-size: 1.5rem;">تایمر تمرکز</h2>
         <div class="modes">
             <button id="m5" onclick="setTime(300, this)">۵ د</button>
             <button id="m15" onclick="setTime(900, this)">۱۵ د</button>
             <button id="m25" class="active" onclick="setTime(1500, this)">۲۵ د</button>
             <button id="m40" onclick="setTime(2400, this)">۴۰ د</button>
             <button id="m60" onclick="setTime(3600, this)">۶۰ د</button>
+            <button id="m90" onclick="setTime(5400, this)">۹۰ د</button>
         </div>
         <div class="time" id="display">25:00</div>
         <button class="main-btn" id="mainBtn" onclick="toggleTimer()">شروع</button>
         <button class="reset-btn" id="lbl-reset" onclick="resetTimer()">بازنشانی</button>
         <hr>
-        <p style="margin: 0; font-size: 0.8rem; opacity: 0.7;" id="lbl-rounds">دورهای تمرکز: 0</p>
+        <p style="margin: 0; font-size: 0.85rem; opacity: 0.8; font-weight: 500;" id="lbl-rounds">دورهای تمرکز: 0</p>
         <div class="task-input-group">
             <input type="text" id="taskInput" placeholder="کار جدید...">
             <button class="add-btn" onclick="addTask()">+</button>
         </div>
-        <ul id="taskList"></ul>
+        <ul id="taskList" style="padding:0; margin-top:15px; list-style:none;"></ul>
     </div>
 
     <script>
         const translations = {
-            fa: { title: "تایمر تمرکز", start: "شروع", stop: "توقف", reset: "بازنشانی", rounds: "دورهای تمرکز: ", taskPh: "کار جدید...", dir: "rtl", langCode: 'fa-IR', m5:"۵ د", m15:"۱۵ د", m25:"۲۵ د", m40:"۴۰ د", m60:"۶۰ د" },
-            en: { title: "Focus Timer", start: "Start", stop: "Stop", reset: "Reset", rounds: "Focus Rounds: ", taskPh: "New task...", dir: "ltr", langCode: 'en-US', m5:"5m", m15:"15m", m25:"25m", m40:"40m", m60:"60m" },
-            ar: { title: "مؤقت التركيز", start: "بدء", stop: "إيقاف", reset: "إعادة ضبط", rounds: "دورات التركيز: ", taskPh: "مهمة جديدة...", dir: "rtl", langCode: 'ar-SA', m5:"٥ د", m15:"١٥ د", m25:"٢٥ د", m40:"٤٠ د", m60:"٦٠ د" }
+            fa: { title: "تایمر تمرکز", start: "شروع", stop: "توقف", reset: "بازنشانی", rounds: "دورهای تمرکز: ", taskPh: "کار جدید...", dir: "rtl", langCode: 'fa-IR', m5:"۵ د", m15:"۱۵ د", m25:"۲۵ د", m40:"۴۰ د", m60:"۶۰ د", m90:"۹۰ د" },
+            en: { title: "Focus Timer", start: "Start", stop: "Stop", reset: "Reset", rounds: "Focus Rounds: ", taskPh: "New task...", dir: "ltr", langCode: 'en-US', m5:"5m", m15:"15m", m25:"25m", m40:"40m", m60:"60m", m90:"90m" },
+            ar: { title: "مؤقت التركيز", start: "بدء", stop: "إيقاف", reset: "إعادة ضبط", rounds: "دورات التركيز: ", taskPh: "مهمة جديدة...", dir: "rtl", langCode: 'ar-SA', m5:"٥ د", m15:"١٥ د", m25:"٢٥ د", m40:"٤٠ د", m60:"٦٠ د", m90:"٩٠ د" }
         };
 
         let timeLeft = 1500, timerId = null, currentLang = 'fa', rounds = 0, isMuted = false;
@@ -79,8 +81,10 @@
             const now = new Date();
             document.getElementById('dateText').innerText = now.toLocaleDateString(translations[currentLang].langCode, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
             document.getElementById('clockText').innerText = now.toLocaleTimeString(translations[currentLang].langCode, { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-            const hour = now.getHours();
-            if (hour >= 6 && hour < 18) document.body.classList.add('light'); else document.body.classList.remove('light');
+            if (!localStorage.getItem('manualTheme')) {
+                const hour = now.getHours();
+                if (hour >= 6 && hour < 18) document.body.classList.add('light'); else document.body.classList.remove('light');
+            }
         }
 
         function changeLang(lang) {
@@ -90,7 +94,7 @@
             document.getElementById('lbl-reset').innerText = t.reset;
             document.getElementById('lbl-rounds').innerText = t.rounds + rounds;
             document.getElementById('taskInput').placeholder = t.taskPh;
-            ['m5','m15','m25','m40','m60'].forEach(id => document.getElementById(id).innerText = t[id]);
+            ['m5','m15','m25','m40','m60','m90'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = t[id]; });
             document.getElementById('mainBtn').innerText = timerId ? t.stop : t.start;
             const card = document.getElementById('mainCard');
             lang === 'en' ? card.classList.add('ltr-mode') : card.classList.remove('ltr-mode');
@@ -115,10 +119,16 @@
         function setTime(s, btn) { resetTimer(); timeLeft = s; updateDisplay(); document.querySelectorAll('.modes button').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
         function updateDisplay() { const m = Math.floor(timeLeft / 60), s = timeLeft % 60; document.getElementById('display').innerText = `${m}:${s < 10 ? '0' : ''}${s}`; }
         function resetTimer() { clearInterval(timerId); timerId = null; const activeBtn = document.querySelector('.modes button.active'); 
-            const times = {m5:300, m15:900, m25:1500, m40:2400, m60:3600};
+            const times = {m5:300, m15:900, m25:1500, m40:2400, m60:3600, m90:5400};
             timeLeft = times[activeBtn.id]; updateDisplay(); document.getElementById('mainBtn').innerText = translations[currentLang].start; }
-        function addTask() { const input = document.getElementById('taskInput'); if (!input.value) return; const li = document.createElement('li'); li.innerHTML = `<span>${input.value}</span><span onclick="this.parentElement.remove()" style="cursor:pointer; color:#ef4444">✕</span>`; document.getElementById('taskList').appendChild(li); input.value = ''; }
-        function toggleThemeManually() { document.body.classList.toggle('light'); }
+        function addTask() { 
+            const input = document.getElementById('taskInput'); if (!input.value) return; 
+            const li = document.createElement('li'); 
+            li.style = "background:rgba(255,255,255,0.05); margin-bottom:8px; padding:12px; border-radius:12px; display:flex; justify-content:space-between; align-items:center; border:1px solid rgba(255,255,255,0.05)";
+            li.innerHTML = `<span>${input.value}</span><span onclick="this.parentElement.remove()" style="cursor:pointer; color:#ef4444; font-weight:bold">✕</span>`; 
+            document.getElementById('taskList').appendChild(li); input.value = ''; 
+        }
+        function toggleThemeManually() { localStorage.setItem('manualTheme', 'true'); document.body.classList.toggle('light'); }
         setInterval(updateClockAndDate, 1000); updateClockAndDate();
     </script>
 </body>
