@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
     <title>Focus Timer Pro | ۳ زبانه - ۶ زمانه</title>
     <meta name="description" content="تایمر هوشمند ۶ زمانه با پشتیبانی از ۳ زبان (FA, EN, AR) و تم خودکار.">
     <meta property="og:title" content="Focus Timer Pro | تایمر ۳ زبانه هوشمند">
     <meta property="og:description" content="دارای ۶ بازه زمانی تمرکز | پشتیبانی از ۳ زبان | تم خودکار شب و روز">
     <meta property="og:type" content="website">
+    
     <link rel="icon" href="icon.png">
     <link rel="apple-touch-icon" href="icon.png">
     <style>
@@ -40,9 +42,9 @@
 <body>
     <div class="card" id="mainCard">
         <div class="lang-btns">
-            <button onclick="changeLang('fa')">FA</button>
             <button onclick="changeLang('en')">EN</button>
             <button onclick="changeLang('ar')">AR</button>
+            <button onclick="changeLang('fa')">FA</button>
         </div>
         <div class="top-controls">
             <a href="#" target="_blank" class="icon-btn donate-btn" title="Support Me">☕</a>
@@ -87,7 +89,6 @@
             document.getElementById('dateText').innerText = now.toLocaleDateString(translations[currentLang].langCode, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
             document.getElementById('clockText').innerText = now.toLocaleTimeString(translations[currentLang].langCode, { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
             
-            // اصلاح هوشمند: روشن بین 6 صبح تا 7 شب
             const hour = now.getHours();
             if (!localStorage.getItem('manualTheme')) {
                 if (hour >= 6 && hour < 19) document.body.classList.add('light'); 
@@ -122,10 +123,33 @@
             }
         }
 
-        function playSound() { if (isMuted) return; const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.connect(gain); gain.connect(audioCtx.destination); osc.type = 'sine'; osc.frequency.value = 880; gain.gain.setValueAtTime(0, audioCtx.currentTime); gain.gain.linearRampToValueAtTime(0.5, audioCtx.currentTime + 0.1); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1); osc.start(); osc.stop(audioCtx.currentTime + 1); }
+        // صدای هشدار ۱۰ ثانیه‌ای حرفه‌ای
+        function playSound() {
+            if (isMuted) return;
+            const alarmDuration = 10; 
+            for(let i = 0; i < alarmDuration; i++) {
+                setTimeout(() => {
+                    if (timerId) return; 
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.type = 'triangle'; 
+                    osc.frequency.setValueAtTime(880, audioCtx.currentTime); 
+                    osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.5);
+                    gain.gain.setValueAtTime(0, audioCtx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.4, audioCtx.currentTime + 0.1);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+                    osc.start(audioCtx.currentTime);
+                    osc.stop(audioCtx.currentTime + 0.5);
+                }, i * 1000);
+            }
+        }
+
         function toggleSound() { isMuted = !isMuted; document.getElementById('soundBtn').innerText = isMuted ? '🔇' : '🔊'; }
         function setTime(s, btn) { resetTimer(); timeLeft = s; updateDisplay(); document.querySelectorAll('.modes button').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
         function updateDisplay() { const m = Math.floor(timeLeft / 60), s = timeLeft % 60; document.getElementById('display').innerText = `${m}:${s < 10 ? '0' : ''}${s}`; }
+        
         function resetTimer() { 
             clearInterval(timerId); timerId = null; 
             const activeBtn = document.querySelector('.modes button.active'); 
@@ -133,6 +157,7 @@
             timeLeft = times[activeBtn.id]; updateDisplay(); 
             document.getElementById('mainBtn').innerText = translations[currentLang].start; 
         }
+
         function addTask() { 
             const input = document.getElementById('taskInput'); if (!input.value) return; 
             const li = document.createElement('li'); 
@@ -140,16 +165,18 @@
             li.innerHTML = `<span>${input.value}</span><span onclick="this.parentElement.remove()" style="cursor:pointer; color:#ef4444; font-weight:bold">✕</span>`; 
             document.getElementById('taskList').appendChild(li); input.value = ''; 
         }
+
         function toggleThemeManually() { 
             localStorage.setItem('manualTheme', 'true'); 
             document.body.classList.toggle('light'); 
         }
+
         // پاکسازی خودکار حافظه تم در هر بار لود برای اطمینان از صحت عملکرد در روز
         if(new Date().getHours() < 19 && new Date().getHours() >= 6) {
              localStorage.removeItem('manualTheme');
         }
+
         setInterval(updateClockAndDate, 1000); updateClockAndDate();
     </script>
 </body>
 </html>
-
