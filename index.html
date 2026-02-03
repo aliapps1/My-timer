@@ -3,69 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تایمر حرفه‌ای سه زمانه</title>
+    <title>تایمر فوق حرفه‌ای علی</title>
     <style>
         :root { --bg: #f0f2f5; --card: #ffffff; --text: #1c1e21; --primary: #22d3ee; }
         .dark { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --primary: #22d3ee; }
-        body { background: var(--bg); color: var(--text); font-family: system-ui; transition: 0.3s; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .card { background: var(--card); padding: 2rem; border-radius: 2rem; box-shadow: 0 20px 50px rgba(0,0,0,0.2); text-align: center; width: 320px; border: 1px solid #334155; }
-        .time { font-size: 4.5rem; font-weight: 800; margin: 1rem 0; color: var(--primary); font-family: monospace; }
-        .modes { display: flex; justify-content: space-between; margin-bottom: 1.5rem; gap: 5px; }
-        .modes button { background: #334155; font-size: 0.8rem; padding: 8px; }
+        body { background: var(--bg); color: var(--text); font-family: system-ui; transition: 0.3s; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }
+        .card { background: var(--card); padding: 1.5rem; border-radius: 2rem; box-shadow: 0 20px 50px rgba(0,0,0,0.2); text-align: center; width: 100%; max-width: 350px; border: 1px solid #334155; }
+        .time { font-size: 4rem; font-weight: 800; margin: 1rem 0; color: var(--primary); font-family: monospace; }
+        .modes { display: flex; justify-content: space-between; margin-bottom: 1rem; gap: 5px; }
+        .modes button { background: #334155; font-size: 0.7rem; padding: 8px; color: white; border: none; border-radius: 8px; flex: 1; }
         .modes button.active { background: var(--primary); color: #0891b2; }
-        button { width: 100%; padding: 0.8rem; margin: 5px 0; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; background: var(--primary); color: #0891b2; font-size: 1.1rem; }
-        .lang-btns { position: absolute; top: 20px; left: 20px; display: flex; gap: 5px; }
-        .lang-btns button { width: auto; font-size: 12px; padding: 5px 10px; background: #334155; color: white; }
-        .theme-toggle { position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 24px; background: #334155; padding: 5px; border-radius: 10px; }
+        .main-btn { width: 100%; padding: 0.8rem; margin: 5px 0; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; background: var(--primary); color: #0891b2; font-size: 1.1rem; }
+        .todo-section { margin-top: 20px; text-align: right; border-top: 1px solid #444; padding-top: 15px; }
+        .todo-input { width: 70%; padding: 8px; border-radius: 8px; border: 1px solid #444; background: transparent; color: var(--text); }
+        .todo-list { list-style: none; padding: 0; margin-top: 10px; max-height: 150px; overflow-y: auto; }
+        .todo-item { display: flex; justify-content: space-between; background: rgba(255,255,255,0.05); padding: 5px 10px; margin-bottom: 5px; border-radius: 5px; font-size: 0.9rem; }
+        .stats { font-size: 0.8rem; color: #94a3b8; margin: 10px 0; }
+        .ambient { margin-top: 10px; font-size: 12px; cursor: pointer; color: var(--primary); background: none; border: 1px solid var(--primary); padding: 5px 10px; border-radius: 20px; }
     </style>
 </head>
 <body class="dark">
-    <div class="theme-toggle" onclick="document.body.classList.toggle('dark')">🌓</div>
-    <div class="lang-btns">
-        <button onclick="setLang('fa')">FA</button>
-        <button onclick="setLang('en')">EN</button>
-        <button onclick="setLang('ar')">AR</button>
+    <div style="position: absolute; top: 20px; left: 20px;">
+        <button onclick="setLang('fa')" style="font-size:10px;">FA</button>
+        <button onclick="setLang('en')" style="font-size:10px;">EN</button>
     </div>
+    <div style="position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 20px;" onclick="document.body.classList.toggle('dark')">🌓</div>
+
     <div class="card">
-        <h2 id="title">تایمر تمرکز</h2>
+        <h2 id="title" style="margin-top:0;">تایمر تمرکز</h2>
+        
         <div class="modes">
             <button onclick="setTime(300, this)">۵ دقیقه</button>
             <button class="active" onclick="setTime(1500, this)">۲۵ دقیقه</button>
             <button onclick="setTime(3000, this)">۵۰ دقیقه</button>
         </div>
+
         <div class="time" id="display">25:00</div>
-        <button id="mainBtn" onclick="toggleTimer()">شروع</button>
-        <button style="background:transparent; color:gray; text-decoration:underline; font-size: 0.9rem;" onclick="resetTimer()" id="resetBtn">بازنشانی</button>
+        
+        <button class="main-btn" id="mainBtn" onclick="toggleTimer()">شروع</button>
+        <button style="background:transparent; color:gray; border:none; text-decoration:underline; cursor:pointer;" onclick="resetTimer()" id="resetBtn">بازنشانی</button>
+
+        <div class="stats">دورهای تمرکز امروز: <span id="roundCount">0</span></div>
+        <button class="ambient" onclick="toggleRain()" id="rainBtn">🌧️ صدای باران: خاموش</button>
+
+        <div class="todo-section">
+            <div style="display:flex; gap:5px;">
+                <input type="text" id="todoInput" class="todo-input" placeholder="کار جدید...">
+                <button onclick="addTodo()" style="width:25%; padding:8px;">+</button>
+            </div>
+            <ul id="todoList" class="todo-list"></ul>
+        </div>
     </div>
 
     <audio id="alarm" src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg"></audio>
+    <audio id="rainSource" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
 
     <script>
         let defaultTime = 1500;
         let timeLeft = 1500;
         let timerId = null;
-        const dict = {
-            fa: { title: "تایمر تمرکز", start: "شروع", stop: "توقف", reset: "بازنشانی", m5: "۵ دقیقه", m25: "۲۵ دقیقه", m50: "۵۰ دقیقه" },
-            en: { title: "Focus Timer", start: "Start", stop: "Stop", reset: "Reset", m5: "5 Min", m25: "25 Min", m50: "50 Min" },
-            ar: { title: "مؤقت التركيز", start: "بدء", stop: "إيقاف", reset: "إعادة تعيين", m5: "۵ دقائق", m25: "۲۵ دقيقة", m50: "۵۰ دقيقة" }
-        };
-
-        function setLang(l) {
-            document.body.dir = (l === 'en') ? 'ltr' : 'rtl';
-            document.getElementById('title').innerText = dict[l].title;
-            document.getElementById('mainBtn').innerText = (timerId) ? dict[l].stop : dict[l].start;
-            document.getElementById('resetBtn').innerText = dict[l].reset;
-            const modeBtns = document.querySelectorAll('.modes button');
-            modeBtns[0].innerText = dict[l].m5;
-            modeBtns[1].innerText = dict[l].m25;
-            modeBtns[2].innerText = dict[l].m50;
-        }
+        let rounds = 0;
+        let rainPlaying = false;
 
         function setTime(seconds, btn) {
-            clearInterval(timerId);
-            timerId = null;
-            defaultTime = seconds;
-            timeLeft = seconds;
+            clearInterval(timerId); timerId = null;
+            defaultTime = seconds; timeLeft = seconds;
             updateDisplay();
             document.getElementById('mainBtn').innerText = "شروع";
             document.querySelectorAll('.modes button').forEach(b => b.classList.remove('active'));
@@ -81,31 +83,48 @@
         function toggleTimer() {
             const btn = document.getElementById('mainBtn');
             if (timerId) {
-                clearInterval(timerId);
-                timerId = null;
+                clearInterval(timerId); timerId = null;
                 btn.innerText = "ادامه";
             } else {
                 btn.innerText = "توقف";
                 timerId = setInterval(() => {
                     if (timeLeft > 0) {
-                        timeLeft--;
-                        updateDisplay();
+                        timeLeft--; updateDisplay();
                     } else {
-                        clearInterval(timerId);
+                        clearInterval(timerId); timerId = null;
+                        rounds++; document.getElementById('roundCount').innerText = rounds;
                         document.getElementById('alarm').play();
-                        alert("زمان تمام شد!");
+                        alert("زمان تمام شد! یک دور تمرکز به آمار شما اضافه شد.");
+                        btn.innerText = "شروع";
                     }
                 }, 1000);
             }
         }
 
         function resetTimer() {
-            clearInterval(timerId);
-            timerId = null;
-            timeLeft = defaultTime;
-            updateDisplay();
+            clearInterval(timerId); timerId = null;
+            timeLeft = defaultTime; updateDisplay();
             document.getElementById('mainBtn').innerText = "شروع";
+        }
+
+        function toggleRain() {
+            const rain = document.getElementById('rainSource');
+            const btn = document.getElementById('rainBtn');
+            rainPlaying = !rainPlaying;
+            if(rainPlaying) { rain.play(); btn.innerText = "🌧️ صدای باران: روشن"; }
+            else { rain.pause(); btn.innerText = "🌧️ صدای باران: خاموش"; }
+        }
+
+        function addTodo() {
+            const input = document.getElementById('todoInput');
+            if (!input.value) return;
+            const li = document.createElement('li');
+            li.className = 'todo-item';
+            li.innerHTML = `<span>${input.value}</span><button onclick="this.parentElement.remove()" style="width:auto; padding:0 5px; background:none; color:red;">✕</button>`;
+            document.getElementById('todoList').appendChild(li);
+            input.value = '';
         }
     </script>
 </body>
 </html>
+
