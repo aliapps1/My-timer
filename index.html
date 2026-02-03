@@ -21,14 +21,14 @@
         .reset-btn { background: none; border: none; color: #64748b; cursor: pointer; margin-top: 10px; font-size: 0.9rem; text-decoration: underline; width: 100%; text-align: center; }
         .lang-btns { position: absolute; top: -50px; left: 0; display: flex; gap: 5px; }
         .lang-btns button { font-size: 11px; padding: 6px 10px; background: #334155; color: white; border: none; border-radius: 8px; cursor: pointer; }
-        .theme-btn { position: absolute; top: -50px; right: 0; font-size: 24px; cursor: pointer; }
+        .top-controls { position: absolute; top: -50px; right: 0; display: flex; gap: 10px; align-items: center; }
+        .icon-btn { font-size: 22px; cursor: pointer; background: none; border: none; padding: 0; }
         hr { border: 0; border-top: 1px solid #334155; margin: 20px 0; }
-        .task-section { text-align: inherit; }
         .task-input-group { display: flex; gap: 5px; margin-top: 10px; }
         input { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: white; }
         .add-btn { background: var(--primary); border: none; padding: 10px 15px; border-radius: 10px; cursor: pointer; font-weight: bold; }
-        ul { list-style: none; padding: 0; margin-top: 15px; text-align: inherit; }
-        li { background: #334155; margin-bottom: 5px; padding: 8px 12px; border-radius: 8px; font-size: 0.9rem; display: flex; justify-content: space-between; }
+        ul { list-style: none; padding: 0; margin-top: 15px; }
+        li { background: #334155; margin-bottom: 5px; padding: 8px 12px; border-radius: 8px; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; }
     </style>
 </head>
 <body>
@@ -38,7 +38,10 @@
             <button onclick="changeLang('en')">EN</button>
             <button onclick="changeLang('ar')">AR</button>
         </div>
-        <div class="theme-btn" onclick="document.body.classList.toggle('light')">🌓</div>
+        <div class="top-controls">
+            <button class="icon-btn" id="soundBtn" onclick="toggleSound()">🔇</button>
+            <div class="icon-btn" onclick="document.body.classList.toggle('light')">🌓</div>
+        </div>
 
         <div class="date-display" id="dateText"></div>
         <h2 id="lbl-title" style="margin: 0;">تایمر تمرکز</h2>
@@ -54,14 +57,12 @@
         <button class="reset-btn" id="lbl-reset" onclick="resetTimer()">بازنشانی</button>
 
         <hr>
-        <div class="task-section">
-            <p style="margin: 0; font-size: 0.8rem; opacity: 0.7;" id="lbl-rounds">دورهای تمرکز: 0</p>
-            <div class="task-input-group">
-                <input type="text" id="taskInput" placeholder="کار جدید...">
-                <button class="add-btn" onclick="addTask()">+</button>
-            </div>
-            <ul id="taskList"></ul>
+        <p style="margin: 0; font-size: 0.8rem; opacity: 0.7;" id="lbl-rounds">دورهای تمرکز: 0</p>
+        <div class="task-input-group">
+            <input type="text" id="taskInput" placeholder="کار جدید...">
+            <button class="add-btn" onclick="addTask()">+</button>
         </div>
+        <ul id="taskList"></ul>
     </div>
 
     <script>
@@ -71,7 +72,13 @@
             ar: { title: "مؤقت التركيز", start: "بدء", stop: "إيقاف", reset: "إعادة ضبط", rounds: "دورات التركيز: ", taskPh: "مهمة جديدة...", dir: "rtl", langCode: 'ar-SA' }
         };
 
-        let timeLeft = 1500, timerId = null, currentLang = 'fa', rounds = 0;
+        let timeLeft = 1500, timerId = null, currentLang = 'fa', rounds = 0, isMuted = true;
+        const beep = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+
+        function toggleSound() {
+            isMuted = !isMuted;
+            document.getElementById('soundBtn').innerText = isMuted ? '🔇' : '🔊';
+        }
 
         function updateDate() {
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
@@ -87,7 +94,6 @@
             document.getElementById('lbl-rounds').innerText = t.rounds + rounds;
             document.getElementById('taskInput').placeholder = t.taskPh;
             document.getElementById('mainBtn').innerText = timerId ? t.stop : t.start;
-            
             const card = document.getElementById('mainCard');
             lang === 'en' ? card.classList.add('ltr-mode') : card.classList.remove('ltr-mode');
             updateDate();
@@ -111,7 +117,11 @@
                 btn.innerText = translations[currentLang].stop;
                 timerId = setInterval(() => {
                     if (timeLeft > 0) { timeLeft--; updateDisplay(); }
-                    else { clearInterval(timerId); timerId = null; rounds++; changeLang(currentLang); alert("Done!"); }
+                    else { 
+                        clearInterval(timerId); timerId = null; rounds++; 
+                        if(!isMuted) beep.play();
+                        changeLang(currentLang); alert("Done!"); 
+                    }
                 }, 1000);
             }
         }
@@ -128,13 +138,11 @@
             const input = document.getElementById('taskInput');
             if (!input.value) return;
             const li = document.createElement('li');
-            li.innerHTML = `${input.value} <span onclick="this.parentElement.remove()" style="cursor:pointer">×</span>`;
+            li.innerHTML = `<span>${input.value}</span><span onclick="this.parentElement.remove()" style="cursor:pointer; color:#ef4444">✕</span>`;
             document.getElementById('taskList').appendChild(li);
             input.value = '';
         }
-
         updateDate();
     </script>
 </body>
 </html>
-
