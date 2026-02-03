@@ -1,30 +1,76 @@
-
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تایمر هوشمند</title>
+    <title>تایمر حرفه‌ای سه زمانه</title>
     <style>
-        body { background: #0f172a; color: white; font-family: system-ui; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .card { background: #1e293b; padding: 2rem; border-radius: 1.5rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); text-align: center; border: 1px solid #334155; width: 300px; }
-        .time { font-size: 4rem; font-weight: 800; margin: 1.5rem 0; color: #22d3ee; font-variant-numeric: tabular-nums; }
-        button { width: 100%; padding: 0.75rem; font-size: 1.25rem; font-weight: 600; border: none; border-radius: 0.75rem; cursor: pointer; transition: 0.2s; background: #22d3ee; color: #0891b2; }
-        button:active { transform: scale(0.95); }
-        .reset { background: transparent; color: #94a3b8; margin-top: 1rem; font-size: 0.9rem; text-decoration: underline; }
+        :root { --bg: #f0f2f5; --card: #ffffff; --text: #1c1e21; --primary: #22d3ee; }
+        .dark { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --primary: #22d3ee; }
+        body { background: var(--bg); color: var(--text); font-family: system-ui; transition: 0.3s; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .card { background: var(--card); padding: 2rem; border-radius: 2rem; box-shadow: 0 20px 50px rgba(0,0,0,0.2); text-align: center; width: 320px; border: 1px solid #334155; }
+        .time { font-size: 4.5rem; font-weight: 800; margin: 1rem 0; color: var(--primary); font-family: monospace; }
+        .modes { display: flex; justify-content: space-between; margin-bottom: 1.5rem; gap: 5px; }
+        .modes button { background: #334155; font-size: 0.8rem; padding: 8px; }
+        .modes button.active { background: var(--primary); color: #0891b2; }
+        button { width: 100%; padding: 0.8rem; margin: 5px 0; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; background: var(--primary); color: #0891b2; font-size: 1.1rem; }
+        .lang-btns { position: absolute; top: 20px; left: 20px; display: flex; gap: 5px; }
+        .lang-btns button { width: auto; font-size: 12px; padding: 5px 10px; background: #334155; color: white; }
+        .theme-toggle { position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 24px; background: #334155; padding: 5px; border-radius: 10px; }
     </style>
 </head>
-<body>
+<body class="dark">
+    <div class="theme-toggle" onclick="document.body.classList.toggle('dark')">🌓</div>
+    <div class="lang-btns">
+        <button onclick="setLang('fa')">FA</button>
+        <button onclick="setLang('en')">EN</button>
+        <button onclick="setLang('ar')">AR</button>
+    </div>
     <div class="card">
-        <div style="color: #94a3b8; font-weight: 500;">تایمر تمرکز</div>
+        <h2 id="title">تایمر تمرکز</h2>
+        <div class="modes">
+            <button onclick="setTime(300, this)">۵ دقیقه</button>
+            <button class="active" onclick="setTime(1500, this)">۲۵ دقیقه</button>
+            <button onclick="setTime(3000, this)">۵۰ دقیقه</button>
+        </div>
         <div class="time" id="display">25:00</div>
         <button id="mainBtn" onclick="toggleTimer()">شروع</button>
-        <button class="reset" onclick="resetTimer()">بازنشانی</button>
+        <button style="background:transparent; color:gray; text-decoration:underline; font-size: 0.9rem;" onclick="resetTimer()" id="resetBtn">بازنشانی</button>
     </div>
 
+    <audio id="alarm" src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg"></audio>
+
     <script>
+        let defaultTime = 1500;
         let timeLeft = 1500;
         let timerId = null;
+        const dict = {
+            fa: { title: "تایمر تمرکز", start: "شروع", stop: "توقف", reset: "بازنشانی", m5: "۵ دقیقه", m25: "۲۵ دقیقه", m50: "۵۰ دقیقه" },
+            en: { title: "Focus Timer", start: "Start", stop: "Stop", reset: "Reset", m5: "5 Min", m25: "25 Min", m50: "50 Min" },
+            ar: { title: "مؤقت التركيز", start: "بدء", stop: "إيقاف", reset: "إعادة تعيين", m5: "۵ دقائق", m25: "۲۵ دقيقة", m50: "۵۰ دقيقة" }
+        };
+
+        function setLang(l) {
+            document.body.dir = (l === 'en') ? 'ltr' : 'rtl';
+            document.getElementById('title').innerText = dict[l].title;
+            document.getElementById('mainBtn').innerText = (timerId) ? dict[l].stop : dict[l].start;
+            document.getElementById('resetBtn').innerText = dict[l].reset;
+            const modeBtns = document.querySelectorAll('.modes button');
+            modeBtns[0].innerText = dict[l].m5;
+            modeBtns[1].innerText = dict[l].m25;
+            modeBtns[2].innerText = dict[l].m50;
+        }
+
+        function setTime(seconds, btn) {
+            clearInterval(timerId);
+            timerId = null;
+            defaultTime = seconds;
+            timeLeft = seconds;
+            updateDisplay();
+            document.getElementById('mainBtn').innerText = "شروع";
+            document.querySelectorAll('.modes button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
 
         function updateDisplay() {
             const m = Math.floor(timeLeft / 60);
@@ -37,19 +83,17 @@
             if (timerId) {
                 clearInterval(timerId);
                 timerId = null;
-                btn.innerText = 'ادامه';
-                btn.style.background = '#22d3ee';
+                btn.innerText = "ادامه";
             } else {
-                btn.innerText = 'توقف';
-                btn.style.background = '#f87171';
-                btn.style.color = '#7f1d1d';
+                btn.innerText = "توقف";
                 timerId = setInterval(() => {
                     if (timeLeft > 0) {
                         timeLeft--;
                         updateDisplay();
                     } else {
                         clearInterval(timerId);
-                        alert('زمان به پایان رسید!');
+                        document.getElementById('alarm').play();
+                        alert("زمان تمام شد!");
                     }
                 }, 1000);
             }
@@ -58,12 +102,9 @@
         function resetTimer() {
             clearInterval(timerId);
             timerId = null;
-            timeLeft = 1500;
+            timeLeft = defaultTime;
             updateDisplay();
-            const btn = document.getElementById('mainBtn');
-            btn.innerText = 'شروع';
-            btn.style.background = '#22d3ee';
-            btn.style.color = '#0891b2';
+            document.getElementById('mainBtn').innerText = "شروع";
         }
     </script>
 </body>
