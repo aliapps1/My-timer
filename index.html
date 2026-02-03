@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Focus Timer Pro</title>
+    <title>Focus Timer Pro | v2.5</title>
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --primary: #22d3ee; }
         .light { --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --primary: #0891b2; }
         body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; transition: 0.5s; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }
-        .card { background: var(--card); padding: 1.5rem; border-radius: 2.5rem; width: 100%; max-width: 360px; position: relative; text-align: right; border: 1px solid rgba(255,255,255,0.1); }
+        .card { background: var(--card); padding: 1.5rem; border-radius: 2.5rem; width: 100%; max-width: 360px; position: relative; text-align: right; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
         
         .lang-btns { position: absolute; top: -55px; left: 10px; display: flex; gap: 8px; direction: ltr !important; }
         .lang-btns button { padding: 8px 12px; background: var(--card); color: var(--text); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 12px; }
@@ -19,10 +19,14 @@
 
         .time { font-size: 5rem; font-weight: 800; margin: 10px 0; color: var(--primary); text-align: center; font-family: monospace; }
         .modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 15px 0; }
-        .modes button { background: rgba(51, 65, 85, 0.5); padding: 10px; color: white; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; font-size: 0.85rem; }
+        .modes button { background: rgba(51, 65, 85, 0.5); padding: 10px; color: white; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; font-size: 0.85rem; transition: 0.3s; }
         .light .modes button { background: #e2e8f0; color: #475569; }
-        .modes button.active { background: var(--primary); color: #0f172a; font-weight: bold; }
-        .main-btn { width: 100%; padding: 1.2rem; border-radius: 18px; cursor: pointer; font-weight: 800; background: var(--primary); color: #0f172a; font-size: 1.3rem; border:none; }
+        .modes button.active { background: var(--primary); color: #0f172a; font-weight: bold; transform: scale(1.05); }
+        
+        .main-btn { width: 100%; padding: 1.2rem; border-radius: 18px; cursor: pointer; font-weight: 800; background: var(--primary); color: #0f172a; font-size: 1.3rem; border:none; box-shadow: 0 4px 14px 0 rgba(34, 211, 238, 0.39); }
+        .main-btn:active { transform: scale(0.98); }
+        
+        .visitor-counter { text-align: center; margin-top: 25px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); }
     </style>
 </head>
 <body>
@@ -49,11 +53,13 @@
         </div>
         <div class="time" id="display">25:00</div>
         <button class="main-btn" id="mainBtn" onclick="toggleTimer()">شروع</button>
-        <p id="lbl-rounds" style="text-align:center; margin-top:15px;">دورهای تمرکز: 0</p>
+        <p id="lbl-rounds" style="text-align:center; margin-top:15px; font-size: 0.9rem;">دورهای تمرکز: 0</p>
+
+        <div class="visitor-counter">
+            <img src="https://profile-counter.glitch.me/aliapps1-timer/count.svg" alt="Visitors" style="height: 22px;">
+            <div style="font-size: 9px; opacity: 0.4; margin-top: 4px;">TOTAL VISITS</div>
+        </div>
     </div>
-<div style="text-align: center; margin-top: 20px; opacity: 0.6; font-size: 10px;">
-    <img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Faliapps1.github.io%2FMy-timer&count_bg=%2322D3EE&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=Views&edge_flat=false" alt="Views"/>
-</div>
 
     <script>
         let duration = 1500, endTime = null, timerId = null, currentLang = 'fa', rounds = 0, isMuted = false;
