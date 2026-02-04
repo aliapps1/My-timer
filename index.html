@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Focus Timer Pro</title>
+    <title>Focus Timer Pro</title> <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0284c7">
+
     <style>
         :root { 
             /* تم کاملاً روشن و شفاف */
@@ -124,9 +126,10 @@
             <button class="btn-main btn-reset" id="btn-reset" onclick="resetTimer()">Reset</button>
         </div>
 
-        <div class="stats-card">
-            <div class="stat-item"><span id="lbl-today">⏱️ Today:</span> <span id="stat-today">0 min</span></div>
-            <div class="stat-item"><span id="lbl-streak">🔥 Streak:</span> <span id="stat-streak">0 days</span></div>
+        <div class="stat-item"><span id="lbl-today">📅 Today:</span> <span id="stat-today">0 min</span></div>
+<div class="stat-item"><span id="lbl-week">📈 This Week:</span> <span id="stat-week">0 min</span></div>
+<div class="stat-item"><span id="lbl-streak">🔥 Streak:</span> <span id="stat-streak">0 days</span></div>
+
             <div class="stat-item"><span id="lbl-level">⭐ Level:</span> <span id="stat-level" style="color:var(--accent); font-weight:bold;">Level 1</span></div>
         </div>
         
@@ -137,15 +140,19 @@
     <audio id="rainAudio" loop src="https://www.soundjay.com/nature/rain-01.mp3"></audio>
     <audio id="cafeAudio" loop src="https://www.soundjay.com/misc/sounds/coffee-shop-1.mp3"></audio>
 
-    <script>
+    <script> if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+}
+
         let duration = 1500, timeLeft = 1500, timerId = null, currentLang = 'en', isMuted = false;
         let stats = JSON.parse(localStorage.getItem('focusStats')) || { totalMin: 0, streak: 0, lastDate: null };
 
         const translations = {
-            en: { title: "Focus Timer", start: "Start", pause: "Pause", reset: "Reset", share: "Share Result", today: "⏱️ Today:", streak: "🔥 Streak:", level: "⭐ Level:", rain: "Rain Mood", cafe: "Cozy Cafe", none: "No Sound", min: "min", day: "days", dir: "ltr", lang: "en-US" },
-            fa: { title: "تایمر تمرکز", start: "شروع", pause: "توقف", reset: "شروع مجدد", share: "ارسال نتیجه", today: "⏱️ امروز:", streak: "🔥 زنجیره:", level: "⭐ سطح:", rain: "صدای باران", cafe: "صدای کافه", none: "بدون صدا", min: "دقیقه", day: "روز", dir: "rtl", lang: "fa-IR" },
-            ar: { title: "مؤقت التركيز", start: "بدء", pause: "إيقاف", reset: "إعادة تعيين", share: "ارسال النتيجة", today: "⏱️ اليوم:", streak: "🔥 متسلسل:", level: "⭐ مستوى:", rain: "صوت المطر", cafe: "صوت المقهى", none: "بدون صوت", min: "دقيقة", day: "يوم", dir: "rtl", lang: "ar-SA" }
-        };
+    en: { title: "Focus Timer Pro", start: "Start", pause: "Pause", reset: "Reset", today: "📅 Today:", week: "📈 This Week:", streak: "🔥 Streak:", min: "min", day: "days" },
+    fa: { title: "تایمر تمرکز", start: "شروع", pause: "توقف", reset: "بازنشانی", today: "📅 امروز:", week: "📈 این هفته:", streak: "🔥 زنجیره:", min: "دقیقه", day: "روز" },
+    ar: { title: "مؤقت التركيز", start: "بدء", pause: "إيقاف", reset: "إعادة ضبط", today: "📅 اليوم:", week: "📈 هذا الأسبوع:", streak: "🔥 متسلسل:", min: "دقيقة", day: "يوم" }
+};
+
 
         function updateUI() {
             const t = translations[currentLang];
