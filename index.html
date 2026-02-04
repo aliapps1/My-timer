@@ -6,24 +6,25 @@
     <title>Focus Timer Pro</title>
     <style>
         :root { 
-            /* تم اقیانوسی: ملایم‌تر از سیاه */
-            --bg: linear-gradient(135deg, #1a1c2c 0%, #4a192c 100%); 
-            --card: rgba(30, 41, 59, 0.7); 
+            /* رنگ‌های اقیانوسی روشن‌تر برای اینکه خفگی سیاه را نداشته باشد */
+            --bg: linear-gradient(135deg, #2e3a59 0%, #161d2f 100%); 
+            --card: rgba(45, 55, 72, 0.8); 
             --text: #f8fafc; 
             --primary: #38bdf8; 
             --accent: #fbbf24; 
         }
         
         .light-theme { 
-            --bg: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%); 
-            --card: rgba(255, 255, 255, 0.8); 
-            --text: #102a43; 
-            --primary: #007ace; 
+            --bg: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%); 
+            --card: rgba(255, 255, 255, 0.9); 
+            --text: #0f172a; 
+            --primary: #0284c7; 
         }
         
         body { 
-            background: var(--bg); 
-            background-attachment: fixed;
+            /* این خط باعث می‌شود حتماً رنگ جدید اعمال شود */
+            background: var(--bg) !important; 
+            background-attachment: fixed !important;
             color: var(--text); 
             font-family: system-ui, -apple-system, sans-serif; 
             display: flex; align-items: center; justify-content: center; 
@@ -36,7 +37,7 @@
             padding: 2.5rem; border-radius: 3rem; 
             width: 100%; max-width: 400px; text-align: center; 
             border: 1px solid rgba(255,255,255,0.1); 
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4); 
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); 
         }
 
         .header-controls { display: flex; justify-content: space-between; margin-bottom: 25px; }
