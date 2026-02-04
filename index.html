@@ -8,13 +8,14 @@
         :root { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --primary: #22d3ee; --accent: #fbbf24; }
         .light { --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --primary: #0891b2; }
         body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; transition: 0.5s; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }
-        .card { background: var(--card); padding: 1.5rem; border-radius: 2.5rem; width: 100%; max-width: 380px; position: relative; text-align: right; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); }
+        .card { background: var(--card); padding: 1.5rem; border-radius: 2.5rem; width: 100%; max-width: 380px; text-align: right; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); }
         
-        .top-nav { position: absolute; top: -55px; width: 100%; display: flex; justify-content: space-between; left: 0; padding: 0 10px; box-sizing: border-box; }
-        .btns-group { display: flex; gap: 8px; }
-        .nav-btn { padding: 8px 12px; background: var(--card); color: var(--text); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 12px; }
+        /* اصلاح بخش دکمه‌های بالای صفحه */
+        .header-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .lang-group { display: flex; gap: 5px; }
+        .nav-btn { padding: 6px 10px; background: rgba(51, 65, 85, 0.5); color: white; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: bold; }
 
-        .time { font-size: 5.5rem; font-weight: 800; margin: 5px 0; color: var(--primary); text-align: center; font-family: monospace; letter-spacing: -2px; }
+        .time { font-size: 5.5rem; font-weight: 800; margin: 5px 0; color: var(--primary); text-align: center; font-family: monospace; }
         .modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 15px 0; }
         .modes button { background: rgba(51, 65, 85, 0.5); padding: 10px; color: white; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; font-size: 0.8rem; }
         .modes button.active { background: var(--primary); color: #0f172a; font-weight: bold; }
@@ -38,13 +39,13 @@
 </head>
 <body>
     <div class="card" id="mainCard">
-        <div class="top-nav">
-            <div class="btns-group">
+        <div class="header-controls">
+            <div class="lang-group">
                 <button class="nav-btn" onclick="changeLang('en')">EN</button>
                 <button class="nav-btn" onclick="changeLang('ar')">AR</button>
                 <button class="nav-btn" onclick="changeLang('fa')">FA</button>
             </div>
-            <div class="btns-group">
+            <div class="lang-group">
                 <button class="nav-btn" id="muteBtn" onclick="toggleMute()">🔊</button>
                 <button class="nav-btn" onclick="toggleTheme()">🌓</button>
             </div>
