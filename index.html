@@ -1,11 +1,14 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr"> <head>
+<html lang="en" dir="ltr">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Focus Timer Pro</title>
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --primary: #22d3ee; --accent: #fbbf24; }
-        body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }
+        .light-theme { --bg: #f1f5f9; --card: #ffffff; --text: #0f172a; --primary: #0891b2; }
+        
+        body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; transition: 0.5s; }
         .card { background: var(--card); padding: 1.5rem; border-radius: 2.5rem; width: 100%; max-width: 380px; text-align: center; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); }
         .header-controls { display: flex; justify-content: space-between; margin-bottom: 20px; }
         .nav-btn { padding: 8px 12px; background: rgba(51, 65, 85, 0.5); color: white; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: bold; }
@@ -18,10 +21,11 @@
         .btn-start { background: var(--accent); color: #0f172a; }
         .btn-pause { background: #334155; color: white; }
         .btn-reset { background: #ef4444; color: white; }
-        .stats-card { background: rgba(15, 23, 42, 0.4); border-radius: 20px; padding: 15px; margin: 15px 0; text-align: left; }
+        .stats-card { background: rgba(15, 23, 42, 0.1); border: 1px solid rgba(0,0,0,0.05); border-radius: 20px; padding: 15px; margin: 15px 0; text-align: left; }
         .stat-item { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; }
-        .sound-select { width: 100%; padding: 10px; border-radius: 10px; background: #334155; color: white; border: none; margin-bottom: 15px; }
         .share-btn { width: 100%; padding: 15px; background: #3b82f6; color: white; border-radius: 15px; border: none; font-weight: bold; cursor: pointer; }
+        .rtl-mode { text-align: right !important; direction: rtl; }
+        .rtl-mode .stats-card { text-align: right !important; }
     </style>
 </head>
 <body>
@@ -34,16 +38,8 @@
             </div>
             <button class="nav-btn" id="muteBtn" onclick="toggleMute()">🔊</button>
         </div>
-
         <div id="dateText" style="color:var(--primary); font-size:0.8rem;"></div>
         <h2 id="lbl-title">Focus Timer</h2>
-
-        <select id="ambientSound" class="sound-select" onchange="changeAmbient()">
-            <option value="none" id="opt-none">No Sound</option>
-            <option value="rain" id="opt-rain">Rain (Premium)</option>
-            <option value="cafe" id="opt-cafe">Cafe (Premium)</option>
-        </select>
-
         <div class="modes">
             <button onclick="setTime(300, this)">5m</button>
             <button onclick="setTime(900, this)">15m</button>
@@ -52,37 +48,37 @@
             <button onclick="setTime(3600, this)">60m</button>
             <button onclick="setTime(5400, this)">90m</button>
         </div>
-
         <div class="time" id="display">25:00</div>
-
         <div class="controls">
             <button class="btn-main btn-start" id="btn-start" onclick="startTimer()">Start</button>
             <button class="btn-main btn-pause" id="btn-pause" onclick="pauseTimer()">Pause</button>
             <button class="btn-main btn-reset" id="btn-reset" onclick="resetTimer()">Reset</button>
         </div>
-
         <div class="stats-card">
             <div class="stat-item"><span id="lbl-today">⏱️ Today:</span> <span id="stat-today">0 min</span></div>
             <div class="stat-item"><span id="lbl-streak">🔥 Streak:</span> <span id="stat-streak">0 days</span></div>
             <div class="stat-item"><span id="lbl-level">⭐ Level:</span> <span id="stat-level" style="color:var(--accent); font-weight:bold;">Level 1</span></div>
         </div>
-
         <button class="share-btn" id="btn-share" onclick="shareStats()">Share Result</button>
     </div>
 
     <audio id="alarmAudio" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
-    <audio id="rainAudio" loop src="https://www.soundjay.com/nature/rain-01.mp3"></audio>
-    <audio id="cafeAudio" loop src="https://www.soundjay.com/misc/sounds/coffee-shop-1.mp3"></audio>
 
     <script>
         let duration = 1500, timeLeft = 1500, timerId = null, currentLang = 'en', isMuted = false;
         let stats = JSON.parse(localStorage.getItem('focusStats')) || { totalMin: 0, streak: 0, lastDate: null };
 
         const translations = {
-            en: { title: "Focus Timer", start: "Start", pause: "Pause", reset: "Reset", share: "Share Result", today: "⏱️ Today:", streak: "🔥 Streak:", level: "⭐ Level:", rain: "Rain (Premium)", cafe: "Cafe (Premium)", none: "No Sound", min: "min", day: "days", dir: "ltr", lang: "en-US" },
-            fa: { title: "تایمر تمرکز", start: "شروع", pause: "توقف", reset: "ریست", share: "ارسال نتیجه", today: "⏱️ امروز:", streak: "🔥 زنجیره:", level: "⭐ سطح:", rain: "صدای باران", cafe: "صدای کافه", none: "بدون صدا", min: "دقیقه", day: "روز", dir: "rtl", lang: "fa-IR" },
-            ar: { title: "مؤقت التركیز", start: "بدء", pause: "إيقاف", reset: "إعادة", share: "مشاركة", today: "⏱️ اليوم:", streak: "🔥 متسلسل:", level: "⭐ مستوى:", rain: "صوت المطر", cafe: "صوت المقهى", none: "بدون صوت", min: "دقيقة", day: "يوم", dir: "rtl", lang: "ar-SA" }
+            en: { title: "Focus Timer", start: "Start", pause: "Pause", reset: "Reset", share: "Share Result", today: "⏱️ Today:", streak: "🔥 Streak:", level: "⭐ Level:", min: "min", day: "days", dir: "ltr", lang: "en-US" },
+            fa: { title: "تایمر تمرکز", start: "شروع", pause: "توقف", reset: "شروع مجدد", share: "ارسال نتیجه", today: "⏱️ امروز:", streak: "🔥 زنجیره:", level: "⭐ سطح:", min: "دقیقه", day: "روز", dir: "rtl", lang: "fa-IR" },
+            ar: { title: "مؤقت التركيز", start: "بدء", pause: "إيقاف", reset: "إعادة تعيين", share: "ارسال النتيجة", today: "⏱️ اليوم:", streak: "🔥 متسلسل:", level: "⭐ مستوى:", min: "دقيقة", day: "يوم", dir: "rtl", lang: "ar-SA" }
         };
+
+        function autoTheme() {
+            const hour = new Date().getHours();
+            if (hour >= 6 && hour < 18) document.body.classList.add('light-theme');
+            else document.body.classList.remove('light-theme');
+        }
 
         function updateUI() {
             const t = translations[currentLang];
@@ -95,12 +91,11 @@
             document.getElementById('lbl-today').innerText = t.today;
             document.getElementById('lbl-streak').innerText = t.streak;
             document.getElementById('lbl-level').innerText = t.level;
-            document.getElementById('opt-none').innerText = t.none;
-            document.getElementById('opt-rain').innerText = t.rain;
-            document.getElementById('opt-cafe').innerText = t.cafe;
             document.getElementById('stat-today').innerText = stats.totalMin + " " + t.min;
             document.getElementById('stat-streak').innerText = stats.streak + " " + t.day;
             document.getElementById('stat-level').innerText = "Level " + (Math.floor(stats.totalMin / 100) + 1);
+            if(t.dir === 'rtl') document.getElementById('mainCard').classList.add('rtl-mode');
+            else document.getElementById('mainCard').classList.remove('rtl-mode');
         }
 
         function startTimer() {
@@ -109,16 +104,14 @@
                 timeLeft--; updateDisplay();
                 if (timeLeft <= 0) { 
                     clearInterval(timerId); timerId = null; 
-                    if(!isMuted) document.getElementById('alarmAudio').play(); // زنگ خودکار
+                    if(!isMuted) document.getElementById('alarmAudio').play();
                     completeSession(); 
                 }
             }, 1000);
-            changeAmbient();
         }
 
         function completeSession() {
-            let gained = Math.floor(duration / 60);
-            stats.totalMin += gained;
+            stats.totalMin += Math.floor(duration / 60);
             const today = new Date().toDateString();
             if (stats.lastDate !== today) { stats.streak++; stats.lastDate = today; }
             localStorage.setItem('focusStats', JSON.stringify(stats));
@@ -129,31 +122,27 @@
         async function shareStats() {
             const t = translations[currentLang];
             const text = `🎯 ${t.title}\n⭐ Level: ${Math.floor(stats.totalMin / 100) + 1}\n⏱️ Today: ${stats.totalMin} ${t.min}\n🔥 Streak: ${stats.streak} ${t.day}`;
-            
-            if (navigator.share) { // باز کردن مستقیم منوی ارسال گوشی
-                try {
-                    await navigator.share({ title: t.title, text: text });
-                } catch (err) { console.log("Share failed"); }
+            if (navigator.share) {
+                try { await navigator.share({ title: t.title, text: text }); } catch (err) {}
             } else {
                 navigator.clipboard.writeText(text);
-                alert("Copied to clipboard!");
+                alert("Copied!");
             }
         }
 
         function setTime(s, btn) { duration = s; timeLeft = s; document.querySelectorAll('.modes button').forEach(b => b.classList.remove('active')); btn.classList.add('active'); updateDisplay(); }
         function updateDisplay() { const m = Math.floor(timeLeft / 60), s = timeLeft % 60; document.getElementById('display').innerText = `${m}:${s < 10 ? '0' : ''}${s}`; }
-        function pauseTimer() { clearInterval(timerId); timerId = null; stopAmbient(); }
+        function pauseTimer() { clearInterval(timerId); timerId = null; }
         function resetTimer() { pauseTimer(); timeLeft = duration; updateDisplay(); }
-        function changeAmbient() { stopAmbient(); const val = document.getElementById('ambientSound').value; if (val !== 'none' && !isMuted && timerId) document.getElementById(val + 'Audio').play(); }
-        function stopAmbient() { document.getElementById('rainAudio').pause(); document.getElementById('cafeAudio').pause(); }
-        function toggleMute() { isMuted = !isMuted; document.getElementById('muteBtn').innerText = isMuted ? '🔇' : '🔊'; if (isMuted) stopAmbient(); else changeAmbient(); }
+        function toggleMute() { isMuted = !isMuted; document.getElementById('muteBtn').innerText = isMuted ? '🔇' : '🔊'; }
         function changeLang(l) { currentLang = l; updateUI(); }
 
         setInterval(() => {
+            autoTheme();
             document.getElementById('dateText').innerText = new Date().toLocaleDateString(translations[currentLang].lang, {weekday:'long', month:'long', day:'numeric'});
         }, 1000);
 
-        updateUI();
+        autoTheme(); updateUI(); updateDisplay();
     </script>
 </body>
 </html>
