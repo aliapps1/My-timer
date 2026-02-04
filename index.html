@@ -1,143 +1,213 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Focus Timer Pro</title>
+    <title>تایمر تمرکز حرفه‌ای</title>
     <style>
-        :root { 
-            /* رنگ‌های روشن و انرژی‌بخش */
-            --bg: #f0f4f8; 
-            --card: rgba(255, 255, 255, 0.9); 
-            --text: #1e293b; 
-            --primary: #3b82f6; 
-            --accent: #f59e0b; 
-            --danger: #ef4444;
+        :root {
+            /* پالت رنگی روشن و آرام‌بخش */
+            --bg: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --text-color: #2c3e50;
+            --primary: #3498db;
+            --accent: #f39c12;
+            --danger: #e74c3c;
         }
-        
-        body { 
+
+        body {
             background: var(--bg) !important;
-            background-image: radial-gradient(circle at top right, #dbeafe 0%, #f0f4f8 100%) !important;
-            color: var(--text); 
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
-            display: flex; align-items: center; justify-content: center; 
-            min-height: 100vh; margin: 0; padding: 20px; transition: 0.5s; 
+            background-attachment: fixed;
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            transition: all 0.5s ease;
         }
 
-        .card { 
-            background: var(--card); 
-            backdrop-filter: blur(20px);
-            padding: 2.5rem; border-radius: 2.5rem; 
-            width: 100%; max-width: 400px; text-align: center; 
-            border: 1px solid rgba(255,255,255,0.8); 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.05); 
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 40px;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
         }
 
-        .nav-btn { 
-            padding: 8px 15px; background: #fff; 
-            color: var(--text); border: 1px solid #e2e8f0; 
-            border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: bold; margin: 0 2px;
+        .lang-switch button {
+            background: rgba(255,255,255,0.5);
+            border: 1px solid #ddd;
+            padding: 5px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 0 2px;
         }
 
-        .time { 
-            font-size: 6rem; font-weight: 800; margin: 15px 0; 
-            color: var(--primary); letter-spacing: -2px;
+        .time-display {
+            font-size: 6rem;
+            font-weight: 900;
+            color: var(--primary);
+            margin: 15px 0;
+            text-shadow: 2px 4px 10px rgba(52, 152, 219, 0.2);
         }
 
-        .modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 20px 0; }
-        .modes button { 
-            background: #f8fafc; padding: 10px; 
-            color: #64748b; border-radius: 12px; border: 1px solid #e2e8f0; 
-            cursor: pointer; transition: 0.2s; font-weight: 600;
+        .select-style {
+            width: 100%;
+            padding: 12px;
+            border-radius: 15px;
+            border: 1px solid rgba(0,0,0,0.1);
+            background: white;
+            margin-bottom: 20px;
+            outline: none;
         }
-        .modes button.active { background: var(--primary); color: white; border: none; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
 
-        .controls { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; margin: 20px 0; }
-        .btn-main { padding: 16px; border-radius: 18px; border: none; font-weight: 700; cursor: pointer; transition: 0.2s; font-size: 1rem; }
-        .btn-start { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2); }
-        .btn-pause { background: #e2e8f0; color: #475569; }
-        .btn-reset { background: var(--danger); color: white; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2); }
-
-        .stats-card { 
-            background: #f8fafc; border-radius: 20px; 
-            padding: 15px; margin-top: 20px; border: 1px solid #e2e8f0;
+        .modes-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 25px;
         }
-        .stat-item { display: flex; justify-content: space-between; margin-bottom: 5px; font-weight: 600; color: #475569; }
-        
-        .sound-select { 
-            width: 100%; padding: 12px; border-radius: 12px; 
-            background: #f8fafc; border: 1px solid #e2e8f0; margin-bottom: 15px;
+
+        .mode-btn {
+            background: white;
+            border: 1px solid #eee;
+            padding: 10px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .mode-btn.active {
+            background: var(--primary);
+            color: white;
+            border: none;
+        }
+
+        .main-controls {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 15px;
+            border: none;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-start { background: var(--accent); color: white; font-size: 1.1rem; }
+        .btn-pause { background: #95a5a6; color: white; }
+        .btn-reset { background: var(--danger); color: white; }
+
+        .stats-area {
+            background: rgba(0,0,0,0.03);
+            border-radius: 25px;
+            padding: 20px;
+            margin-top: 25px;
+            text-align: right;
+        }
+
+        .stat-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: 600; }
+        .share-btn {
+            width: 100%;
+            background: #34495e;
+            color: white;
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 20px;
+            border: none;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <div class="card" id="mainCard">
-        <div style="margin-bottom: 20px;">
-            <button class="nav-btn" onclick="changeLang('en')">EN</button>
-            <button class="nav-btn" onclick="changeLang('ar')">AR</button>
-            <button class="nav-btn" onclick="changeLang('fa')">FA</button>
-        </div>
-        
-        <h2 id="lbl-title" style="margin: 0; font-size: 1.5rem;">Focus Timer</h2>
 
-        <div class="modes">
-            <button class="active" onclick="setTime(1500, this)">25m</button>
-            <button onclick="setTime(3000, this)">50m</button>
-            <button onclick="setTime(600, this)">10m</button>
-        </div>
-
-        <div class="time" id="display">25:00</div>
-
-        <div class="controls">
-            <button class="btn-main btn-start" id="btn-start" onclick="startTimer()">Start</button>
-            <button class="btn-main btn-pause" id="btn-pause" onclick="pauseTimer()">Pause</button>
-            <button class="btn-main btn-reset" id="btn-reset" onclick="resetTimer()">Reset</button>
-        </div>
-
-        <div class="stats-card">
-            <div class="stat-item"><span id="lbl-today">Today:</span> <span id="stat-today">0 min</span></div>
-            <div class="stat-item"><span id="lbl-streak">Streak:</span> <span id="stat-streak">0 days</span></div>
-        </div>
+<div class="glass-card">
+    <div class="lang-switch" style="margin-bottom: 20px;">
+        <button onclick="setLang('fa')">FA</button>
+        <button onclick="setLang('en')">EN</button>
     </div>
 
-    <script>
-        let timeLeft = 1500, timerId = null, currentLang = 'en';
-        const translations = {
-            en: { title: "Focus Timer", start: "Start", pause: "Pause", reset: "Reset", today: "Today:", streak: "Streak:", min: "min", day: "days", dir: "ltr" },
-            fa: { title: "تایمر تمرکز", start: "شروع", pause: "توقف", reset: "شروع مجدد", today: "امروز:", streak: "زنجیره:", min: "دقیقه", day: "روز", dir: "rtl" },
-            ar: { title: "مؤقت التركيز", start: "بدء", pause: "إيقاف", reset: "إعادة", today: "اليوم:", streak: "متسلسل:", min: "دقیقة", day: "یوم", dir: "rtl" }
-        };
+    <h2 id="title">تایمر تمرکز</h2>
 
-        function updateUI() {
-            const t = translations[currentLang];
-            document.body.dir = t.dir;
-            document.getElementById('lbl-title').innerText = t.title;
-            document.getElementById('btn-start').innerText = t.start;
-            document.getElementById('btn-pause').innerText = t.pause;
-            document.getElementById('btn-reset').innerText = t.reset;
-            document.getElementById('lbl-today').innerText = t.today;
-            document.getElementById('lbl-streak').innerText = t.streak;
-            document.getElementById('mainCard').style.textAlign = t.dir === 'rtl' ? 'right' : 'center';
-        }
+    <select id="sound" class="select-style">
+        <option value="none">بدون صدا</option>
+        <option value="rain">صدای باران</option>
+        <option value="cafe">کافه دنج</option>
+    </select>
 
-        function setTime(s, btn) {
-            timeLeft = s; 
-            document.querySelectorAll('.modes button').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            updateDisplay();
-        }
+    <div class="modes-grid">
+        <button class="mode-btn" onclick="setTime(300, this)">۵دقیقه</button>
+        <button class="mode-btn active" onclick="setTime(1500, this)">۲۵دقیقه</button>
+        <button class="mode-btn" onclick="setTime(3000, this)">۵۰دقیقه</button>
+    </div>
 
-        function updateDisplay() {
-            const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
-            document.getElementById('display').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
-        }
+    <div class="time-display" id="display">25:00</div>
 
-        function startTimer() { if (!timerId) timerId = setInterval(() => { if(timeLeft > 0) { timeLeft--; updateDisplay(); } }, 1000); }
-        function pauseTimer() { clearInterval(timerId); timerId = null; }
-        function resetTimer() { pauseTimer(); updateDisplay(); }
-        function changeLang(l) { currentLang = l; updateUI(); }
+    <div class="main-controls">
+        <button class="btn btn-start" id="start-btn" onclick="toggle()">شروع</button>
+        <button class="btn btn-pause" onclick="pause()">توقف</button>
+        <button class="btn btn-reset" id="reset-btn" onclick="reset()">شروع مجدد</button>
+    </div>
 
-        updateUI();
-    </script>
+    <div class="stats-area">
+        <div class="stat-row"><span>⏱️ امروز:</span> <span>۰ دقیقه</span></div>
+        <div class="stat-row"><span>🔥 زنجیره:</span> <span>۰ روز</span></div>
+        <div class="stat-row"><span>⭐ سطح:</span> <span style="color:var(--accent)">Level 1</span></div>
+    </div>
+
+    <button class="share-btn" id="share-btn">ارسال نتیجه</button>
+</div>
+
+<script>
+    let timeLeft = 1500, timerId = null, currentLang = 'fa';
+
+    const trans = {
+        fa: { title: "تایمر تمرکز", start: "شروع", pause: "توقف", reset: "شروع مجدد", share: "ارسال نتیجه", dir: "rtl" },
+        en: { title: "Focus Timer", start: "Start", pause: "Pause", reset: "Reset", share: "Share Result", dir: "ltr" }
+    };
+
+    function setLang(l) {
+        currentLang = l;
+        const t = trans[l];
+        document.body.dir = t.dir;
+        document.getElementById('title').innerText = t.title;
+        document.getElementById('start-btn').innerText = t.start;
+        document.getElementById('reset-btn').innerText = t.reset;
+        document.getElementById('share-btn').innerText = t.share;
+        document.querySelector('.glass-card').style.textAlign = t.dir === 'rtl' ? 'right' : 'center';
+    }
+
+    function updateDisplay() {
+        const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
+        document.getElementById('display').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    function toggle() {
+        if (timerId) { clearInterval(timerId); timerId = null; }
+        else { timerId = setInterval(() => { if(timeLeft > 0) { timeLeft--; updateDisplay(); } }, 1000); }
+    }
+
+    function pause() { clearInterval(timerId); timerId = null; }
+    function reset() { pause(); timeLeft = 1500; updateDisplay(); }
+    function setTime(s, b) { 
+        timeLeft = s; updateDisplay(); 
+        document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+        b.classList.add('active');
+    }
+</script>
+
 </body>
 </html>
