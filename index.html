@@ -1,107 +1,87 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
-<head>
+<html lang="en" dir="ltr"> <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Focus Timer Pro | Multi-Lang</title>
+    <title>Focus Timer Pro</title>
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --primary: #22d3ee; --accent: #fbbf24; }
-        .light { --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --primary: #0891b2; }
-        body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; transition: 0.5s; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }
-        .card { background: var(--card); padding: 1.5rem; border-radius: 2.5rem; width: 100%; max-width: 380px; text-align: right; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); }
-        
-        /* اصلاح بخش دکمه‌های بالای صفحه */
-        .header-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .lang-group { display: flex; gap: 5px; }
-        .nav-btn { padding: 6px 10px; background: rgba(51, 65, 85, 0.5); color: white; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: bold; }
-
-        .time { font-size: 5.5rem; font-weight: 800; margin: 5px 0; color: var(--primary); text-align: center; font-family: monospace; }
+        body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }
+        .card { background: var(--card); padding: 1.5rem; border-radius: 2.5rem; width: 100%; max-width: 380px; text-align: center; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); }
+        .header-controls { display: flex; justify-content: space-between; margin-bottom: 20px; }
+        .nav-btn { padding: 8px 12px; background: rgba(51, 65, 85, 0.5); color: white; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .time { font-size: 5.5rem; font-weight: 800; margin: 10px 0; color: var(--primary); font-family: monospace; }
         .modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 15px 0; }
-        .modes button { background: rgba(51, 65, 85, 0.5); padding: 10px; color: white; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; font-size: 0.8rem; }
+        .modes button { background: rgba(51, 65, 85, 0.5); padding: 10px; color: white; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; }
         .modes button.active { background: var(--primary); color: #0f172a; font-weight: bold; }
-
-        .controls { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; margin-top: 15px; }
-        .btn-main { padding: 15px; border-radius: 15px; border: none; font-weight: bold; cursor: pointer; font-size: 0.95rem; }
+        .controls { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; margin: 15px 0; }
+        .btn-main { padding: 15px; border-radius: 15px; border: none; font-weight: bold; cursor: pointer; }
         .btn-start { background: var(--accent); color: #0f172a; }
         .btn-pause { background: #334155; color: white; }
         .btn-reset { background: #ef4444; color: white; }
-
-        .stats-card { background: rgba(15, 23, 42, 0.4); border-radius: 20px; padding: 15px; margin: 20px 0; border: 1px solid rgba(255,255,255,0.05); }
+        .stats-card { background: rgba(15, 23, 42, 0.4); border-radius: 20px; padding: 15px; margin: 15px 0; text-align: left; }
         .stat-item { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; }
-        .level-badge { color: var(--accent); font-weight: bold; }
-
-        .sound-select { width: 100%; padding: 10px; border-radius: 10px; background: #334155; color: white; border: none; margin: 10px 0; outline: none; }
-        .share-btn { width: 100%; padding: 12px; background: #3b82f6; color: white; border-radius: 15px; border: none; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        
-        .visitor-section { text-align: center; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; opacity: 0.6; }
-        .ltr-mode { text-align: left !important; direction: ltr; }
+        .sound-select { width: 100%; padding: 10px; border-radius: 10px; background: #334155; color: white; border: none; margin-bottom: 15px; }
+        .share-btn { width: 100%; padding: 15px; background: #3b82f6; color: white; border-radius: 15px; border: none; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
     <div class="card" id="mainCard">
         <div class="header-controls">
-            <div class="lang-group">
+            <div style="display:flex; gap:5px;">
                 <button class="nav-btn" onclick="changeLang('en')">EN</button>
                 <button class="nav-btn" onclick="changeLang('ar')">AR</button>
                 <button class="nav-btn" onclick="changeLang('fa')">FA</button>
             </div>
-            <div class="lang-group">
-                <button class="nav-btn" id="muteBtn" onclick="toggleMute()">🔊</button>
-                <button class="nav-btn" onclick="toggleTheme()">🌓</button>
-            </div>
+            <button class="nav-btn" id="muteBtn" onclick="toggleMute()">🔊</button>
         </div>
 
         <div id="dateText" style="color:var(--primary); font-size:0.8rem;"></div>
-        <div id="clockText" style="font-size:1.1rem; opacity:0.7; margin-bottom:10px;"></div>
-        <h2 id="lbl-title">تایمر تمرکز</h2>
+        <h2 id="lbl-title">Focus Timer</h2>
 
         <select id="ambientSound" class="sound-select" onchange="changeAmbient()">
-            <option value="none" id="opt-none">بدون صدا</option>
-            <option value="rain" id="opt-rain">صدای باران</option>
-            <option value="cafe" id="opt-cafe">صدای کافه</option>
+            <option value="none" id="opt-none">No Sound</option>
+            <option value="rain" id="opt-rain">Rain (Premium)</option>
+            <option value="cafe" id="opt-cafe">Cafe (Premium)</option>
         </select>
 
         <div class="modes">
-            <button id="m5" onclick="setTime(300, this)">۵ د</button>
-            <button id="m15" onclick="setTime(900, this)">۱۵ د</button>
-            <button id="m25" class="active" onclick="setTime(1500, this)">۲۵ د</button>
-            <button id="m40" onclick="setTime(2400, this)">۴۰ د</button>
-            <button id="m60" onclick="setTime(3600, this)">۶۰ د</button>
-            <button id="m90" onclick="setTime(5400, this)">۹۰ د</button>
+            <button onclick="setTime(300, this)">5m</button>
+            <button onclick="setTime(900, this)">15m</button>
+            <button class="active" onclick="setTime(1500, this)">25m</button>
+            <button onclick="setTime(2400, this)">40m</button>
+            <button onclick="setTime(3600, this)">60m</button>
+            <button onclick="setTime(5400, this)">90m</button>
         </div>
 
         <div class="time" id="display">25:00</div>
 
         <div class="controls">
-            <button class="btn-main btn-start" id="btn-start" onclick="startTimer()">شروع</button>
-            <button class="btn-main btn-pause" id="btn-pause" onclick="pauseTimer()">توقف</button>
-            <button class="btn-main btn-reset" id="btn-reset" onclick="resetTimer()">ریست</button>
+            <button class="btn-main btn-start" id="btn-start" onclick="startTimer()">Start</button>
+            <button class="btn-main btn-pause" id="btn-pause" onclick="pauseTimer()">Pause</button>
+            <button class="btn-main btn-reset" id="btn-reset" onclick="resetTimer()">Reset</button>
         </div>
 
         <div class="stats-card">
-            <div class="stat-item"><span id="lbl-today">⏱️ امروز:</span> <span id="stat-today">0 دقیقه</span></div>
-            <div class="stat-item"><span id="lbl-streak">🔥 زنجیره:</span> <span id="stat-streak">0 روز</span></div>
-            <div class="stat-item"><span id="lbl-level">⭐ سطح:</span> <span id="stat-level" class="level-badge">Level 1</span></div>
+            <div class="stat-item"><span id="lbl-today">⏱️ Today:</span> <span id="stat-today">0 min</span></div>
+            <div class="stat-item"><span id="lbl-streak">🔥 Streak:</span> <span id="stat-streak">0 days</span></div>
+            <div class="stat-item"><span id="lbl-level">⭐ Level:</span> <span id="stat-level" style="color:var(--accent); font-weight:bold;">Level 1</span></div>
         </div>
 
-        <button class="share-btn" id="btn-share" onclick="shareStats()">اشتراک‌گذاری نتیجه</button>
-
-        <div class="visitor-section">
-            <img src="https://komarev.com/ghpvc/?username=aliapps1-timer&color=22d3ee&style=flat-square&label=VISITS" alt="Views">
-        </div>
+        <button class="share-btn" id="btn-share" onclick="shareStats()">Share Result</button>
     </div>
 
+    <audio id="alarmAudio" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
     <audio id="rainAudio" loop src="https://www.soundjay.com/nature/rain-01.mp3"></audio>
     <audio id="cafeAudio" loop src="https://www.soundjay.com/misc/sounds/coffee-shop-1.mp3"></audio>
 
     <script>
-        let duration = 1500, timeLeft = 1500, timerId = null, currentLang = 'fa', isMuted = false;
+        let duration = 1500, timeLeft = 1500, timerId = null, currentLang = 'en', isMuted = false;
         let stats = JSON.parse(localStorage.getItem('focusStats')) || { totalMin: 0, streak: 0, lastDate: null };
 
         const translations = {
-            fa: { title: "تایمر تمرکز", start: "شروع", pause: "توقف", reset: "ریست", share: "اشتراک‌گذاری نتیجه", today: "⏱️ امروز:", streak: "🔥 زنجیره:", level: "⭐ سطح:", rain: "صدای باران", cafe: "صدای کافه", none: "بدون صدا", min: "دقیقه", day: "روز", m:["۵ د","۱۵ د","۲۵ د","۴۰ د","۶۰ د","۹۰ د"], lang: 'fa-IR', dir: 'rtl' },
-            en: { title: "Focus Timer", start: "Start", pause: "Pause", reset: "Reset", share: "Share Result", today: "⏱️ Today:", streak: "🔥 Streak:", level: "⭐ Level:", rain: "Rain Sound", cafe: "Cafe Sound", none: "No Sound", min: "min", day: "days", m:["5m","15m","25m","40m","60m","90m"], lang: 'en-US', dir: 'ltr' },
-            ar: { title: "مؤقت التركيز", start: "بدء", pause: "إيقاف", reset: "إعادة", share: "مشاركة النتيجة", today: "⏱️ اليوم:", streak: "🔥 متسلسل:", level: "⭐ مستوى:", rain: "صوت المطر", cafe: "صوت المقهى", none: "بدون صوت", min: "دقيقة", day: "يوم", m:["٥ د","١٥ د","٢٥ د","٤٠ د","٦٠ د","٩٠ د"], lang: 'ar-SA', dir: 'rtl' }
+            en: { title: "Focus Timer", start: "Start", pause: "Pause", reset: "Reset", share: "Share Result", today: "⏱️ Today:", streak: "🔥 Streak:", level: "⭐ Level:", rain: "Rain (Premium)", cafe: "Cafe (Premium)", none: "No Sound", min: "min", day: "days", dir: "ltr", lang: "en-US" },
+            fa: { title: "تایمر تمرکز", start: "شروع", pause: "توقف", reset: "ریست", share: "ارسال نتیجه", today: "⏱️ امروز:", streak: "🔥 زنجیره:", level: "⭐ سطح:", rain: "صدای باران", cafe: "صدای کافه", none: "بدون صدا", min: "دقیقه", day: "روز", dir: "rtl", lang: "fa-IR" },
+            ar: { title: "مؤقت التركیز", start: "بدء", pause: "إيقاف", reset: "إعادة", share: "مشاركة", today: "⏱️ اليوم:", streak: "🔥 متسلسل:", level: "⭐ مستوى:", rain: "صوت المطر", cafe: "صوت المقهى", none: "بدون صوت", min: "دقيقة", day: "يوم", dir: "rtl", lang: "ar-SA" }
         };
 
         function updateUI() {
@@ -118,70 +98,62 @@
             document.getElementById('opt-none').innerText = t.none;
             document.getElementById('opt-rain').innerText = t.rain;
             document.getElementById('opt-cafe').innerText = t.cafe;
-            
-            document.querySelectorAll('.modes button').forEach((btn, i) => btn.innerText = t.m[i]);
-            
-            document.getElementById('stat-today').innerText = (currentLang === 'en' ? stats.totalMin : stats.totalMin.toLocaleString(t.lang)) + " " + t.min;
-            document.getElementById('stat-streak').innerText = (currentLang === 'en' ? stats.streak : stats.streak.toLocaleString(t.lang)) + " " + t.day;
+            document.getElementById('stat-today').innerText = stats.totalMin + " " + t.min;
+            document.getElementById('stat-streak').innerText = stats.streak + " " + t.day;
             document.getElementById('stat-level').innerText = "Level " + (Math.floor(stats.totalMin / 100) + 1);
-
-            currentLang === 'en' ? document.getElementById('mainCard').classList.add('ltr-mode') : document.getElementById('mainCard').classList.remove('ltr-mode');
         }
 
         function startTimer() {
             if (timerId) return;
             timerId = setInterval(() => {
                 timeLeft--; updateDisplay();
-                if (timeLeft <= 0) { clearInterval(timerId); timerId = null; completeSession(); }
+                if (timeLeft <= 0) { 
+                    clearInterval(timerId); timerId = null; 
+                    if(!isMuted) document.getElementById('alarmAudio').play(); // زنگ خودکار
+                    completeSession(); 
+                }
             }, 1000);
             changeAmbient();
         }
 
-        function pauseTimer() { clearInterval(timerId); timerId = null; stopAmbient(); }
-        function resetTimer() { pauseTimer(); timeLeft = duration; updateDisplay(); }
-        function setTime(s, btn) { duration = s; timeLeft = s; document.querySelectorAll('.modes button').forEach(b => b.classList.remove('active')); btn.classList.add('active'); updateDisplay(); }
-
-        function updateDisplay() {
-            const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
-            const str = `${m}:${s < 10 ? '0' : ''}${s}`;
-            document.getElementById('display').innerText = currentLang === 'en' ? str : str.toLocaleString(translations[currentLang].lang);
-        }
-
         function completeSession() {
-            stats.totalMin += Math.floor(duration / 60);
+            let gained = Math.floor(duration / 60);
+            stats.totalMin += gained;
             const today = new Date().toDateString();
             if (stats.lastDate !== today) { stats.streak++; stats.lastDate = today; }
             localStorage.setItem('focusStats', JSON.stringify(stats));
             updateUI();
-            alert(currentLang === 'en' ? "Time is up!" : (currentLang === 'ar' ? "انتهى الوقت!" : "زمان تمام شد!"));
             resetTimer();
         }
 
-        function shareStats() {
+        async function shareStats() {
             const t = translations[currentLang];
-            const text = `${t.title}: ${stats.totalMin} ${t.min} | ${t.streak} ${t.day} | Level ${Math.floor(stats.totalMin / 100) + 1}`;
-            navigator.clipboard.writeText(text);
-            alert(currentLang === 'en' ? "Copied!" : "کپی شد!");
+            const text = `🎯 ${t.title}\n⭐ Level: ${Math.floor(stats.totalMin / 100) + 1}\n⏱️ Today: ${stats.totalMin} ${t.min}\n🔥 Streak: ${stats.streak} ${t.day}`;
+            
+            if (navigator.share) { // باز کردن مستقیم منوی ارسال گوشی
+                try {
+                    await navigator.share({ title: t.title, text: text });
+                } catch (err) { console.log("Share failed"); }
+            } else {
+                navigator.clipboard.writeText(text);
+                alert("Copied to clipboard!");
+            }
         }
 
-        function changeAmbient() {
-            stopAmbient();
-            const val = document.getElementById('ambientSound').value;
-            if (val !== 'none' && !isMuted && timerId) document.getElementById(val + 'Audio').play();
-        }
-
+        function setTime(s, btn) { duration = s; timeLeft = s; document.querySelectorAll('.modes button').forEach(b => b.classList.remove('active')); btn.classList.add('active'); updateDisplay(); }
+        function updateDisplay() { const m = Math.floor(timeLeft / 60), s = timeLeft % 60; document.getElementById('display').innerText = `${m}:${s < 10 ? '0' : ''}${s}`; }
+        function pauseTimer() { clearInterval(timerId); timerId = null; stopAmbient(); }
+        function resetTimer() { pauseTimer(); timeLeft = duration; updateDisplay(); }
+        function changeAmbient() { stopAmbient(); const val = document.getElementById('ambientSound').value; if (val !== 'none' && !isMuted && timerId) document.getElementById(val + 'Audio').play(); }
         function stopAmbient() { document.getElementById('rainAudio').pause(); document.getElementById('cafeAudio').pause(); }
         function toggleMute() { isMuted = !isMuted; document.getElementById('muteBtn').innerText = isMuted ? '🔇' : '🔊'; if (isMuted) stopAmbient(); else changeAmbient(); }
-        function toggleTheme() { document.body.classList.toggle('light'); }
-        function changeLang(l) { currentLang = l; updateUI(); updateDisplay(); }
+        function changeLang(l) { currentLang = l; updateUI(); }
 
         setInterval(() => {
-            const now = new Date();
-            document.getElementById('clockText').innerText = now.toLocaleTimeString(translations[currentLang].lang);
-            document.getElementById('dateText').innerText = now.toLocaleDateString(translations[currentLang].lang, {weekday:'long', month:'long', day:'numeric'});
+            document.getElementById('dateText').innerText = new Date().toLocaleDateString(translations[currentLang].lang, {weekday:'long', month:'long', day:'numeric'});
         }, 1000);
 
-        updateUI(); updateDisplay();
+        updateUI();
     </script>
 </body>
 </html>
