@@ -6,10 +6,10 @@
     <title>Focus Timer Pro</title>
     <style>
         :root { 
-            /* رنگ‌های اقیانوسی روشن‌تر برای اینکه خفگی سیاه را نداشته باشد */
-            --bg: linear-gradient(135deg, #2e3a59 0%, #161d2f 100%); 
-            --card: rgba(45, 55, 72, 0.8); 
-            --text: #f8fafc; 
+            /* رنگ اقیانوسی ملایم - کاملاً متفاوت با سیاه */
+            --bg: linear-gradient(135deg, #232946 0%, #121629 100%); 
+            --card: rgba(35, 41, 70, 0.8); 
+            --text: #fffffe; 
             --primary: #38bdf8; 
             --accent: #fbbf24; 
         }
@@ -22,8 +22,7 @@
         }
         
         body { 
-            /* این خط باعث می‌شود حتماً رنگ جدید اعمال شود */
-            background: var(--bg) !important; 
+            background: var(--bg) !important; /* اجبار به اعمال رنگ جدید */
             background-attachment: fixed !important;
             color: var(--text); 
             font-family: system-ui, -apple-system, sans-serif; 
@@ -147,12 +146,6 @@
             ar: { title: "مؤقت التركيز", start: "بدء", pause: "إيقاف", reset: "إعادة تعيين", share: "ارسال النتيجة", today: "⏱️ اليوم:", streak: "🔥 متسلسل:", level: "⭐ مستوى:", rain: "صوت المطر", cafe: "صوت المقهى", none: "بدون صوت", min: "دقيقة", day: "يوم", dir: "rtl", lang: "ar-SA" }
         };
 
-        function autoTheme() {
-            const hour = new Date().getHours();
-            if (hour >= 6 && hour < 18) document.body.classList.add('light-theme');
-            else document.body.classList.remove('light-theme');
-        }
-
         function updateUI() {
             const t = translations[currentLang];
             document.body.dir = t.dir;
@@ -226,11 +219,11 @@
         function changeLang(l) { currentLang = l; updateUI(); }
 
         setInterval(() => {
-            autoTheme();
-            document.getElementById('dateText').innerText = new Date().toLocaleDateString(translations[currentLang].lang, {weekday:'long', month:'long', day:'numeric'});
+            const t = translations[currentLang];
+            document.getElementById('dateText').innerText = new Date().toLocaleDateString(t.lang, {weekday:'long', month:'long', day:'numeric'});
         }, 1000);
 
-        autoTheme(); updateUI(); updateDisplay();
+        updateUI(); updateDisplay();
     </script>
 </body>
 </html>
