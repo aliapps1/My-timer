@@ -1,7 +1,19 @@
+const CACHE_NAME = 'focus-v1';
+const ASSETS = [
+  './',
+  './index.html',
+  './manifest.json',
+  './icon.png'
+];
+
 self.addEventListener('install', (e) => {
-  console.log('Service Worker Installed');
+  e.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
+  );
 });
 
 self.addEventListener('fetch', (e) => {
-  e.respondWith(fetch(e.request));
+  e.respondWith(
+    caches.match(e.request).then((res) => res || fetch(e.request))
+  );
 });
