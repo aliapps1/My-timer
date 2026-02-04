@@ -1,206 +1,159 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>FocusTimer Pro</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focus Timer Pro | Final</title>
+    <style>
+        :root { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --primary: #22d3ee; }
+        .light { --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --primary: #0891b2; }
+        body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; transition: 0.5s; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }
+        .card { background: var(--card); padding: 1.5rem; border-radius: 2.5rem; width: 100%; max-width: 360px; position: relative; text-align: right; border: 1px solid rgba(255,255,255,0.1); }
+        
+        .lang-btns { position: absolute; top: -55px; left: 10px; display: flex; gap: 8px; direction: ltr !important; }
+        .lang-btns button { padding: 8px 12px; background: var(--card); color: var(--text); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 12px; }
+        .top-controls { position: absolute; top: -55px; right: 10px; display: flex; gap: 10px; direction: ltr !important; }
 
-<style>
-body{
-  font-family: system-ui;
-  background:#0f172a;
-  color:white;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
-  margin:0;
-}
+        .ltr-mode { text-align: left !important; }
+        .ltr-mode .time, .ltr-mode .modes button, .ltr-mode .clock-display { font-family: 'Arial', sans-serif !important; }
 
-.app{
-  width:360px;
-  background:#1e293b;
-  padding:25px;
-  border-radius:20px;
-  box-shadow:0 0 30px rgba(0,0,0,.5);
-  text-align:center;
-}
-
-h1{
-  margin-bottom:10px;
-  font-size:22px;
-}
-
-.timer{
-  font-size:60px;
-  margin:20px 0;
-}
-
-button{
-  background:#facc15;
-  border:none;
-  padding:10px 16px;
-  margin:5px;
-  border-radius:10px;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-.secondary{
-  background:#334155;
-  color:white;
-}
-
-.stats{
-  margin-top:20px;
-  background:#0f172a;
-  padding:12px;
-  border-radius:12px;
-  font-size:14px;
-  line-height:1.8;
-}
-
-.lock{
-  opacity:.4;
-}
-
-.share{
-  margin-top:10px;
-  background:#3b82f6;
-  color:white;
-}
-</style>
+        .time { font-size: 5rem; font-weight: 800; margin: 10px 0; color: var(--primary); text-align: center; font-family: monospace; }
+        .modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 15px 0; }
+        .modes button { background: rgba(51, 65, 85, 0.5); padding: 10px; color: white; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; font-size: 0.85rem; }
+        .light .modes button { background: #e2e8f0; color: #475569; }
+        .modes button.active { background: var(--primary); color: #0f172a; font-weight: bold; }
+        
+        .main-btn { width: 100%; padding: 1.2rem; border-radius: 18px; cursor: pointer; font-weight: 800; background: var(--primary); color: #0f172a; font-size: 1.3rem; border:none; }
+        .visitor-section { text-align: center; margin-top: 25px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; }
+    </style>
 </head>
-
 <body>
+    <div class="card" id="mainCard">
+        <div class="lang-btns">
+            <button onclick="changeLang('en')">EN</button>
+            <button onclick="changeLang('ar')">AR</button>
+            <button onclick="changeLang('fa')">FA</button>
+        </div>
+        <div class="top-controls">
+            <button id="soundBtn" onclick="toggleSound()" style="background:none; border:none; font-size:22px; cursor:pointer;">🔊</button>
+            <div onclick="toggleThemeManually()" style="font-size:22px; cursor:pointer;">🌓</div>
+        </div>
+        <div id="dateText" style="color:var(--primary); font-size:0.85rem;"></div>
+        <div id="clockText" class="clock-display" style="font-size:1.2rem; opacity:0.8; margin-bottom:15px;"></div>
+        <h2 id="lbl-title">تایمر تمرکز</h2>
+        <div class="modes">
+            <button id="m5" onclick="setTime(300, this)">۵ د</button>
+            <button id="m15" onclick="setTime(900, this)">۱۵ د</button>
+            <button id="m25" class="active" onclick="setTime(1500, this)">۲۵ د</button>
+            <button id="m40" onclick="setTime(2400, this)">۴۰ د</button>
+            <button id="m60" onclick="setTime(3600, this)">۶۰ د</button>
+            <button id="m90" onclick="setTime(5400, this)">۹۰ د</button>
+        </div>
+        <div class="time" id="display">25:00</div>
+        <button class="main-btn" id="mainBtn" onclick="toggleTimer()">شروع</button>
+        <p id="lbl-rounds" style="text-align:center; margin-top:15px; font-size: 0.9rem;">دورهای تمرکز: 0</p>
+        
+        <div class="visitor-section">
+            <img src="https://komarev.com/ghpvc/?username=aliapps1-timer&color=22d3ee&style=flat-square&label=VISITS" alt="Visitors">
+        </div>
+    </div>
 
-<div class="app">
+    <script>
+        let duration = 1500, endTime = null, timerId = null, currentLang = 'fa', rounds = 0, isMuted = false;
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const translations = {
+            fa: { title: "تایمر تمرکز", start: "شروع", stop: "توقف", cont: "ادامه", msg: "زمان تمام شد!", rounds: "دورهای تمرکز: ", m:["۵ د","۱۵ د","۲۵ د","۴۰ د","۶۰ د","۹۰ د"], dir: "rtl", lang: 'fa-IR' },
+            en: { title: "Focus Timer", start: "Start", stop: "Stop", cont: "Continue", msg: "Time is up!", rounds: "Focus Rounds: ", m:["5m","15m","25m","40m","60m","90m"], dir: "ltr", lang: 'en-US' },
+            ar: { title: "مؤقت التركيز", start: "بدء", stop: "إيقاف", cont: "متابعة", msg: "انتهى الوقت!", rounds: "دورات التركيز: ", m:["٥ د","١٥ د","٢٥ د","٤٠ د","٦٠ د","٩٠ د"], dir: "rtl", lang: 'ar-SA' }
+        };
 
-<h1>FocusTimer Pro</h1>
+        function updateClockAndTheme() {
+            const now = new Date();
+            document.getElementById('clockText').innerText = now.toLocaleTimeString(translations[currentLang].lang, { hour12: false });
+            document.getElementById('dateText').innerText = now.toLocaleDateString(translations[currentLang].lang, { weekday: 'long', month: 'long', day: 'numeric' });
+            if (!localStorage.getItem('manualTheme')) {
+                const hour = now.getHours();
+                if (hour >= 6 && hour < 19) document.body.classList.add('light');
+                else document.body.classList.remove('light');
+            }
+        }
 
-<div class="timer" id="time">25:00</div>
+        function changeLang(lang) {
+            currentLang = lang; const t = translations[lang];
+            document.body.dir = t.dir;
+            document.getElementById('lbl-title').innerText = t.title;
+            document.getElementById('lbl-rounds').innerText = t.rounds + (currentLang === 'en' ? rounds : rounds.toLocaleString(t.lang));
+            document.querySelectorAll('.modes button').forEach((btn, i) => { btn.innerText = t.m[i]; });
+            const btn = document.getElementById('mainBtn');
+            if(!timerId) btn.innerText = duration < (parseInt(document.querySelector('.modes button.active').innerText)*60) ? t.cont : t.start;
+            else btn.innerText = t.stop;
+            lang === 'en' ? document.getElementById('mainCard').classList.add('ltr-mode') : document.getElementById('mainCard').classList.remove('ltr-mode');
+            updateDisplay(duration);
+        }
 
-<button onclick="startTimer()">Start</button>
-<button onclick="pauseTimer()" class="secondary">Pause</button>
-<button onclick="resetTimer()" class="secondary">Reset</button>
+        function updateDisplay(seconds) {
+            const m = Math.floor(seconds / 60), s = seconds % 60;
+            const timeStr = `${m}:${s < 10 ? '0' : ''}${s}`;
+            document.getElementById('display').innerText = currentLang === 'en' ? timeStr : timeStr.toLocaleString(translations[currentLang].lang);
+        }
 
-<br/><br/>
+        function toggleTimer() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const btn = document.getElementById('mainBtn');
+            if (timerId) {
+                duration = Math.ceil((endTime - Date.now()) / 1000);
+                clearInterval(timerId); timerId = null;
+                btn.innerText = translations[currentLang].cont;
+            } else {
+                endTime = Date.now() + (duration * 1000);
+                btn.innerText = translations[currentLang].stop;
+                timerId = setInterval(() => {
+                    const rem = Math.max(0, Math.ceil((endTime - Date.now()) / 1000));
+                    updateDisplay(rem);
+                    if (rem <= 0) {
+                        clearInterval(timerId); timerId = null;
+                        rounds++; playSound(); resetAfterFinish();
+                        setTimeout(() => { alert(translations[currentLang].msg); }, 100);
+                    }
+                }, 500);
+            }
+        }
 
-<select id="soundSelect">
-  <option value="">No Sound</option>
-  <option value="rain.mp3">Rain (Premium)</option>
-  <option value="cafe.mp3">Cafe (Premium)</option>
-</select>
+        function playSound() {
+            if (isMuted) return;
+            for(let i = 0; i < 10; i++) {
+                setTimeout(() => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.connect(gain); gain.connect(audioCtx.destination);
+                    osc.type = 'triangle'; osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0, audioCtx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.1);
+                    osc.start(audioCtx.currentTime); osc.stop(audioCtx.currentTime + 0.5);
+                }, i * 1000);
+            }
+        }
 
-<div class="stats">
-  ⏱ Today: <span id="today">0</span> min<br/>
-  🔥 Streak: <span id="streak">0</span> days<br/>
-  ⭐ Level: <span id="level">1</span>
-</div>
+        function setTime(s, btn) {
+            clearInterval(timerId); timerId = null;
+            duration = s; updateDisplay(s);
+            document.querySelectorAll('.modes button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('mainBtn').innerText = translations[currentLang].start;
+        }
 
-<button class="share" onclick="shareResult()">Share Result</button>
+        function resetAfterFinish() {
+            const activeBtn = document.querySelector('.modes button.active');
+            const times = {m5:300, m15:900, m25:1500, m40:2400, m60:3600, m90:5400};
+            duration = times[activeBtn.id]; updateDisplay(duration);
+            document.getElementById('mainBtn').innerText = translations[currentLang].start;
+            document.getElementById('lbl-rounds').innerText = translations[currentLang].rounds + (currentLang === 'en' ? rounds : rounds.toLocaleString(translations[currentLang].lang));
+        }
 
-<p style="margin-top:15px;font-size:12px;">
-Unlock sounds & advanced stats with Premium
-</p>
+        function toggleThemeManually() { localStorage.setItem('manualTheme', 'true'); document.body.classList.toggle('light'); }
+        function toggleSound() { isMuted = !isMuted; document.getElementById('soundBtn').innerText = isMuted ? '🔇' : '🔊'; }
 
-</div>
-
-<script>
-let duration = 25 * 60
-let timeLeft = duration
-let interval = null
-let audio = new Audio()
-
-const timeEl = document.getElementById("time")
-
-function updateDisplay(){
-  let m = Math.floor(timeLeft/60)
-  let s = timeLeft%60
-  timeEl.innerText =
-    String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")
-}
-
-function startTimer(){
-  if(interval) return
-
-  const sound = document.getElementById("soundSelect").value
-
-  // premium lock
-  if(sound){
-    alert("This sound is Premium 🔒")
-  }
-
-  interval = setInterval(()=>{
-    timeLeft--
-
-    if(timeLeft <= 0){
-      completeSession()
-      resetTimer()
-    }
-
-    updateDisplay()
-
-  },1000)
-}
-
-function pauseTimer(){
-  clearInterval(interval)
-  interval=null
-}
-
-function resetTimer(){
-  pauseTimer()
-  timeLeft = duration
-  updateDisplay()
-}
-
-function completeSession(){
-  let today = getTodayKey()
-
-  let stats = JSON.parse(localStorage.getItem("stats")||"{}")
-
-  stats[today] = (stats[today]||0) + 25
-
-  localStorage.setItem("stats",JSON.stringify(stats))
-
-  updateStats()
-}
-
-function getTodayKey(){
-  return new Date().toISOString().slice(0,10)
-}
-
-function updateStats(){
-  let stats = JSON.parse(localStorage.getItem("stats")||"{}")
-
-  let today = stats[getTodayKey()] || 0
-  document.getElementById("today").innerText = today
-
-  let days = Object.keys(stats).length
-  document.getElementById("streak").innerText = days
-
-  let level = Math.floor(today/60)+1
-  document.getElementById("level").innerText = level
-}
-
-function shareResult(){
-  const today = document.getElementById("today").innerText
-  const streak = document.getElementById("streak").innerText
-  const level = document.getElementById("level").innerText
-
-  const text = `I focused ${today} min today with FocusTimer Pro! 🔥 Streak: ${streak} days, Level: ${level}. Can you beat me?`
-  
-  if(navigator.share){
-    navigator.share({text})
-  } else {
-    prompt("Copy & share your result:", text)
-  }
-}
-
-updateDisplay()
-updateStats()
-</script>
-
+        setInterval(updateClockAndTheme, 1000); updateClockAndTheme();
+    </script>
 </body>
 </html>
