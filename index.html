@@ -5,122 +5,81 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Focus Timer Pro</title>
     <style>
-        /* رنگ‌بندی جدید: ملایم‌تر و مدرن‌تر */
         :root { 
-            --bg: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); 
-            --card: rgba(30, 41, 59, 0.7); /* حالت نیمه‌شفاف شیشه‌ای */
+            /* تم اقیانوسی: ملایم‌تر از سیاه */
+            --bg: linear-gradient(135deg, #1a1c2c 0%, #4a192c 100%); 
+            --card: rgba(30, 41, 59, 0.7); 
             --text: #f8fafc; 
             --primary: #38bdf8; 
             --accent: #fbbf24; 
         }
         
         .light-theme { 
-            --bg: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); 
+            --bg: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%); 
             --card: rgba(255, 255, 255, 0.8); 
-            --text: #0f172a; 
-            --primary: #0284c7; 
+            --text: #102a43; 
+            --primary: #007ace; 
         }
         
         body { 
             background: var(--bg); 
             background-attachment: fixed;
             color: var(--text); 
-            font-family: 'Segoe UI', system-ui, sans-serif; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            min-height: 100vh; 
-            margin: 0; 
-            padding: 20px; 
-            transition: 0.5s; 
+            font-family: system-ui, -apple-system, sans-serif; 
+            display: flex; align-items: center; justify-content: center; 
+            min-height: 100vh; margin: 0; padding: 20px; transition: 0.5s; 
         }
 
         .card { 
             background: var(--card); 
-            backdrop-filter: blur(10px); /* افکت شیشه‌ای */
-            padding: 2rem; 
-            border-radius: 3rem; 
-            width: 100%; 
-            max-width: 400px; 
-            text-align: center; 
+            backdrop-filter: blur(15px);
+            padding: 2.5rem; border-radius: 3rem; 
+            width: 100%; max-width: 400px; text-align: center; 
             border: 1px solid rgba(255,255,255,0.1); 
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); 
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4); 
         }
 
         .header-controls { display: flex; justify-content: space-between; margin-bottom: 25px; }
-        
         .nav-btn { 
-            padding: 8px 15px; 
-            background: rgba(255, 255, 255, 0.1); 
-            color: var(--text); 
-            border: 1px solid rgba(255,255,255,0.1); 
-            border-radius: 12px; 
-            cursor: pointer; 
-            font-size: 12px; 
-            font-weight: bold;
-            transition: 0.3s;
+            padding: 8px 15px; background: rgba(255, 255, 255, 0.1); 
+            color: var(--text); border: 1px solid rgba(255,255,255,0.1); 
+            border-radius: 12px; cursor: pointer; font-size: 12px; font-weight: bold;
         }
-        .nav-btn:hover { background: rgba(255, 255, 255, 0.2); }
 
         .time { 
-            font-size: 6rem; 
-            font-weight: 800; 
-            margin: 10px 0; 
-            color: var(--primary); 
-            font-family: 'Courier New', monospace;
-            text-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+            font-size: 6.5rem; font-weight: 900; margin: 10px 0; 
+            color: var(--primary); font-family: 'Courier New', monospace;
+            text-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
         }
 
         .modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0; }
         .modes button { 
-            background: rgba(255, 255, 255, 0.05); 
-            padding: 12px; 
-            color: var(--text); 
-            border-radius: 15px; 
-            border: 1px solid rgba(255,255,255,0.1); 
-            cursor: pointer;
-            transition: 0.3s;
+            background: rgba(255, 255, 255, 0.05); padding: 12px; 
+            color: var(--text); border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); 
+            cursor: pointer; transition: 0.3s;
         }
         .modes button.active { background: var(--primary); color: #0f172a; font-weight: bold; border: none; }
 
         .controls { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px; margin: 20px 0; }
-        .btn-main { padding: 18px; border-radius: 20px; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 1rem; }
-        .btn-main:active { transform: scale(0.95); }
-        .btn-start { background: var(--accent); color: #0f172a; box-shadow: 0 10px 15px -3px rgba(251, 191, 36, 0.3); }
+        .btn-main { padding: 18px; border-radius: 20px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-start { background: var(--accent); color: #0f172a; }
         .btn-pause { background: #475569; color: white; }
-        .btn-reset { background: #f43f5e; color: white; }
+        .btn-reset { background: #ef4444; color: white; }
+
+        .sound-select { 
+            width: 100%; padding: 12px; border-radius: 15px; 
+            background: rgba(255,255,255,0.1); color: var(--text); 
+            border: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; outline: none;
+        }
 
         .stats-card { 
-            background: rgba(0, 0, 0, 0.2); 
-            border-radius: 25px; 
-            padding: 20px; 
-            margin: 20px 0; 
-            text-align: left; 
+            background: rgba(0, 0, 0, 0.2); border-radius: 25px; 
+            padding: 20px; margin: 20px 0; text-align: left; 
         }
-        .stat-item { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-size: 0.95rem; }
-        
-        .sound-select { 
-            width: 100%; 
-            padding: 12px; 
-            border-radius: 15px; 
-            background: rgba(255,255,255,0.1); 
-            color: var(--text); 
-            border: 1px solid rgba(255,255,255,0.1); 
-            margin-bottom: 20px; 
-            outline: none;
-            cursor: pointer;
-        }
-
+        .stat-item { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95rem; }
         .share-btn { 
-            width: 100%; 
-            padding: 18px; 
-            background: #0ea5e9; 
-            color: white; 
-            border-radius: 20px; 
-            border: none; 
-            font-weight: bold; 
-            cursor: pointer;
-            box-shadow: 0 10px 15px -3px rgba(14, 165, 233, 0.3);
+            width: 100%; padding: 18px; background: #3b82f6; 
+            color: white; border-radius: 20px; border: none; font-weight: bold; cursor: pointer; 
         }
 
         .rtl-mode { text-align: right !important; direction: rtl; }
@@ -138,12 +97,12 @@
             <button class="nav-btn" id="muteBtn" onclick="toggleMute()">🔊</button>
         </div>
         
-        <div id="dateText" style="color:var(--primary); font-size:0.9rem; font-weight: 500;"></div>
-        <h2 id="lbl-title" style="margin: 10px 0;">Focus Timer</h2>
+        <div id="dateText" style="color:var(--primary); font-size:0.9rem; margin-bottom: 5px;"></div>
+        <h2 id="lbl-title" style="margin: 5px 0 15px 0;">Focus Timer</h2>
 
         <select id="ambientSound" class="sound-select" onchange="changeAmbient()">
             <option value="none" id="opt-none">No Sound</option>
-            <option value="rain" id="opt-rain">Rainy Mood</option>
+            <option value="rain" id="opt-rain">Rain Mood</option>
             <option value="cafe" id="opt-cafe">Cozy Cafe</option>
         </select>
 
@@ -182,7 +141,7 @@
         let stats = JSON.parse(localStorage.getItem('focusStats')) || { totalMin: 0, streak: 0, lastDate: null };
 
         const translations = {
-            en: { title: "Focus Timer", start: "Start", pause: "Pause", reset: "Reset", share: "Share Result", today: "⏱️ Today:", streak: "🔥 Streak:", level: "⭐ Level:", rain: "Rainy Mood", cafe: "Cozy Cafe", none: "No Sound", min: "min", day: "days", dir: "ltr", lang: "en-US" },
+            en: { title: "Focus Timer", start: "Start", pause: "Pause", reset: "Reset", share: "Share Result", today: "⏱️ Today:", streak: "🔥 Streak:", level: "⭐ Level:", rain: "Rain Mood", cafe: "Cozy Cafe", none: "No Sound", min: "min", day: "days", dir: "ltr", lang: "en-US" },
             fa: { title: "تایمر تمرکز", start: "شروع", pause: "توقف", reset: "شروع مجدد", share: "ارسال نتیجه", today: "⏱️ امروز:", streak: "🔥 زنجیره:", level: "⭐ سطح:", rain: "صدای باران", cafe: "صدای کافه", none: "بدون صدا", min: "دقیقه", day: "روز", dir: "rtl", lang: "fa-IR" },
             ar: { title: "مؤقت التركيز", start: "بدء", pause: "إيقاف", reset: "إعادة تعيين", share: "ارسال النتيجة", today: "⏱️ اليوم:", streak: "🔥 متسلسل:", level: "⭐ مستوى:", rain: "صوت المطر", cafe: "صوت المقهى", none: "بدون صوت", min: "دقيقة", day: "يوم", dir: "rtl", lang: "ar-SA" }
         };
@@ -221,8 +180,7 @@
                 if (timeLeft <= 0) { 
                     clearInterval(timerId); timerId = null; 
                     if(!isMuted) document.getElementById('alarmAudio').play();
-                    stopAmbient();
-                    completeSession(); 
+                    stopAmbient(); completeSession(); 
                 }
             }, 1000);
             changeAmbient();
@@ -233,8 +191,7 @@
             const today = new Date().toDateString();
             if (stats.lastDate !== today) { stats.streak++; stats.lastDate = today; }
             localStorage.setItem('focusStats', JSON.stringify(stats));
-            updateUI();
-            resetTimer();
+            updateUI(); resetTimer();
         }
 
         async function shareStats() {
@@ -243,8 +200,7 @@
             if (navigator.share) {
                 try { await navigator.share({ title: t.title, text: text }); } catch (err) {}
             } else {
-                navigator.clipboard.writeText(text);
-                alert("Copied!");
+                navigator.clipboard.writeText(text); alert("Copied!");
             }
         }
 
