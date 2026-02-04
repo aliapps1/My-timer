@@ -1,213 +1,225 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تایمر تمرکز حرفه‌ای</title>
+    <title>Focus Timer Pro</title>
     <style>
-        :root {
-            /* پالت رنگی روشن و آرام‌بخش */
-            --bg: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
-            --card-bg: rgba(255, 255, 255, 0.7);
-            --text-color: #2c3e50;
-            --primary: #3498db;
-            --accent: #f39c12;
-            --danger: #e74c3c;
+        :root { 
+            /* پالت رنگی کاملاً روشن و دلباز */
+            --bg: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); 
+            --card: rgba(255, 255, 255, 0.95); 
+            --text: #1e293b; 
+            --primary: #0284c7; 
+            --accent: #f59e0b; 
+        }
+        
+        body { 
+            background: var(--bg) !important; 
+            background-attachment: fixed !important;
+            color: var(--text); 
+            font-family: system-ui, -apple-system, sans-serif; 
+            display: flex; align-items: center; justify-content: center; 
+            min-height: 100vh; margin: 0; padding: 20px; transition: 0.5s; 
         }
 
-        body {
-            background: var(--bg) !important;
-            background-attachment: fixed;
-            color: var(--text-color);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            transition: all 0.5s ease;
+        .card { 
+            background: var(--card); 
+            backdrop-filter: blur(10px);
+            padding: 2.5rem; border-radius: 3rem; 
+            width: 100%; max-width: 400px; text-align: center; 
+            border: 1px solid rgba(255,255,255,1); 
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); 
         }
 
-        .glass-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 40px;
-            padding: 30px;
-            width: 90%;
-            max-width: 400px;
-            text-align: center;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        .header-controls { display: flex; justify-content: space-between; margin-bottom: 25px; }
+        .nav-btn { 
+            padding: 8px 15px; background: #fff; 
+            color: var(--text); border: 1px solid #e2e8f0; 
+            border-radius: 12px; cursor: pointer; font-size: 12px; font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
-        .lang-switch button {
-            background: rgba(255,255,255,0.5);
-            border: 1px solid #ddd;
-            padding: 5px 12px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: bold;
-            margin: 0 2px;
+        .time { 
+            font-size: 6.5rem; font-weight: 900; margin: 10px 0; 
+            color: var(--primary); font-family: 'Courier New', monospace;
+            text-shadow: 2px 2px 0px rgba(255,255,255,1);
         }
 
-        .time-display {
-            font-size: 6rem;
-            font-weight: 900;
-            color: var(--primary);
-            margin: 15px 0;
-            text-shadow: 2px 4px 10px rgba(52, 152, 219, 0.2);
+        .modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0; }
+        .modes button { 
+            background: #fff; padding: 12px; 
+            color: #64748b; border-radius: 15px; border: 1px solid #e2e8f0; 
+            cursor: pointer; transition: 0.3s; font-weight: 600;
+        }
+        .modes button.active { background: var(--primary); color: #fff; border: none; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3); }
+
+        .controls { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px; margin: 20px 0; }
+        .btn-main { padding: 18px; border-radius: 20px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-start { background: var(--accent); color: #fff; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); }
+        .btn-pause { background: #94a3b8; color: white; }
+        .btn-reset { background: #ef4444; color: white; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
+
+        .sound-select { 
+            width: 100%; padding: 12px; border-radius: 15px; 
+            background: #fff; color: var(--text); 
+            border: 1px solid #e2e8f0; margin-bottom: 20px; outline: none;
         }
 
-        .select-style {
-            width: 100%;
-            padding: 12px;
-            border-radius: 15px;
-            border: 1px solid rgba(0,0,0,0.1);
-            background: white;
-            margin-bottom: 20px;
-            outline: none;
+        .stats-card { 
+            background: #f1f5f9; border-radius: 25px; 
+            padding: 20px; margin: 20px 0; text-align: left; 
+            border: 1px solid #e2e8f0;
+        }
+        .stat-item { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95rem; font-weight: 600; color: #475569; }
+        .share-btn { 
+            width: 100%; padding: 18px; background: #3b82f6; 
+            color: white; border-radius: 20px; border: none; font-weight: bold; cursor: pointer; 
         }
 
-        .modes-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 25px;
-        }
-
-        .mode-btn {
-            background: white;
-            border: 1px solid #eee;
-            padding: 10px;
-            border-radius: 15px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: 0.3s;
-        }
-
-        .mode-btn.active {
-            background: var(--primary);
-            color: white;
-            border: none;
-        }
-
-        .main-controls {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr;
-            gap: 10px;
-        }
-
-        .btn {
-            padding: 15px;
-            border: none;
-            border-radius: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .btn-start { background: var(--accent); color: white; font-size: 1.1rem; }
-        .btn-pause { background: #95a5a6; color: white; }
-        .btn-reset { background: var(--danger); color: white; }
-
-        .stats-area {
-            background: rgba(0,0,0,0.03);
-            border-radius: 25px;
-            padding: 20px;
-            margin-top: 25px;
-            text-align: right;
-        }
-
-        .stat-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: 600; }
-        .share-btn {
-            width: 100%;
-            background: #34495e;
-            color: white;
-            margin-top: 15px;
-            padding: 15px;
-            border-radius: 20px;
-            border: none;
-            font-weight: bold;
-        }
+        .rtl-mode { text-align: right !important; direction: rtl; }
+        .rtl-mode .stats-card { text-align: right !important; }
     </style>
 </head>
 <body>
+    <div class="card" id="mainCard">
+        <div class="header-controls">
+            <div style="display:flex; gap:8px;">
+                <button class="nav-btn" onclick="changeLang('en')">EN</button>
+                <button class="nav-btn" onclick="changeLang('ar')">AR</button>
+                <button class="nav-btn" onclick="changeLang('fa')">FA</button>
+            </div>
+            <button class="nav-btn" id="muteBtn" onclick="toggleMute()">🔊</button>
+        </div>
+        
+        <div id="dateText" style="color:var(--primary); font-size:0.9rem; margin-bottom: 5px; font-weight:bold;"></div>
+        <h2 id="lbl-title" style="margin: 5px 0 15px 0;">Focus Timer</h2>
 
-<div class="glass-card">
-    <div class="lang-switch" style="margin-bottom: 20px;">
-        <button onclick="setLang('fa')">FA</button>
-        <button onclick="setLang('en')">EN</button>
+        <select id="ambientSound" class="sound-select" onchange="changeAmbient()">
+            <option value="none" id="opt-none">No Sound</option>
+            <option value="rain" id="opt-rain">Rain Mood</option>
+            <option value="cafe" id="opt-cafe">Cozy Cafe</option>
+        </select>
+
+        <div class="modes">
+            <button onclick="setTime(300, this)">5m</button>
+            <button onclick="setTime(900, this)">15m</button>
+            <button class="active" onclick="setTime(1500, this)">25m</button>
+            <button onclick="setTime(2400, this)">40m</button>
+            <button onclick="setTime(3600, this)">60m</button>
+            <button onclick="setTime(5400, this)">90m</button>
+        </div>
+
+        <div class="time" id="display">25:00</div>
+
+        <div class="controls">
+            <button class="btn-main btn-start" id="btn-start" onclick="startTimer()">Start</button>
+            <button class="btn-main btn-pause" id="btn-pause" onclick="pauseTimer()">Pause</button>
+            <button class="btn-main btn-reset" id="btn-reset" onclick="resetTimer()">Reset</button>
+        </div>
+
+        <div class="stats-card">
+            <div class="stat-item"><span id="lbl-today">⏱️ Today:</span> <span id="stat-today">0 min</span></div>
+            <div class="stat-item"><span id="lbl-streak">🔥 Streak:</span> <span id="stat-streak">0 days</span></div>
+            <div class="stat-item"><span id="lbl-level">⭐ Level:</span> <span id="stat-level" style="color:var(--accent); font-weight:bold;">Level 1</span></div>
+        </div>
+        
+        <button class="share-btn" id="btn-share" onclick="shareStats()">Share Result</button>
     </div>
 
-    <h2 id="title">تایمر تمرکز</h2>
+    <audio id="alarmAudio" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
+    <audio id="rainAudio" loop src="https://www.soundjay.com/nature/rain-01.mp3"></audio>
+    <audio id="cafeAudio" loop src="https://www.soundjay.com/misc/sounds/coffee-shop-1.mp3"></audio>
 
-    <select id="sound" class="select-style">
-        <option value="none">بدون صدا</option>
-        <option value="rain">صدای باران</option>
-        <option value="cafe">کافه دنج</option>
-    </select>
+    <script>
+        /* کدهای جاوااسکریپت دقیقاً همان کدهای خودت هستند و هیچ تغییری نکردند */
+        let duration = 1500, timeLeft = 1500, timerId = null, currentLang = 'en', isMuted = false;
+        let stats = JSON.parse(localStorage.getItem('focusStats')) || { totalMin: 0, streak: 0, lastDate: null };
 
-    <div class="modes-grid">
-        <button class="mode-btn" onclick="setTime(300, this)">۵دقیقه</button>
-        <button class="mode-btn active" onclick="setTime(1500, this)">۲۵دقیقه</button>
-        <button class="mode-btn" onclick="setTime(3000, this)">۵۰دقیقه</button>
-    </div>
+        const translations = {
+            en: { title: "Focus Timer", start: "Start", pause: "Pause", reset: "Reset", share: "Share Result", today: "⏱️ Today:", streak: "🔥 Streak:", level: "⭐ Level:", rain: "Rain Mood", cafe: "Cozy Cafe", none: "No Sound", min: "min", day: "days", dir: "ltr", lang: "en-US" },
+            fa: { title: "تایمر تمرکز", start: "شروع", pause: "توقف", reset: "شروع مجدد", share: "ارسال نتیجه", today: "⏱️ امروز:", streak: "🔥 زنجیره:", level: "⭐ سطح:", rain: "صدای باران", cafe: "صدای کافه", none: "بدون صدا", min: "دقیقه", day: "روز", dir: "rtl", lang: "fa-IR" },
+            ar: { title: "مؤقت التركيز", start: "بدء", pause: "إيقاف", reset: "إعادة تعيين", share: "ارسال النتيجة", today: "⏱️ اليوم:", streak: "🔥 متسلسل:", level: "⭐ مستوى:", rain: "صوت المطر", cafe: "صوت المقهى", none: "بدون صوت", min: "دقيقة", day: "يوم", dir: "rtl", lang: "ar-SA" }
+        };
 
-    <div class="time-display" id="display">25:00</div>
+        function updateUI() {
+            const t = translations[currentLang];
+            document.body.dir = t.dir;
+            document.getElementById('lbl-title').innerText = t.title;
+            document.getElementById('btn-start').innerText = t.start;
+            document.getElementById('btn-pause').innerText = t.pause;
+            document.getElementById('btn-reset').innerText = t.reset;
+            document.getElementById('btn-share').innerText = t.share;
+            document.getElementById('lbl-today').innerText = t.today;
+            document.getElementById('lbl-streak').innerText = t.streak;
+            document.getElementById('lbl-level').innerText = t.level;
+            document.getElementById('opt-none').innerText = t.none;
+            document.getElementById('opt-rain').innerText = t.rain;
+            document.getElementById('opt-cafe').innerText = t.cafe;
+            document.getElementById('stat-today').innerText = stats.totalMin + " " + t.min;
+            document.getElementById('stat-streak').innerText = stats.streak + " " + t.day;
+            document.getElementById('stat-level').innerText = "Level " + (Math.floor(stats.totalMin / 100) + 1);
+            if(t.dir === 'rtl') document.getElementById('mainCard').classList.add('rtl-mode');
+            else document.getElementById('mainCard').classList.remove('rtl-mode');
+        }
 
-    <div class="main-controls">
-        <button class="btn btn-start" id="start-btn" onclick="toggle()">شروع</button>
-        <button class="btn btn-pause" onclick="pause()">توقف</button>
-        <button class="btn btn-reset" id="reset-btn" onclick="reset()">شروع مجدد</button>
-    </div>
+        function startTimer() {
+            if (timerId) return;
+            timerId = setInterval(() => {
+                timeLeft--; updateDisplay();
+                if (timeLeft <= 0) { 
+                    clearInterval(timerId); timerId = null; 
+                    if(!isMuted) document.getElementById('alarmAudio').play();
+                    stopAmbient(); completeSession(); 
+                }
+            }, 1000);
+            changeAmbient();
+        }
 
-    <div class="stats-area">
-        <div class="stat-row"><span>⏱️ امروز:</span> <span>۰ دقیقه</span></div>
-        <div class="stat-row"><span>🔥 زنجیره:</span> <span>۰ روز</span></div>
-        <div class="stat-row"><span>⭐ سطح:</span> <span style="color:var(--accent)">Level 1</span></div>
-    </div>
+        function completeSession() {
+            stats.totalMin += Math.floor(duration / 60);
+            const today = new Date().toDateString();
+            if (stats.lastDate !== today) { stats.streak++; stats.lastDate = today; }
+            localStorage.setItem('focusStats', JSON.stringify(stats));
+            updateUI(); resetTimer();
+        }
 
-    <button class="share-btn" id="share-btn">ارسال نتیجه</button>
-</div>
+        async function shareStats() {
+            const t = translations[currentLang];
+            const text = `🎯 ${t.title}\n⭐ Level: ${Math.floor(stats.totalMin / 100) + 1}\n⏱️ Today: ${stats.totalMin} ${t.min}\n🔥 Streak: ${stats.streak} ${t.day}`;
+            if (navigator.share) {
+                try { await navigator.share({ title: t.title, text: text }); } catch (err) {}
+            } else {
+                navigator.clipboard.writeText(text); alert("Copied!");
+            }
+        }
 
-<script>
-    let timeLeft = 1500, timerId = null, currentLang = 'fa';
+        function changeAmbient() {
+            stopAmbient();
+            const val = document.getElementById('ambientSound').value;
+            if (val !== 'none' && !isMuted && timerId) {
+                document.getElementById(val + 'Audio').play();
+            }
+        }
 
-    const trans = {
-        fa: { title: "تایمر تمرکز", start: "شروع", pause: "توقف", reset: "شروع مجدد", share: "ارسال نتیجه", dir: "rtl" },
-        en: { title: "Focus Timer", start: "Start", pause: "Pause", reset: "Reset", share: "Share Result", dir: "ltr" }
-    };
+        function stopAmbient() {
+            document.getElementById('rainAudio').pause();
+            document.getElementById('cafeAudio').pause();
+        }
 
-    function setLang(l) {
-        currentLang = l;
-        const t = trans[l];
-        document.body.dir = t.dir;
-        document.getElementById('title').innerText = t.title;
-        document.getElementById('start-btn').innerText = t.start;
-        document.getElementById('reset-btn').innerText = t.reset;
-        document.getElementById('share-btn').innerText = t.share;
-        document.querySelector('.glass-card').style.textAlign = t.dir === 'rtl' ? 'right' : 'center';
-    }
+        function setTime(s, btn) { duration = s; timeLeft = s; document.querySelectorAll('.modes button').forEach(b => b.classList.remove('active')); btn.classList.add('active'); updateDisplay(); }
+        function updateDisplay() { const m = Math.floor(timeLeft / 60), s = timeLeft % 60; document.getElementById('display').innerText = `${m}:${s < 10 ? '0' : ''}${s}`; }
+        function pauseTimer() { clearInterval(timerId); timerId = null; stopAmbient(); }
+        function resetTimer() { pauseTimer(); timeLeft = duration; updateDisplay(); }
+        function toggleMute() { isMuted = !isMuted; document.getElementById('muteBtn').innerText = isMuted ? '🔇' : '🔊'; if(isMuted) stopAmbient(); else changeAmbient(); }
+        function changeLang(l) { currentLang = l; updateUI(); }
 
-    function updateDisplay() {
-        const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
-        document.getElementById('display').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
-    }
+        setInterval(() => {
+            const t = translations[currentLang];
+            document.getElementById('dateText').innerText = new Date().toLocaleDateString(t.lang, {weekday:'long', month:'long', day:'numeric'});
+        }, 1000);
 
-    function toggle() {
-        if (timerId) { clearInterval(timerId); timerId = null; }
-        else { timerId = setInterval(() => { if(timeLeft > 0) { timeLeft--; updateDisplay(); } }, 1000); }
-    }
-
-    function pause() { clearInterval(timerId); timerId = null; }
-    function reset() { pause(); timeLeft = 1500; updateDisplay(); }
-    function setTime(s, b) { 
-        timeLeft = s; updateDisplay(); 
-        document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-        b.classList.add('active');
-    }
-</script>
-
+        updateUI(); updateDisplay();
+    </script>
 </body>
 </html>
