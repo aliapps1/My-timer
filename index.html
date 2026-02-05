@@ -1,86 +1,120 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تایمر تمرکز</title>
+    <title>Focus Timer Pro</title>
     <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0284c7">
     <style>
-        :root { --bg: #f0f2f5; --primary: #0284c7; }
-        body { background: var(--bg); font-family: sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
-        .card { background: white; padding: 2rem; border-radius: 2rem; width: 90%; max-width: 350px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .time { font-size: 5rem; font-weight: bold; color: var(--primary); margin: 20px 0; }
-        .modes { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
-        button { padding: 10px 20px; border-radius: 10px; border: 1px solid #ddd; cursor: pointer; }
-        .active { background: var(--primary); color: white; border: none; }
-        .btn-start { background: #f59e0b; color: white; width: 100%; padding: 15px; font-weight: bold; border: none; }
+        :root { --bg: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); --card: rgba(255, 255, 255, 0.95); --text: #1e293b; --primary: #0284c7; --accent: #f59e0b; }
+        body { background: var(--bg) !important; color: var(--text); font-family: system-ui, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; transition: 0.5s; }
+        .card { background: var(--card); backdrop-filter: blur(15px); padding: 2.5rem; border-radius: 3rem; width: 100%; max-width: 400px; text-align: center; border: 1px solid rgba(255,255,255,1); box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        .header-controls { display: flex; justify-content: space-between; margin-bottom: 25px; }
+        .nav-btn { padding: 8px 15px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .time { font-size: 6.5rem; font-weight: 900; margin: 10px 0; color: var(--primary); font-family: 'Courier New', monospace; }
+        .modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0; }
+        .modes button { background: #fff; padding: 12px; border-radius: 15px; border: 1px solid #e2e8f0; cursor: pointer; transition: 0.3s; }
+        .modes button.active { background: var(--primary); color: #fff; font-weight: bold; }
+        .controls { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px; margin: 20px 0; }
+        .btn-main { padding: 18px; border-radius: 20px; border: none; font-weight: bold; cursor: pointer; }
+        .btn-start { background: var(--accent); color: #fff; }
+        .btn-pause { background: #94a3b8; color: white; }
+        .btn-reset { background: #ef4444; color: white; }
+        .stats-card { background: #f1f5f9; border-radius: 25px; padding: 20px; margin: 20px 0; text-align: left; border: 1px solid #e2e8f0; }
+        .stat-item { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95rem; font-weight: 600; }
+        .share-btn { width: 100%; padding: 18px; background: #3b82f6; color: white; border-radius: 20px; border: none; font-weight: bold; cursor: pointer; }
+        .rtl-mode { text-align: right !important; direction: rtl; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h2>تایمر تمرکز Pro</h2>
-        <div class="modes">
-            <button onclick="setTime(10, this)">۱۰ ثانیه</button>
-            <button class="active" onclick="setTime(1500, this)">۲۵ دقیقه</button>
+    <div class="card" id="mainCard">
+        <div class="header-controls">
+            <div style="display:flex; gap:8px;">
+                <button class="nav-btn" onclick="changeLang('en')">EN</button>
+                <button class="nav-btn" onclick="changeLang('ar')">AR</button>
+                <button class="nav-btn" onclick="changeLang('fa')">FA</button>
+            </div>
+            <button class="nav-btn" id="muteBtn" onclick="toggleMute()">🔊</button>
         </div>
-        <div class="time" id="display">۲۵:۰۰</div>
-        <button class="btn-start" id="startBtn" onclick="startTimer()">شروع تمرکز</button>
+        <h2 id="lbl-title">Focus Timer Pro</h2>
+        <div class="modes">
+            <button onclick="setTime(10, this)">10s</button>
+            <button onclick="setTime(1500, this)" class="active">25m</button>
+            <button onclick="setTime(3000, this)">50m</button>
+        </div>
+        <div class="time" id="display">25:00</div>
+        <div class="controls">
+            <button class="btn-main btn-start" id="btn-start" onclick="startTimer()">Start</button>
+            <button class="btn-main btn-pause" id="btn-pause" onclick="pauseTimer()">Pause</button>
+            <button class="btn-main btn-reset" id="btn-reset" onclick="resetTimer()">Reset</button>
+        </div>
+        <div class="stats-card">
+            <div class="stat-item"><span id="lbl-today">📅 Today:</span> <span id="stat-today">0 min</span></div>
+            <div class="stat-item"><span id="lbl-week">📈 This Week:</span> <span id="stat-week">0 min</span></div>
+            <div class="stat-item"><span id="lbl-streak">🔥 Streak:</span> <span id="stat-streak">0 days</span></div>
+        </div>
+        <button class="share-btn" id="btn-share" onclick="shareStats()">Share Result</button>
     </div>
 
     <audio id="alarmAudio" src="https://assets.mixkit.co/active_storage/sfx/930/930-preview.mp3" loop></audio>
 
     <script>
-        let duration = 1500, timeLeft = 1500, timerId = null, wakeLock = null;
+        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
+        let duration = 1500, timeLeft = 1500, timerId = null, currentLang = 'en', isMuted = false, wakeLock = null;
+        let stats = JSON.parse(localStorage.getItem('focusStats')) || { todayMin: 0, weekMin: 0, streak: 0, lastDate: null };
 
-        // اجازه گرفتن برای نوتیفیکیشن (حیاتی برای خاموشی اسکرین)
-        if (Notification.permission !== "granted") {
-            Notification.requestPermission();
-        }
+        const translations = {
+            en: { title: "Focus Timer Pro", start: "Start", pause: "Pause", reset: "Reset", share: "Share Result", today: "📅 Today:", week: "📈 This Week:", streak: "🔥 Streak:", min: "min", day: "days" },
+            fa: { title: "تایمر تمرکز", start: "شروع", pause: "توقف", reset: "بازنشانی", share: "اشتراک گذاری", today: "📅 امروز:", week: "📈 این هفته:", streak: "🔥 زنجیره:", min: "دقیقه", day: "روز" },
+            ar: { title: "مؤقت التركيز", start: "بدء", pause: "إيقاف", reset: "إعادة ضبط", share: "مشاركة", today: "📅 اليوم:", week: "📈 هذا الأسبوع:", streak: "🔥 متسلسل:", min: "دقيقة", day: "يوم" }
+        };
 
         async function startTimer() {
             if (timerId) return;
-            
-            // فعال سازی بیدارباش
-            if ('wakeLock' in navigator) {
-                try { wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {}
-            }
-
+            if ('wakeLock' in navigator) { try { wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {} }
             timerId = setInterval(() => {
-                timeLeft--;
-                updateDisplay();
-                if (timeLeft <= 0) {
-                    clearInterval(timerId);
-                    timerId = null;
-                    playAlarm();
-                    if (wakeLock) wakeLock.release();
+                timeLeft--; updateDisplay();
+                if (timeLeft <= 0) { 
+                    clearInterval(timerId); timerId = null;
+                    if(!isMuted) document.getElementById('alarmAudio').play();
+                    if (navigator.vibrate) navigator.vibrate([500, 200, 500]);
+                    completeSession(); if (wakeLock) wakeLock.release();
                 }
             }, 1000);
         }
 
-        function playAlarm() {
-            const alarm = document.getElementById('alarmAudio');
-            alarm.play();
-            
-            // ارسال نوتیفیکیشن برای بیدار کردن گوشی
-            if (Notification.permission === "granted") {
-                new Notification("زمان تمام شد!", {
-                    body: "وقت استراحت است. ساعت کوکی بیدارباش!",
-                    icon: "icon.png"
-                });
-            }
+        function completeSession() {
+            const addedMin = Math.floor(duration / 60);
+            stats.todayMin += addedMin; stats.weekMin += addedMin;
+            localStorage.setItem('focusStats', JSON.stringify(stats));
+            updateUI(); resetTimer();
         }
 
-        function setTime(s, btn) {
-            duration = s; timeLeft = s;
-            document.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            updateDisplay();
+        function updateUI() {
+            const t = translations[currentLang];
+            document.getElementById('lbl-title').innerText = t.title;
+            document.getElementById('btn-start').innerText = t.start;
+            document.getElementById('btn-pause').innerText = t.pause;
+            document.getElementById('btn-reset').innerText = t.reset;
+            document.getElementById('btn-share').innerText = t.share;
+            document.getElementById('lbl-today').innerText = t.today;
+            document.getElementById('lbl-week').innerText = t.week;
+            document.getElementById('lbl-streak').innerText = t.streak;
+            document.getElementById('stat-today').innerText = stats.todayMin + " " + t.min;
+            document.getElementById('stat-week').innerText = stats.weekMin + " " + t.min;
+            document.getElementById('stat-streak').innerText = stats.streak + " " + t.day;
+            document.getElementById('mainCard').className = ['fa', 'ar'].includes(currentLang) ? 'card rtl-mode' : 'card';
         }
 
-        function updateDisplay() {
-            const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
-            document.getElementById('display').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
-        }
+        function setTime(s, btn) { duration = s; timeLeft = s; document.querySelectorAll('.modes button').forEach(b => b.classList.remove('active')); btn.classList.add('active'); updateDisplay(); }
+        function updateDisplay() { const m = Math.floor(timeLeft / 60), s = timeLeft % 60; document.getElementById('display').innerText = `${m}:${s < 10 ? '0' : ''}${s}`; }
+        function pauseTimer() { clearInterval(timerId); timerId = null; if (wakeLock) wakeLock.release(); document.getElementById('alarmAudio').pause(); }
+        function resetTimer() { pauseTimer(); timeLeft = duration; updateDisplay(); }
+        function toggleMute() { isMuted = !isMuted; document.getElementById('muteBtn').innerText = isMuted ? '🔇' : '🔊'; if(isMuted) document.getElementById('alarmAudio').pause(); }
+        function changeLang(l) { currentLang = l; updateUI(); }
+        
+        updateUI(); updateDisplay();
     </script>
 </body>
 </html>
