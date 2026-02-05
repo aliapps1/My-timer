@@ -1,76 +1,86 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Focus Timer Pro</title>
+    <title>تایمر تمرکز</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0284c7">
     <style>
-        :root { --bg: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); --card: rgba(255, 255, 255, 0.95); --text: #1e293b; --primary: #0284c7; --accent: #f59e0b; }
-        body { background: var(--bg) !important; color: var(--text); font-family: system-ui, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }
-        .card { background: var(--card); padding: 2.5rem; border-radius: 3rem; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        .time { font-size: 6.5rem; font-weight: 900; margin: 10px 0; color: var(--primary); font-family: 'Courier New', monospace; }
-        .modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0; }
-        .modes button { background: #fff; padding: 12px; border-radius: 15px; border: 1px solid #e2e8f0; cursor: pointer; }
-        .modes button.active { background: var(--primary); color: #fff; font-weight: bold; }
-        .controls { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px; margin: 20px 0; }
-        .btn-main { padding: 18px; border-radius: 20px; border: none; font-weight: bold; cursor: pointer; }
-        .btn-start { background: var(--accent); color: #fff; }
-        .btn-pause { background: #94a3b8; color: white; }
-        .btn-reset { background: #ef4444; color: white; }
-        .rtl-mode { direction: rtl; }
+        :root { --bg: #f0f2f5; --primary: #0284c7; }
+        body { background: var(--bg); font-family: sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+        .card { background: white; padding: 2rem; border-radius: 2rem; width: 90%; max-width: 350px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .time { font-size: 5rem; font-weight: bold; color: var(--primary); margin: 20px 0; }
+        .modes { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
+        button { padding: 10px 20px; border-radius: 10px; border: 1px solid #ddd; cursor: pointer; }
+        .active { background: var(--primary); color: white; border: none; }
+        .btn-start { background: #f59e0b; color: white; width: 100%; padding: 15px; font-weight: bold; border: none; }
     </style>
 </head>
 <body>
-    <div class="card" id="mainCard">
-        <h2 id="lbl-title">Focus Timer Pro</h2>
+    <div class="card">
+        <h2>تایمر تمرکز Pro</h2>
         <div class="modes">
-            <button onclick="setTime(10, this)">10s</button>
-            <button onclick="setTime(300, this)">5m</button>
-            <button class="active" onclick="setTime(1500, this)">25m</button>
+            <button onclick="setTime(10, this)">۱۰ ثانیه</button>
+            <button class="active" onclick="setTime(1500, this)">۲۵ دقیقه</button>
         </div>
-        <div class="time" id="display">25:00</div>
-        <div class="controls">
-            <button class="btn-main btn-start" onclick="startTimer()">Start</button>
-            <button class="btn-main btn-pause" onclick="pauseTimer()">Pause</button>
-            <button class="btn-main btn-reset" onclick="resetTimer()">Reset</button>
-        </div>
+        <div class="time" id="display">۲۵:۰۰</div>
+        <button class="btn-start" id="startBtn" onclick="startTimer()">شروع تمرکز</button>
     </div>
 
-    <audio id="alarmAudio" src="https://www.soundjay.com/clock/sounds/alarm-clock-01.mp3"></audio>
+    <audio id="alarmAudio" src="https://assets.mixkit.co/active_storage/sfx/930/930-preview.mp3" loop></audio>
 
     <script>
         let duration = 1500, timeLeft = 1500, timerId = null, wakeLock = null;
 
-        async function requestWakeLock() {
-            try {
-                if ('wakeLock' in navigator) {
-                    wakeLock = await navigator.wakeLock.request('screen');
-                }
-            } catch (err) { console.log("Wake Lock error: " + err.message); }
+        // اجازه گرفتن برای نوتیفیکیشن (حیاتی برای خاموشی اسکرین)
+        if (Notification.permission !== "granted") {
+            Notification.requestPermission();
         }
 
-        function startTimer() {
+        async function startTimer() {
             if (timerId) return;
-            requestWakeLock(); // فعال‌سازی بیدارباش بلافاصله بعد از شروع
+            
+            // فعال سازی بیدارباش
+            if ('wakeLock' in navigator) {
+                try { wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {}
+            }
+
             timerId = setInterval(() => {
-                timeLeft--; updateDisplay();
-                if (timeLeft <= 0) { 
-                    clearInterval(timerId); timerId = null; 
-                    const alarm = document.getElementById('alarmAudio');
-                    alarm.loop = true; alarm.play(); // پخش صدای ساعت کوکی
-                    if (navigator.vibrate) navigator.vibrate([500, 200, 500, 200, 500]);
+                timeLeft--;
+                updateDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timerId);
+                    timerId = null;
+                    playAlarm();
                     if (wakeLock) wakeLock.release();
                 }
             }, 1000);
         }
 
-        function setTime(s, btn) { duration = s; timeLeft = s; document.querySelectorAll('.modes button').forEach(b => b.classList.remove('active')); btn.classList.add('active'); updateDisplay(); }
-        function updateDisplay() { const m = Math.floor(timeLeft / 60), s = timeLeft % 60; document.getElementById('display').innerText = `${m}:${s < 10 ? '0' : ''}${s}`; }
-        function pauseTimer() { clearInterval(timerId); timerId = null; if (wakeLock) wakeLock.release(); document.getElementById('alarmAudio').pause(); }
-        function resetTimer() { pauseTimer(); timeLeft = duration; updateDisplay(); }
-        updateDisplay();
+        function playAlarm() {
+            const alarm = document.getElementById('alarmAudio');
+            alarm.play();
+            
+            // ارسال نوتیفیکیشن برای بیدار کردن گوشی
+            if (Notification.permission === "granted") {
+                new Notification("زمان تمام شد!", {
+                    body: "وقت استراحت است. ساعت کوکی بیدارباش!",
+                    icon: "icon.png"
+                });
+            }
+        }
+
+        function setTime(s, btn) {
+            duration = s; timeLeft = s;
+            document.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
+            document.getElementById('display').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+        }
     </script>
 </body>
 </html>
