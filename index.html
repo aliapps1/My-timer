@@ -17,7 +17,7 @@
         .modes button { background: #fff; padding: 12px; border-radius: 15px; border: 1px solid #e2e8f0; cursor: pointer; }
         .modes button.active { background: var(--primary); color: #fff; font-weight: bold; }
         .controls { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px; margin: 20px 0; }
-        .btn-main { padding: 18px; border-radius: 20px; border: none; font-weight: bold; cursor: pointer; }
+        .btn-main { padding: 18px; border-radius: 20px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .btn-start { background: var(--accent); color: #fff; }
         .btn-pause { background: #94a3b8; color: white; }
         .btn-reset { background: #ef4444; color: white; }
@@ -37,32 +37,39 @@
             </div>
             <button class="nav-btn" id="muteBtn" onclick="toggleMute()">🔊</button>
         </div>
+        
         <h2 id="lbl-title">Focus Timer Pro</h2>
+
         <div class="modes">
             <button onclick="setTime(10, this)">10s</button>
             <button onclick="setTime(1500, this)" class="active">25m</button>
             <button onclick="setTime(3000, this)">50m</button>
         </div>
+
         <div class="time" id="display">25:00</div>
+
         <div class="controls">
-            <button class="btn-main btn-start" id="btn-start" onclick="startTimer()">Start</button>
+            <button class="btn-main btn-start" id="btn-start" onclick="initAndStart()">Start</button>
             <button class="btn-main btn-pause" id="btn-pause" onclick="pauseTimer()">Pause</button>
             <button class="btn-main btn-reset" id="btn-reset" onclick="resetTimer()">Reset</button>
         </div>
+
         <div class="stats-card">
             <div class="stat-item"><span id="lbl-today">📅 Today:</span> <span id="stat-today">0 min</span></div>
             <div class="stat-item"><span id="lbl-week">📈 This Week:</span> <span id="stat-week">0 min</span></div>
             <div class="stat-item"><span id="lbl-streak">🔥 Streak:</span> <span id="stat-streak">0 days</span></div>
         </div>
+        
         <button class="share-btn" id="btn-share" onclick="shareStats()">Share Result</button>
     </div>
 
-    <audio id="alarmAudio" src="https://www.soundjay.com/clock/sounds/alarm-clock-01.mp3" loop></audio>
+    <audio id="alarmAudio" src="https://www.soundjay.com/clock/sounds/alarm-clock-01.mp3" preload="auto" loop></audio>
 
     <script>
         if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
         let duration = 1500, timeLeft = 1500, timerId = null, currentLang = 'en', isMuted = false, wakeLock = null;
         let stats = JSON.parse(localStorage.getItem('focusStats')) || { todayMin: 0, weekMin: 0, streak: 0, lastDate: null };
+        const alarm = document.getElementById('alarmAudio');
 
         const translations = {
             en: { title: "Focus Timer Pro", start: "Start", pause: "Pause", reset: "Reset", share: "Share Result", today: "📅 Today:", week: "📈 This Week:", streak: "🔥 Streak:", min: "min", day: "days" },
@@ -70,16 +77,27 @@
             ar: { title: "مؤقت التركيز", start: "بدء", pause: "إيقاف", reset: "إعادة ضبط", share: "مشاركة", today: "📅 اليوم:", week: "📈 هذا الأسبوع:", streak: "🔥 متسلسل:", min: "دقيقة", day: "يوم" }
         };
 
-        async function startTimer() {
+        // فعال‌سازی صدا و بیدارباش به صورت همزمان با کلیک کاربر
+        async function initAndStart() {
             if (timerId) return;
-            // فعالسازی Wake Lock (بیدارباش)
-            if ('wakeLock' in navigator) { try { wakeLock = await navigator.wakeLock.request('screen'); } catch (e) { console.log("WakeLock error"); } }
             
+            // پخش و توقف سریع برای باز کردن قفل صدای مرورگر
+            try { await alarm.play(); alarm.pause(); alarm.currentTime = 0; } catch (e) { console.log("Sound unlock needed"); }
+
+            // فعالسازی بیدارباش برای جلوگیری از توقف در خاموشی
+            if ('wakeLock' in navigator) {
+                try { wakeLock = await navigator.wakeLock.request('screen'); } catch (e) { console.log("WakeLock error"); }
+            }
+
+            startTimer();
+        }
+
+        function startTimer() {
             timerId = setInterval(() => {
                 timeLeft--; updateDisplay();
                 if (timeLeft <= 0) { 
                     clearInterval(timerId); timerId = null;
-                    if(!isMuted) document.getElementById('alarmAudio').play(); // پخش صدای کلاسیک
+                    if(!isMuted) alarm.play();
                     if (navigator.vibrate) navigator.vibrate([500, 200, 500]);
                     completeSession(); if (wakeLock) wakeLock.release();
                 }
@@ -111,10 +129,16 @@
 
         function setTime(s, btn) { duration = s; timeLeft = s; document.querySelectorAll('.modes button').forEach(b => b.classList.remove('active')); btn.classList.add('active'); updateDisplay(); }
         function updateDisplay() { const m = Math.floor(timeLeft / 60), s = timeLeft % 60; document.getElementById('display').innerText = `${m}:${s < 10 ? '0' : ''}${s}`; }
-        function pauseTimer() { clearInterval(timerId); timerId = null; if (wakeLock) wakeLock.release(); document.getElementById('alarmAudio').pause(); }
+        function pauseTimer() { clearInterval(timerId); timerId = null; if (wakeLock) wakeLock.release(); alarm.pause(); }
         function resetTimer() { pauseTimer(); timeLeft = duration; updateDisplay(); }
-        function toggleMute() { isMuted = !isMuted; document.getElementById('muteBtn').innerText = isMuted ? '🔇' : '🔊'; if(isMuted) document.getElementById('alarmAudio').pause(); }
+        function toggleMute() { isMuted = !isMuted; document.getElementById('muteBtn').innerText = isMuted ? '🔇' : '🔊'; if(isMuted) alarm.pause(); }
         function changeLang(l) { currentLang = l; updateUI(); }
+        async function shareStats() {
+            const t = translations[currentLang];
+            const text = `🎯 ${t.title}\n${t.today} ${stats.todayMin} ${t.min}\n${t.week} ${stats.weekMin} ${t.min}\n${t.streak} ${stats.streak} ${t.day}`;
+            if (navigator.share) { try { await navigator.share({ title: t.title, text: text }); } catch (err) {} }
+            else { navigator.clipboard.writeText(text); alert(currentLang === 'fa' ? "کپی شد!" : "Copied!"); }
+        }
         
         updateUI(); updateDisplay();
     </script>
