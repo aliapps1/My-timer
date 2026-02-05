@@ -14,7 +14,7 @@
         .nav-btn { padding: 8px 15px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer; font-size: 12px; font-weight: bold; }
         .time { font-size: 6.5rem; font-weight: 900; margin: 10px 0; color: var(--primary); font-family: 'Courier New', monospace; }
         .modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0; }
-        .modes button { background: #fff; padding: 12px; border-radius: 15px; border: 1px solid #e2e8f0; cursor: pointer; transition: 0.3s; }
+        .modes button { background: #fff; padding: 12px; border-radius: 15px; border: 1px solid #e2e8f0; cursor: pointer; }
         .modes button.active { background: var(--primary); color: #fff; font-weight: bold; }
         .controls { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px; margin: 20px 0; }
         .btn-main { padding: 18px; border-radius: 20px; border: none; font-weight: bold; cursor: pointer; }
@@ -57,7 +57,7 @@
         <button class="share-btn" id="btn-share" onclick="shareStats()">Share Result</button>
     </div>
 
-    <audio id="alarmAudio" src="https://assets.mixkit.co/active_storage/sfx/930/930-preview.mp3" loop></audio>
+    <audio id="alarmAudio" src="https://www.soundjay.com/clock/sounds/alarm-clock-01.mp3" loop></audio>
 
     <script>
         if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
@@ -72,12 +72,14 @@
 
         async function startTimer() {
             if (timerId) return;
-            if ('wakeLock' in navigator) { try { wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {} }
+            // فعالسازی Wake Lock (بیدارباش)
+            if ('wakeLock' in navigator) { try { wakeLock = await navigator.wakeLock.request('screen'); } catch (e) { console.log("WakeLock error"); } }
+            
             timerId = setInterval(() => {
                 timeLeft--; updateDisplay();
                 if (timeLeft <= 0) { 
                     clearInterval(timerId); timerId = null;
-                    if(!isMuted) document.getElementById('alarmAudio').play();
+                    if(!isMuted) document.getElementById('alarmAudio').play(); // پخش صدای کلاسیک
                     if (navigator.vibrate) navigator.vibrate([500, 200, 500]);
                     completeSession(); if (wakeLock) wakeLock.release();
                 }
