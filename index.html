@@ -13,13 +13,13 @@
         .header-controls { display: flex; justify-content: space-between; margin-bottom: 15px; }
         .nav-btn { padding: 8px 15px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer; font-size: 12px; font-weight: bold; }
         .date-display { color: var(--primary); font-weight: bold; margin-bottom: 5px; font-size: 0.9rem; }
-        .sound-select { width: 100%; padding: 12px; border-radius: 15px; border: 1px solid #e2e8f0; margin: 15px 0; background: white; }
+        .sound-select { width: 100%; padding: 12px; border-radius: 15px; border: 1px solid #e2e8f0; margin: 15px 0; background: white; font-weight: bold; }
         .time { font-size: 6.5rem; font-weight: 900; margin: 10px 0; color: var(--primary); font-family: 'Courier New', monospace; }
         .modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 15px 0; }
-        .modes button { background: #fff; padding: 12px; border-radius: 15px; border: 1px solid #e2e8f0; cursor: pointer; font-size: 0.9rem; }
-        .modes button.active { background: var(--primary); color: #fff; font-weight: bold; }
+        .modes button { background: #fff; padding: 12px; border-radius: 15px; border: 1px solid #e2e8f0; cursor: pointer; font-size: 0.9rem; font-weight: bold; }
+        .modes button.active { background: var(--primary); color: #fff; border: none; }
         .controls { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 20px 0; }
-        .btn-main { padding: 15px; border-radius: 20px; border: none; font-weight: bold; cursor: pointer; color: white; }
+        .btn-main { padding: 15px; border-radius: 20px; border: none; font-weight: bold; cursor: pointer; color: white; font-size: 1.1rem; }
         .btn-start { background: var(--accent); }
         .btn-pause { background: #94a3b8; }
         .btn-reset { background: #ef4444; }
@@ -76,7 +76,8 @@
     <audio id="alarmAudio" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto" loop></audio>
 
     <script>
-        let duration = 1500, timeLeft = 1500, timerId = null, currentLang = 'en', isMuted = false, wakeLock = null, endTime = null;
+        let duration = 1500, timeLeft = 1500, isPaused = true, currentLang = 'en', isMuted = false;
+        let worker = new Worker('worker.js'); // اتصال به فایلی که در گیت‌هاب ساختید
         let stats = JSON.parse(localStorage.getItem('focusStats')) || { todayMin: 0, weekMin: 0, streak: 0 };
         const alarm = document.getElementById('alarmAudio');
 
@@ -86,25 +87,59 @@
             ar: { title: "مؤقت التركيز", start: "بدء", pause: "إيقاف", reset: "إعادة ضبط", share: "مشاركة", today: "📅 اليوم:", week: "📈 هذا الأسبوع:", streak: "🔥 متسلسل:", min: "دقيقة", day: "يوم" }
         };
 
-        async function initAndStart() {
-            if (timerId) return;
-            try { await alarm.play(); alarm.pause(); alarm.currentTime = 0; } catch (e) {}
-            if ('wakeLock' in navigator) { try { wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {} }
-            endTime = Date.now() + (timeLeft * 1000);
-            timerId = setInterval(() => {
-                let now = Date.now();
-                timeLeft = Math.max(0, Math.round((endTime - now) / 1000));
+        // گوش دادن به تیک‌تیک‌های فایل worker.js در پس‌زمینه
+        worker.onmessage = function(e) {
+            if (e.data === 'tick' && !isPaused) {
+                timeLeft--;
                 updateDisplay();
                 if (timeLeft <= 0) {
-                    clearInterval(timerId); timerId = null;
+                    stopWorker();
                     if(!isMuted && document.getElementById('soundChoice').value !== 'none') {
                         alarm.play();
                         setTimeout(() => { alarm.pause(); alarm.currentTime = 0; }, 15000);
                     }
                     completeSession();
-                    if (wakeLock) { wakeLock.release(); wakeLock = null; }
                 }
-            }, 500);
+            }
+        };
+
+        function initAndStart() {
+            if (!isPaused) return;
+            isPaused = false;
+            try { alarm.play(); alarm.pause(); } catch(e){} 
+            worker.postMessage('start');
+        }
+
+        function pauseTimer() {
+            isPaused = true;
+            worker.postMessage('stop');
+            alarm.pause();
+        }
+
+        function stopWorker() {
+            isPaused = true;
+            worker.postMessage('stop');
+        }
+
+        function updateDisplay() {
+            const m = Math.floor(timeLeft / 60);
+            const s = timeLeft % 60;
+            document.getElementById('display').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+
+        function resetTimer() {
+            stopWorker();
+            timeLeft = duration;
+            updateDisplay();
+        }
+
+        function setTime(s, btn) {
+            stopWorker();
+            duration = s;
+            timeLeft = s;
+            document.querySelectorAll('.modes button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            updateDisplay();
         }
 
         function completeSession() {
@@ -128,19 +163,27 @@
             document.getElementById('mainCard').className = ['fa', 'ar'].includes(currentLang) ? 'card rtl-mode' : 'card';
         }
 
-        function setTime(s, btn) { duration = s; timeLeft = s; document.querySelectorAll('.modes button').forEach(b => b.classList.remove('active')); btn.classList.add('active'); updateDisplay(); }
-        function updateDisplay() { const m = Math.floor(timeLeft / 60), s = timeLeft % 60; document.getElementById('display').innerText = `${m}:${s < 10 ? '0' : ''}${s}`; }
-        function pauseTimer() { clearInterval(timerId); timerId = null; if (wakeLock) wakeLock.release(); alarm.pause(); }
-        function resetTimer() { pauseTimer(); timeLeft = duration; updateDisplay(); }
-        function toggleMute() { isMuted = !isMuted; document.getElementById('muteBtn').innerText = isMuted ? '🔇' : '🔊'; if(isMuted) alarm.pause(); }
+        function toggleMute() {
+            isMuted = !isMuted;
+            document.getElementById('muteBtn').innerText = isMuted ? '🔇' : '🔊';
+            if(isMuted) alarm.pause();
+        }
+
         function changeLang(l) { currentLang = l; updateUI(); }
+
         async function shareStats() {
             const t = translations[currentLang];
             const text = `🎯 ${t.title}\n${t.today} ${stats.todayMin} ${t.min}\n${t.week} ${stats.weekMin} ${t.min}\n${t.streak} ${stats.streak} ${t.day}`;
-            if (navigator.share) { try { await navigator.share({ title: t.title, text: text }); } catch (err) {} }
-            else { navigator.clipboard.writeText(text); alert(currentLang === 'fa' ? "کپی شد!" : "Copied!"); }
+            if (navigator.share) {
+                try { await navigator.share({ title: t.title, text: text }); } catch (err) {}
+            } else {
+                navigator.clipboard.writeText(text);
+                alert(currentLang === 'fa' ? "کپی شد!" : "Copied!");
+            }
         }
-        updateUI(); updateDisplay();
+
+        updateUI();
+        updateDisplay();
     </script>
 </body>
 </html>
