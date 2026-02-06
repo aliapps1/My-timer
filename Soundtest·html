@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sound Test - Focus Timer Pro</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            direction: ltr;
+        }
+        body.rtl { 
+            direction: rtl; 
+            font-family: Tahoma, Arial, sans-serif;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        h1 { color: #0284c7; text-align: center; }
+        .lang-selector {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .lang-btn {
+            padding: 8px 15px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .lang-btn.active {
+            background: #0284c7;
+            color: white;
+            border: none;
+        }
+        button {
+            background: #0284c7;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.2s;
+        }
+        button:hover { background: #0369a1; transform: scale(1.05); }
+        button:active { transform: scale(0.95); }
+        .success { background: #10b981; }
+        .warning { background: #f59e0b; }
+        .info {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+        .volume-slider {
+            width: 100%;
+            margin: 20px 0;
+        }
+        ul { 
+            text-align: start;
+            margin-inline-start: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="lang-selector">
+            <button class="lang-btn active" onclick="changeLang('en')">EN</button>
+            <button class="lang-btn" onclick="changeLang('ar')">AR</button>
+            <button class="lang-btn" onclick="changeLang('fa')">FA</button>
+        </div>
+
+        <h1 id="title">🔊 Sound Test</h1>
+        <p id="subtitle" style="text-align: center;">To ensure the timer alarm works, try the buttons below:</p>
+
+        <div style="margin: 30px 0; text-align: center;">
+            <button onclick="testSimpleTone()" id="btn-simple">🔔 Test Simple Tone</button>
+            <button onclick="testChime()" class="success" id="btn-chime">🎵 Test Double Chime</button>
+            <button onclick="testRepeating()" class="warning" id="btn-repeat">🔁 Test Repeat (3x)</button>
+        </div>
+
+        <div class="info">
+            <h3 id="guide-title">📋 Guide:</h3>
+            <ul id="guide-list">
+                <li>If you don't hear any sound, check your device volume</li>
+                <li>In some browsers, you must click on the page first</li>
+                <li>If still no sound, your browser doesn't support Web Audio API</li>
+                <li>Best browsers: Chrome, Edge, Safari</li>
+            </ul>
+        </div>
+
+        <div style="text-align: center;">
+            <label for="volume" id="volume-label">🔊 Volume:</label>
+            <input type="range" id="volume" class="volume-slider" min="0" max="100" value="70">
+            <span id="volumeDisplay">70%</span>
+        </div>
+
+        <div id="status" style="margin-top: 20px; font-weight: bold; text-align: center;"></div>
+    </div>
+
+    <audio id="backupAudio" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+
+    <script>
+        let audioContext;
+        let currentVolume = 0.7;
+        let currentLang = 'en';
+
+        const translations = {
+            en: {
+                title: '🔊 Sound Test',
+                subtitle: 'To ensure the timer alarm works, try the buttons below:',
+                btnSimple: '🔔 Test Simple Tone',
+                btnChime: '🎵 Test Double Chime',
+                btnRepeat: '🔁 Test Repeat (3x)',
+                guideTitle: '📋 Guide:',
+                guide: [
+                    'If you don\'t hear any sound, check your device volume',
+                    'In some browsers, you must click on the page first',
+                    'If still no sound, your browser doesn\'t support Web Audio API',
+                    'Best browsers: Chrome, Edge, Safari'
+                ],
+                volumeLabel: '🔊 Volume:',
+                statusSimple: 'Playing simple tone...',
+                statusChime: 'Playing double chime...',
+                statusRepeat: 'Playing repeat (3 times)...',
+                statusSuccess: '✅ Sound played!',
+                statusChimeSuccess: '✅ Double chime played!',
+                statusRepeatSuccess: '✅ Repeat complete!',
+                statusError: '❌ Error: ',
+                statusReady: '✅ Your browser is ready. Click the buttons.',
+                statusNoSupport: '⚠️ Your browser doesn\'t support Web Audio API. Please use Chrome or Edge.'
+            },
+            fa: {
+                title: '🔊 تست صدا',
+                subtitle: 'برای اطمینان از کار کردن صدای تایمر، دکمه‌های زیر را امتحان کنید:',
+                btnSimple: '🔔 تست صدای ساده',
+                btnChime: '🎵 تست زنگ دوگانه',
+                btnRepeat: '🔁 تست تکرار (3 بار)',
+                guideTitle: '📋 راهنما:',
+                guide: [
+                    'اگر هیچ صدایی نشنیدید، حجم گوشی خود را چک کنید',
+                    'در بعضی مرورگرها باید اول روی صفحه کلیک کنید',
+                    'اگر باز هم صدا نیامد، مرورگر شما Web Audio API را پشتیبانی نمی‌کند',
+                    'بهترین مرورگر: Chrome، Edge، Safari'
+                ],
+                volumeLabel: '🔊 حجم صدا:',
+                statusSimple: 'در حال پخش صدای ساده...',
+                statusChime: 'در حال پخش زنگ دوگانه...',
+                statusRepeat: 'در حال پخش تکراری (3 بار)...',
+                statusSuccess: '✅ صدا پخش شد!',
+                statusChimeSuccess: '✅ زنگ دوگانه پخش شد!',
+                statusRepeatSuccess: '✅ تکرار کامل شد!',
+                statusError: '❌ خطا: ',
+                statusReady: '✅ مرورگر شما آماده است. روی دکمه‌ها کلیک کنید.',
+                statusNoSupport: '⚠️ مرورگر شما Web Audio API را پشتیبانی نمی‌کند. لطفاً از Chrome یا Edge استفاده کنید.'
+            },
+            ar: {
+                title: '🔊 اختبار الصوت',
+                subtitle: 'للتأكد من أن منبه المؤقت يعمل، جرب الأزرار أدناه:',
+                btnSimple: '🔔 اختبار نغمة بسيطة',
+                btnChime: '🎵 اختبار رنين مزدوج',
+                btnRepeat: '🔁 اختبار التكرار (3 مرات)',
+                guideTitle: '📋 الدليل:',
+                guide: [
+                    'إذا لم تسمع أي صوت، تحقق من مستوى صوت جهازك',
+                    'في بعض المتصفحات، يجب النقر على الصفحة أولاً',
+                    'إذا لم يكن هناك صوت، فإن متصفحك لا يدعم Web Audio API',
+                    'أفضل المتصفحات: Chrome، Edge، Safari'
+                ],
+                volumeLabel: '🔊 مستوى الصوت:',
+                statusSimple: 'تشغيل نغمة بسيطة...',
+                statusChime: 'تشغيل رنين مزدوج...',
+                statusRepeat: 'تشغيل متكرر (3 مرات)...',
+                statusSuccess: '✅ تم تشغيل الصوت!',
+                statusChimeSuccess: '✅ تم تشغيل الرنين المزدوج!',
+                statusRepeatSuccess: '✅ اكتمل التكرار!',
+                statusError: '❌ خطأ: ',
+                statusReady: '✅ متصفحك جاهز. انقر على الأزرار.',
+                statusNoSupport: '⚠️ متصفحك لا يدعم Web Audio API. يرجى استخدام Chrome أو Edge.'
+            }
+        };
+
+        function changeLang(lang) {
+            currentLang = lang;
+            const isRTL = lang === 'fa' || lang === 'ar';
+            document.body.className = isRTL ? 'rtl' : '';
+            document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+            
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            updateUI();
+        }
+
+        function updateUI() {
+            const t = translations[currentLang];
+            document.getElementById('title').textContent = t.title;
+            document.getElementById('subtitle').textContent = t.subtitle;
+            document.getElementById('btn-simple').textContent = t.btnSimple;
+            document.getElementById('btn-chime').textContent = t.btnChime;
+            document.getElementById('btn-repeat').textContent = t.btnRepeat;
+            document.getElementById('guide-title').textContent = t.guideTitle;
+            document.getElementById('volume-label').textContent = t.volumeLabel;
+            
+            const guideList = document.getElementById('guide-list');
+            guideList.innerHTML = t.guide.map(item => `<li>${item}</li>`).join('');
+            
+            checkBrowserSupport();
+        }
+
+        document.getElementById('volume').addEventListener('input', (e) => {
+            currentVolume = e.target.value / 100;
+            document.getElementById('volumeDisplay').innerText = e.target.value + '%';
+        });
+
+        function testSimpleTone() {
+            const t = translations[currentLang];
+            showStatus(t.statusSimple, '#0284c7');
+            
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 800;
+                oscillator.type = 'sine';
+                gainNode.gain.value = currentVolume;
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.5);
+                
+                setTimeout(() => {
+                    showStatus(t.statusSuccess, '#10b981');
+                }, 600);
+                
+            } catch (err) {
+                showStatus(t.statusError + err.message, '#ef4444');
+            }
+        }
+
+        function testChime() {
+            const t = translations[currentLang];
+            showStatus(t.statusChime, '#0284c7');
+            
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                playTone(audioContext, 800, 0, 0.3);
+                setTimeout(() => {
+                    playTone(audioContext, 1000, 0, 0.3);
+                }, 200);
+                
+                setTimeout(() => {
+                    showStatus(t.statusChimeSuccess, '#10b981');
+                }, 600);
+                
+            } catch (err) {
+                showStatus(t.statusError + err.message, '#ef4444');
+                document.getElementById('backupAudio').play();
+            }
+        }
+
+        function testRepeating() {
+            const t = translations[currentLang];
+            showStatus(t.statusRepeat, '#f59e0b');
+            
+            let count = 0;
+            const interval = setInterval(() => {
+                count++;
+                testChime();
+                
+                if (count >= 3) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        showStatus(t.statusRepeatSuccess, '#10b981');
+                    }, 1000);
+                }
+            }, 1000);
+        }
+
+        function playTone(audioContext, frequency, delay, duration) {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+            
+            const now = audioContext.currentTime + delay;
+            gainNode.gain.setValueAtTime(0, now);
+            gainNode.gain.linearRampToValueAtTime(currentVolume, now + 0.01);
+            gainNode.gain.linearRampToValueAtTime(0, now + duration);
+            
+            oscillator.start(now);
+            oscillator.stop(now + duration);
+        }
+
+        function showStatus(message, color) {
+            const status = document.getElementById('status');
+            status.innerText = message;
+            status.style.color = color;
+        }
+
+        function checkBrowserSupport() {
+            const t = translations[currentLang];
+            if (!window.AudioContext && !window.webkitAudioContext) {
+                showStatus(t.statusNoSupport, '#ef4444');
+            } else {
+                showStatus(t.statusReady, '#10b981');
+            }
+        }
+
+        updateUI();
+    </script>
+</body>
+</html>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        h1 { color: #0284c7; }
+        button {
+            background: #0284c7;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.2s;
+        }
+        button:hover { background: #0369a1; transform: scale(1.05); }
+        button:active { transform: scale(0.95); }
+        .success { background: #10b981; }
+        .warning { background: #f59e0b; }
+        .info {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 12px;
+            margin: 20px 0;
+            text-align: right;
+        }
+        .volume-slider {
+            width: 100%;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🔊 تست صدای زنگ</h1>
+        <p>برای اطمینان از کار کردن صدای تایمر، دکمه‌های زیر را امتحان کنید:</p>
+
+        <div style="margin: 30px 0;">
+            <button onclick="testSimpleTone()">🔔 تست صدای ساده</button>
+            <button onclick="testChime()" class="success">🎵 تست زنگ دوگانه</button>
+            <button onclick="testRepeating()" class="warning">🔁 تست تکرار (3 بار)</button>
+        </div>
+
+        <div class="info">
+            <h3>📋 راهنما:</h3>
+            <ul style="text-align: right;">
+                <li>اگر هیچ صدایی نشنیدید، حجم گوشی خود را چک کنید</li>
+                <li>در بعضی مرورگرها باید اول روی صفحه کلیک کنید</li>
+                <li>اگر باز هم صدا نیامد، مرورگر شما Web Audio API را پشتیبانی نمی‌کند</li>
+                <li>بهترین مرورگر: Chrome، Edge، Safari</li>
+            </ul>
+        </div>
+
+        <div>
+            <label for="volume">🔊 حجم صدا:</label>
+            <input type="range" id="volume" class="volume-slider" min="0" max="100" value="70">
+            <span id="volumeDisplay">70%</span>
+        </div>
+
+        <div id="status" style="margin-top: 20px; font-weight: bold;"></div>
+    </div>
+
+    <audio id="backupAudio" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+
+    <script>
+        let audioContext;
+        let currentVolume = 0.7;
+
+        // Initialize
+        document.getElementById('volume').addEventListener('input', (e) => {
+            currentVolume = e.target.value / 100;
+            document.getElementById('volumeDisplay').innerText = e.target.value + '%';
+        });
+
+        // Test simple tone
+        function testSimpleTone() {
+            showStatus('در حال پخش صدای ساده...', '#0284c7');
+            
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 800;
+                oscillator.type = 'sine';
+                gainNode.gain.value = currentVolume;
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.5);
+                
+                setTimeout(() => {
+                    showStatus('✅ صدا پخش شد!', '#10b981');
+                }, 600);
+                
+            } catch (err) {
+                showStatus('❌ خطا: ' + err.message, '#ef4444');
+            }
+        }
+
+        // Test chime (two tones)
+        function testChime() {
+            showStatus('در حال پخش زنگ دوگانه...', '#0284c7');
+            
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // First tone
+                playTone(audioContext, 800, 0, 0.3);
+                
+                // Second tone (higher pitch)
+                setTimeout(() => {
+                    playTone(audioContext, 1000, 0, 0.3);
+                }, 200);
+                
+                setTimeout(() => {
+                    showStatus('✅ زنگ دوگانه پخش شد!', '#10b981');
+                }, 600);
+                
+            } catch (err) {
+                showStatus('❌ خطا: ' + err.message, '#ef4444');
+                // Fallback to HTML5 audio
+                document.getElementById('backupAudio').play();
+            }
+        }
+
+        // Test repeating sound
+        function testRepeating() {
+            showStatus('در حال پخش تکراری (3 بار)...', '#f59e0b');
+            
+            let count = 0;
+            const interval = setInterval(() => {
+                count++;
+                testChime();
+                
+                if (count >= 3) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        showStatus('✅ تکرار کامل شد!', '#10b981');
+                    }, 1000);
+                }
+            }, 1000);
+        }
+
+        // Helper: Play a tone
+        function playTone(audioContext, frequency, delay, duration) {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+            
+            // Smooth fade in/out
+            const now = audioContext.currentTime + delay;
+            gainNode.gain.setValueAtTime(0, now);
+            gainNode.gain.linearRampToValueAtTime(currentVolume, now + 0.01);
+            gainNode.gain.linearRampToValueAtTime(0, now + duration);
+            
+            oscillator.start(now);
+            oscillator.stop(now + duration);
+        }
+
+        // Show status message
+        function showStatus(message, color) {
+            const status = document.getElementById('status');
+            status.innerText = message;
+            status.style.color = color;
+        }
+
+        // Check browser support on load
+        window.addEventListener('load', () => {
+            if (!window.AudioContext && !window.webkitAudioContext) {
+                showStatus('⚠️ مرورگر شما Web Audio API را پشتیبانی نمی‌کند. لطفاً از Chrome یا Edge استفاده کنید.', '#ef4444');
+            } else {
+                showStatus('✅ مرورگر شما آماده است. روی دکمه‌ها کلیک کنید.', '#10b981');
+            }
+        });
+    </script>
+</body>
+</html>
