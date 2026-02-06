@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification Setup Guide - Focus Timer Pro</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            max-width: 700px;
+            margin: 30px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            line-height: 1.8;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        h1 { color: #0284c7; text-align: center; }
+        h2 { 
+            color: #0369a1; 
+            background: #f0f9ff; 
+            padding: 12px; 
+            border-radius: 10px;
+            border-left: 4px solid #0284c7;
+        }
+        h3 { color: #0c4a6e; margin-top: 20px; }
+        .step {
+            background: #f1f5f9;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 12px;
+            border-left: 4px solid #f59e0b;
+        }
+        .warning {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        .success {
+            background: #dcfce7;
+            border: 2px solid #10b981;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        ul, ol { margin-left: 20px; }
+        li { margin: 8px 0; }
+        .btn {
+            background: #0284c7;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        .btn:hover { background: #0369a1; }
+        .test-section {
+            background: #fef3c7;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🔔 Notification & Alarm Setup Guide</h1>
+        <p style="text-align: center; font-size: 1.1em;">
+            Ensure you hear the timer alarm even when your phone is locked or you're in another app
+        </p>
+    </div>
+
+    <div class="card">
+        <h2>📱 Android Settings (Chrome)</h2>
+        
+        <div class="step">
+            <h3>Step 1: Grant Notification Permission</h3>
+            <ol>
+                <li>When you start the timer for the first time, you'll see: <strong>"Allow notifications?"</strong></li>
+                <li>Click <strong>"Allow"</strong></li>
+                <li>If you accidentally clicked <strong>"Block"</strong>, follow the manual steps below</li>
+            </ol>
+        </div>
+
+        <div class="step">
+            <h3>Step 2: Manual Notification Setup (if blocked)</h3>
+            <ol>
+                <li>In Chrome, click the lock icon 🔒 next to the website URL</li>
+                <li>Find <strong>"Notifications"</strong></li>
+                <li>Set it to <strong>"Allow"</strong></li>
+                <li>Refresh the page</li>
+            </ol>
+        </div>
+
+        <div class="step">
+            <h3>Step 3: Android System Settings</h3>
+            <ol>
+                <li><strong>Settings</strong> > <strong>Apps</strong> > <strong>Chrome</strong></li>
+                <li><strong>Notifications</strong> > Make sure it's ON</li>
+                <li><strong>Battery</strong> > Select <strong>Unrestricted</strong></li>
+                <li>Turn off <strong>Do Not Disturb</strong> or exempt Chrome from it</li>
+            </ol>
+        </div>
+
+        <div class="warning">
+            <strong>⚠️ Important Notes:</strong>
+            <ul>
+                <li>Turn on phone sound (not Silent Mode)</li>
+                <li>Increase Media Volume</li>
+                <li>If you installed the PWA, go to Settings > Apps > Focus Timer and enable notifications</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>🍎 iOS Settings (Safari)</h2>
+        
+        <div class="step">
+            <h3>Step 1: Install PWA</h3>
+            <ol>
+                <li>Open the website in Safari</li>
+                <li>Tap the Share button (square with arrow)</li>
+                <li>Select <strong>"Add to Home Screen"</strong></li>
+                <li>Open the app from your Home Screen (not Safari)</li>
+            </ol>
+        </div>
+
+        <div class="step">
+            <h3>Step 2: Notification Permissions</h3>
+            <ol>
+                <li><strong>Settings</strong> > <strong>Notifications</strong></li>
+                <li>Find Focus Timer</li>
+                <li>Enable <strong>Allow Notifications</strong></li>
+                <li>Make sure <strong>Sounds</strong> is enabled</li>
+                <li>Enable <strong>Lock Screen</strong> and <strong>Banners</strong></li>
+            </ol>
+        </div>
+
+        <div class="warning">
+            <strong>⚠️ iOS Limitation:</strong>
+            <p>Unfortunately, iOS doesn't allow web apps to play sound in the background. For best results:</p>
+            <ul>
+                <li>Keep the app open</li>
+                <li>Or convert it to a native app (for App Store)</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>🔧 Technology Used</h2>
+        
+        <div class="success">
+            <h3>✅ The app uses 5 different methods for notifications:</h3>
+            <ol>
+                <li><strong>Web Notifications API:</strong> System notifications that show even when app is closed</li>
+                <li><strong>HTML5 Audio:</strong> External audio file played at maximum volume</li>
+                <li><strong>Web Audio API:</strong> Custom generated sound (3 different tones)</li>
+                <li><strong>Vibration API:</strong> Phone vibration (Android only)</li>
+                <li><strong>Wake Lock API:</strong> Prevents screen from turning off</li>
+            </ol>
+        </div>
+
+        <div class="warning">
+            <strong>🔍 How It Works:</strong>
+            <p>When the timer completes:</p>
+            <ul>
+                <li>✅ Shows 5 consecutive notifications (one every 4 seconds)</li>
+                <li>✅ Plays sound 5 times (every 2 seconds)</li>
+                <li>✅ Phone vibrates 3 times</li>
+                <li>✅ Sound continues for 10 seconds</li>
+                <li>✅ Notifications appear on lock screen</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="test-section">
+            <h2>🧪 Test It!</h2>
+            <p>Click the buttons below to receive a sample notification and sound:</p>
+            <button class="btn" onclick="testNotification()">Test Notification & Sound 🔔</button>
+            <button class="btn" onclick="testVibration()" style="background: #f59e0b;">Test Vibration 📳</button>
+            <div id="testResult" style="margin-top: 20px; font-weight: bold;"></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>❓ Troubleshooting</h2>
+        
+        <h3>🔇 No Sound:</h3>
+        <ul>
+            <li>Check device volume (Media Volume, not Ring Volume)</li>
+            <li>Turn off Silent Mode or Do Not Disturb</li>
+            <li>In app settings, set sound to "Soft Chime" (not "No Sound")</li>
+            <li>Check the mute button 🔇 in the app</li>
+        </ul>
+
+        <h3>🔕 No Notifications:</h3>
+        <ul>
+            <li>Make sure you clicked "Allow" for notification permission</li>
+            <li>Check browser and system settings (above)</li>
+            <li>Refresh the page</li>
+            <li>Clear browser cache</li>
+        </ul>
+
+        <h3>📱 Only Works When App is Open:</h3>
+        <ul>
+            <li>Install the PWA (Add to Home Screen)</li>
+            <li>Enable Background permissions</li>
+            <li>Set Battery Optimization to Unrestricted</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <div class="success">
+            <h2>✅ Final Checklist</h2>
+            <ul style="font-size: 1.05em; line-height: 2;">
+                <li>☐ Granted Notification permission</li>
+                <li>☐ Phone volume is on</li>
+                <li>☐ Silent Mode is off</li>
+                <li>☐ Do Not Disturb is off</li>
+                <li>☐ Battery Optimization: Unrestricted</li>
+                <li>☐ PWA installed</li>
+                <li>☐ Tested and working ✅</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        async function testNotification() {
+            const result = document.getElementById('testResult');
+            
+            if ('Notification' in window) {
+                const permission = await Notification.requestPermission();
+                
+                if (permission === 'granted') {
+                    const notification = new Notification('🎉 Test Successful!', {
+                        body: 'Notifications are working. Did you hear the sound?',
+                        icon: 'icon-192.png',
+                        requireInteraction: true,
+                        vibrate: [200, 100, 200, 100, 200]
+                    });
+                    
+                    const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+                    audio.volume = 1.0;
+                    audio.play().catch(err => {
+                        result.innerHTML = '⚠️ Audio blocked. Click on the page and try again.';
+                        result.style.color = '#f59e0b';
+                    });
+                    
+                    setTimeout(() => audio.pause(), 3000);
+                    
+                    result.innerHTML = '✅ Notification shown! Did you hear the sound?';
+                    result.style.color = '#10b981';
+                    
+                } else {
+                    result.innerHTML = '❌ Notification permission denied. Enable it in browser settings.';
+                    result.style.color = '#ef4444';
+                }
+            } else {
+                result.innerHTML = '❌ Your browser doesn\'t support Notifications.';
+                result.style.color = '#ef4444';
+            }
+        }
+
+        function testVibration() {
+            const result = document.getElementById('testResult');
+            
+            if ('vibrate' in navigator) {
+                navigator.vibrate([400, 200, 400, 200, 400]);
+                result.innerHTML = '✅ Vibration activated! Did your phone vibrate?';
+                result.style.color = '#10b981';
+            } else {
+                result.innerHTML = '⚠️ Your device doesn\'t support Vibration API.';
+                result.style.color = '#f59e0b';
+            }
+        }
+    </script>
+</body>
+</html>
