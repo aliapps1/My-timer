@@ -7,6 +7,7 @@ let isPaused = true;
 let timerId = null;
 let currentLang = 'en';
 let isMuted = false;
+let wakeLock = null;
 
 // Load or initialize stats
 let stats = JSON.parse(localStorage.getItem('focusStats')) || {
@@ -19,8 +20,8 @@ let stats = JSON.parse(localStorage.getItem('focusStats')) || {
 
 const alarm = document.getElementById('alarmAudio');
 
-// Set alarm sound as data URI (embedded)
-alarm.src = 'data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAASAAAeMwAUFBQUFCIiIiIiIjAwMDAwPj4+Pj4+TExMTExZWVlZWVlnZ2dnZ3V1dXV1dYODg4ODkZGRkZGRn5+fn5+frKysrKy6urq6urrIyMjIyNbW1tbW1uTk5OTk8vLy8vLy////////AAAAAExhdmM1OC4xMzQAAAAAAAAAAAAAAAAkBgAAAAAAAAA=';
+// Backup: Use external sound URL
+alarm.src = 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3';
 
 const translations = {
     en: {
@@ -169,17 +170,63 @@ function updateDisplay() {
 }
 
 // Start timer
-function initAndStart() {
+async function initAndStart() {
     if (!isPaused) return;
     isPaused = false;
+    
+    // Request notification permission if not granted
+    if ('Notification' in window && Notification.permission === 'default') {
+        await Notification.requestPermission();
+    }
+    
+    // Request Wake Lock to keep screen/app active
+    try {
+        if ('wakeLock' in navigator) {
+            wakeLock = await navigator.wakeLock.request('screen');
+            console.log('Wake Lock activated');
+            
+            // Re-acquire wake lock if it's released
+            wakeLock.addEventListener('release', () => {
+                console.log('Wake Lock released');
+                if (!isPaused) {
+                    requestWakeLock();
+                }
+            });
+        }
+    } catch (err) {
+        console.log('Wake Lock error:', err);
+    }
     
     // Save end time
     const endTime = Date.now() + (timeLeft * 1000);
     localStorage.setItem('focus_timer_end', endTime);
     localStorage.setItem('focus_timer_duration', duration);
     localStorage.setItem('is_running', 'true');
+    
+    // Show persistent notification on Android
+    if ('Notification' in window && Notification.permission === 'granted') {
+        const minutes = Math.floor(timeLeft / 60);
+        new Notification('Focus Timer Running ⏰', {
+            body: `Timer set for ${minutes} minutes. Keep focused!`,
+            icon: 'icon-192.png',
+            tag: 'focus-timer',
+            requireInteraction: false,
+            silent: true
+        });
+    }
 
     timerId = setInterval(syncTimer, 500);
+}
+
+// Helper function to request wake lock
+async function requestWakeLock() {
+    try {
+        if ('wakeLock' in navigator && !wakeLock) {
+            wakeLock = await navigator.wakeLock.request('screen');
+        }
+    } catch (err) {
+        console.log('Wake Lock request failed:', err);
+    }
 }
 
 // Sync timer with actual time
@@ -204,15 +251,121 @@ function finishTimer() {
     localStorage.removeItem('is_running');
     localStorage.removeItem('focus_timer_duration');
     
+    // Release wake lock
+    if (wakeLock) {
+        wakeLock.release();
+        wakeLock = null;
+    }
+    
+    // CRITICAL: Show notification FIRST (before sound) for better reliability
+    if ('Notification' in window && Notification.permission === 'granted') {
+        const notification = new Notification('🎉 Focus Session Complete!', {
+            body: 'Great work! Time to take a break.',
+            icon: 'icon-192.png',
+            badge: 'icon-72.png',
+            tag: 'focus-complete',
+            requireInteraction: true, // Keep notification visible
+            vibrate: [200, 100, 200, 100, 200, 100, 200], // Strong vibration
+            silent: false, // Allow system sound
+            timestamp: Date.now()
+        });
+        
+        // Make notification clickable
+        notification.onclick = () => {
+            window.focus();
+            notification.close();
+        };
+    }
+    
+    // Play sound if not muted
     if (!isMuted && document.getElementById('soundChoice').value !== 'none') {
-        alarm.play().catch(e => console.log('Audio play failed:', e));
-        setTimeout(() => {
-            alarm.pause();
-            alarm.currentTime = 0;
-        }, 15000);
+        // Method 1: HTML5 Audio (with loop)
+        alarm.loop = true;
+        alarm.volume = 1.0; // Maximum volume
+        alarm.play().catch(err => {
+            console.log('HTML5 audio blocked:', err);
+        });
+        
+        // Method 2: Web Audio API (custom tone - louder)
+        createLoudAlarmSound();
+        
+        // Method 3: Vibrate on mobile devices
+        if ('vibrate' in navigator) {
+            // Strong vibration pattern
+            navigator.vibrate([400, 200, 400, 200, 400, 200, 400]);
+        }
+        
+        // Repeat sound and vibration every 2 seconds for 10 seconds total
+        let repeatCount = 0;
+        const repeatInterval = setInterval(() => {
+            repeatCount++;
+            createLoudAlarmSound();
+            
+            if ('vibrate' in navigator) {
+                navigator.vibrate([400, 200, 400]);
+            }
+            
+            // Show additional notifications every 4 seconds
+            if (repeatCount % 2 === 0 && 'Notification' in window && Notification.permission === 'granted') {
+                new Notification('⏰ Timer Complete - Click to dismiss', {
+                    body: `Session finished ${repeatCount * 2} seconds ago`,
+                    icon: 'icon-192.png',
+                    tag: 'focus-reminder',
+                    requireInteraction: true,
+                    vibrate: [200, 100, 200]
+                });
+            }
+            
+            if (repeatCount >= 5) { // Stop after 10 seconds
+                clearInterval(repeatInterval);
+                alarm.pause();
+                alarm.loop = false;
+                alarm.currentTime = 0;
+            }
+        }, 2000);
     }
     
     completeSession();
+}
+
+// Create louder alarm sound
+function createLoudAlarmSound() {
+    try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const now = audioContext.currentTime;
+        
+        // First tone - 800Hz
+        playLoudTone(audioContext, 800, now, 0.4, 0.8);
+        
+        // Second tone - 1000Hz (higher pitch) after 0.15s
+        playLoudTone(audioContext, 1000, now + 0.15, 0.4, 0.8);
+        
+        // Third tone - 1200Hz (even higher) after 0.3s
+        playLoudTone(audioContext, 1200, now + 0.3, 0.4, 0.8);
+        
+    } catch (err) {
+        console.log('Web Audio API error:', err);
+    }
+}
+
+// Helper to play loud tone
+function playLoudTone(audioContext, frequency, startTime, duration, volume) {
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.value = frequency;
+    oscillator.type = 'sine';
+    
+    // Louder volume with smooth envelope
+    gainNode.gain.setValueAtTime(0, startTime);
+    gainNode.gain.linearRampToValueAtTime(volume, startTime + 0.02);
+    gainNode.gain.linearRampToValueAtTime(0, startTime + duration);
+    
+    oscillator.start(startTime);
+    oscillator.stop(startTime + duration);
 }
 
 // Pause timer
@@ -220,6 +373,12 @@ function pauseTimer() {
     isPaused = true;
     clearInterval(timerId);
     localStorage.removeItem('is_running');
+    
+    // Release wake lock
+    if (wakeLock) {
+        wakeLock.release();
+        wakeLock = null;
+    }
     
     // Save current state
     localStorage.setItem('focus_timer_paused_time', timeLeft);
@@ -266,9 +425,20 @@ function restoreTimerState() {
     }
 }
 
-// Handle visibility change
+// Handle visibility change - critical for background operation
 document.addEventListener('visibilitychange', () => {
     if (!document.hidden && localStorage.getItem('is_running') === 'true') {
+        syncTimer();
+        // Re-acquire wake lock if needed
+        if (!wakeLock && !isPaused) {
+            requestWakeLock();
+        }
+    }
+});
+
+// Handle page focus - ensure timer syncs when coming back to app
+window.addEventListener('focus', () => {
+    if (localStorage.getItem('is_running') === 'true') {
         syncTimer();
     }
 });
@@ -377,4 +547,4 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(err => {
         console.log('SW registration failed:', err);
     });
-}
+        }
