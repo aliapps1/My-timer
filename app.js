@@ -159,6 +159,15 @@ function initAndStart() {
     
     // Use syncTimer instead of simple countdown
     timerId = setInterval(syncTimer, 1000);
+    
+    // CRITICAL: Send message to Service Worker
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+            type: 'TIMER_STARTED',
+            endTime: endTime,
+            duration: duration
+        });
+    }
 }
 
 // FIX 2: Sync with stored end time
@@ -243,6 +252,14 @@ function finishTimer() {
     timeLeft = duration;
     updateDisplay();
     
+    // CRITICAL: Notify Service Worker
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+            type: 'TIMER_COMPLETE',
+            duration: duration
+        });
+    }
+    
     // ALWAYS PLAY ALARM - NO CHECKS
     console.log('Playing alarm now...');
     playAlarmWithStop();
@@ -260,8 +277,20 @@ function finishTimer() {
     // Update stats
     const addedMin = Math.floor(duration / 60);
     stats.todayMin += addedMin;
+    
+    // Update weekly data
+    const today = getTodayString();
+    if (!stats.weeklyData) stats.weeklyData = {};
+    stats.weeklyData[today] = (stats.weeklyData[today] || 0) + addedMin;
+    
     localStorage.setItem('focusStats', JSON.stringify(stats));
+    console.log('Stats updated:', stats);
     updateUI();
+}
+
+function getTodayString() {
+    const d = new Date();
+    return `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`;
 }
 
 // FIX 5: Alarm always plays - simpler version
@@ -421,6 +450,19 @@ function toggleMute() {
 function updateUI() {
     const t = translations[currentLang];
     
+    // Calculate weekly total properly
+    let weekTotal = 0;
+    const today = getTodayString();
+    const weekStart = getWeekStart();
+    
+    if (stats.weeklyData) {
+        for (let date in stats.weeklyData) {
+            if (date >= weekStart && date <= today) {
+                weekTotal += stats.weeklyData[date] || 0;
+            }
+        }
+    }
+    
     const elements = {
         'lbl-title': t.title,
         'btn-start': t.start,
@@ -431,7 +473,7 @@ function updateUI() {
         'lbl-week': t.week,
         'lbl-streak': t.streak,
         'stat-today': stats.todayMin + " " + t.min,
-        'stat-week': stats.todayMin + " " + t.min,
+        'stat-week': weekTotal + " " + t.min,
         'stat-streak': stats.streak + " " + t.day
     };
     
@@ -448,6 +490,15 @@ function updateUI() {
     }
     
     updateCurrentDate();
+    console.log('UI updated - Today:', stats.todayMin, 'Week:', weekTotal);
+}
+
+function getWeekStart() {
+    const d = new Date();
+    const day = d.getDay();
+    const diff = d.getDate() - day;
+    const weekStart = new Date(d.setDate(diff));
+    return `${weekStart.getFullYear()}-${(weekStart.getMonth()+1).toString().padStart(2,'0')}-${weekStart.getDate().toString().padStart(2,'0')}`;
 }
 
 async function shareStats() {
