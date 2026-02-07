@@ -1,5 +1,5 @@
 // Focus Timer Pro - Main App Logic
-// Fixed version - buttons work after completion
+// Complete working version with Persian calendar
 
 let duration = 1500;
 let timeLeft = 1500;
@@ -48,7 +48,7 @@ const translations = {
         min: "دقیقه",
         day: "روز",
         days: ["یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه", "شنبه"],
-        months: ["ژانویه", "فوریه", "مارس", "آوریل", "می", "ژوئن", "ژوئیه", "اوت", "سپتامبر", "اکتبر", "نوامبر", "دسامبر"]
+        months: ["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"]
     },
     ar: {
         title: "مؤقت التركيز",
@@ -66,6 +66,27 @@ const translations = {
     }
 };
 
+// Persian (Jalali) calendar converter
+function gregorianToJalali(gy, gm, gd) {
+    const g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+    let jy = (gy <= 1600) ? 0 : 979;
+    gy -= (gy <= 1600) ? 621 : 1600;
+    let gy2 = (gm > 2) ? (gy + 1) : gy;
+    let days = (365 * gy) + (Math.floor((gy2 + 3) / 4)) - (Math.floor((gy2 + 99) / 100)) + 
+               (Math.floor((gy2 + 399) / 400)) - 80 + gd + g_d_m[gm - 1];
+    jy += 33 * Math.floor(days / 12053);
+    days %= 12053;
+    jy += 4 * Math.floor(days / 1461);
+    days %= 1461;
+    if (days > 365) {
+        jy += Math.floor((days - 1) / 365);
+        days = (days - 1) % 365;
+    }
+    let jm = (days < 186) ? 1 + Math.floor(days / 31) : 7 + Math.floor((days - 186) / 30);
+    let jd = 1 + ((days < 186) ? (days % 31) : ((days - 186) % 30));
+    return [jy, jm, jd];
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     updateCurrentDate();
     checkAndUpdateStreak();
@@ -78,10 +99,20 @@ document.addEventListener('DOMContentLoaded', () => {
 function updateCurrentDate() {
     const now = new Date();
     const t = translations[currentLang];
-    const dayName = t.days[now.getDay()];
-    const monthName = t.months[now.getMonth()];
-    const day = now.getDate();
-    document.getElementById('currentDate').innerText = `${dayName}, ${monthName} ${day}`;
+    
+    if (currentLang === 'fa') {
+        // Persian calendar
+        const [jy, jm, jd] = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
+        const dayName = t.days[now.getDay()];
+        const monthName = t.months[jm - 1];
+        document.getElementById('currentDate').innerText = `${dayName}، ${jd} ${monthName} ${jy}`;
+    } else {
+        // Gregorian calendar
+        const dayName = t.days[now.getDay()];
+        const monthName = t.months[now.getMonth()];
+        const day = now.getDate();
+        document.getElementById('currentDate').innerText = `${dayName}, ${monthName} ${day}`;
+    }
 }
 
 function getTodayString() {
@@ -223,7 +254,7 @@ function finishTimer() {
         wakeLock = null;
     }
     
-    // Reset timer to original duration
+    // CRITICAL FIX: Reset timer to original duration so buttons work again
     timeLeft = duration;
     updateDisplay();
     
@@ -340,11 +371,24 @@ function resetTimer() {
 }
 
 function setTime(s, btn) {
-    resetTimer();
+    // Stop any running timer first
+    pauseTimer();
+    
+    // Clear any intervals
+    if (timerId) {
+        clearInterval(timerId);
+        timerId = null;
+    }
+    
+    // Set new duration
     duration = s;
     timeLeft = s;
+    
+    // Update button states
     document.querySelectorAll('.modes button').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+    
+    // Update display
     updateDisplay();
 }
 
@@ -471,4 +515,4 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(err => {
         console.log('SW registration failed:', err);
     });
-}
+                }
