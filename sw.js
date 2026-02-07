@@ -26,7 +26,6 @@ self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        // Cache hit - return response
         if (response) {
           return response;
         }
@@ -51,4 +50,28 @@ self.addEventListener('activate', event => {
     })
   );
   self.clients.claim();
+});
+
+// Handle messages from main app
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'TIMER_COMPLETE') {
+    // Show notification even if app is in background
+    self.registration.showNotification('🎉 Focus Session Complete!', {
+      body: 'Great work! Time to take a break.',
+      icon: '/icon-192.png',
+      badge: '/icon-72.png',
+      requireInteraction: true,
+      vibrate: [200, 100, 200, 100, 200, 100, 200],
+      tag: 'focus-complete',
+      data: { type: 'timer-complete' }
+    });
+  }
+});
+
+// Handle notification click
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  event.waitUntil(
+    clients.openWindow('/')
+  );
 });
