@@ -529,6 +529,15 @@ if ('Notification' in window && Notification.permission === 'default') {
     Notification.requestPermission();
 }
 
+// Register service worker with version
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js?v=3').then(reg => {
+        console.log('Service Worker registered:', reg);
+    }).catch(err => {
+        console.log('SW registration failed:', err);
+    });
+}
+
 // Handle page visibility change
 document.addEventListener('visibilitychange', () => {
     if (!document.hidden) {
@@ -541,4 +550,4 @@ document.addEventListener('visibilitychange', () => {
     }
 });
 
-console.log('Focus Timer Pro v2.0 loaded');
+console.log('Focus Timer Pro v3.0 loaded');
