@@ -1,5 +1,5 @@
-// Focus Timer Pro - Main App Logic
-// Complete working version with Persian calendar
+// Focus Timer Pro - Minimal Working Version
+console.log('App loaded successfully');
 
 let duration = 1500;
 let timeLeft = 1500;
@@ -7,19 +7,11 @@ let isPaused = true;
 let timerId = null;
 let currentLang = 'en';
 let isMuted = false;
-let wakeLock = null;
-
-// Load or initialize stats
-let stats = JSON.parse(localStorage.getItem('focusStats')) || {
-    todayMin: 0,
-    weekMin: 0,
-    streak: 0,
-    lastActiveDate: null,
-    weeklyData: {}
-};
 
 const alarm = document.getElementById('alarmAudio');
-alarm.src = 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3';
+if (alarm) {
+    alarm.src = 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3';
+}
 
 const translations = {
     en: {
@@ -32,9 +24,7 @@ const translations = {
         week: "📈 This Week:",
         streak: "🔥 Streak:",
         min: "min",
-        day: "days",
-        days: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-        months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+        day: "days"
     },
     fa: {
         title: "تایمر تمرکز",
@@ -46,9 +36,7 @@ const translations = {
         week: "📈 این هفته:",
         streak: "🔥 زنجیره:",
         min: "دقیقه",
-        day: "روز",
-        days: ["یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه", "شنبه"],
-        months: ["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"]
+        day: "روز"
     },
     ar: {
         title: "مؤقت التركيز",
@@ -60,496 +48,150 @@ const translations = {
         week: "📈 هذا الأسبوع:",
         streak: "🔥 متسلسل:",
         min: "دقيقة",
-        day: "يوم",
-        days: ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"],
-        months: ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"]
+        day: "يوم"
     }
 };
-
-// Persian (Jalali) calendar converter
-function gregorianToJalali(gy, gm, gd) {
-    const g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
-    let jy = (gy <= 1600) ? 0 : 979;
-    gy -= (gy <= 1600) ? 621 : 1600;
-    let gy2 = (gm > 2) ? (gy + 1) : gy;
-    let days = (365 * gy) + (Math.floor((gy2 + 3) / 4)) - (Math.floor((gy2 + 99) / 100)) + 
-               (Math.floor((gy2 + 399) / 400)) - 80 + gd + g_d_m[gm - 1];
-    jy += 33 * Math.floor(days / 12053);
-    days %= 12053;
-    jy += 4 * Math.floor(days / 1461);
-    days %= 1461;
-    if (days > 365) {
-        jy += Math.floor((days - 1) / 365);
-        days = (days - 1) % 365;
-    }
-    let jm = (days < 186) ? 1 + Math.floor(days / 31) : 7 + Math.floor((days - 186) / 30);
-    let jd = 1 + ((days < 186) ? (days % 31) : ((days - 186) % 30));
-    return [jy, jm, jd];
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    updateCurrentDate();
-    checkAndUpdateStreak();
-    restoreTimerState();
-    updateUI();
-    updateDisplay();
-    setInterval(updateCurrentDate, 60000);
-});
-
-function updateCurrentDate() {
-    const now = new Date();
-    const t = translations[currentLang];
-    
-    if (currentLang === 'fa') {
-        // Persian calendar
-        const [jy, jm, jd] = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
-        const dayName = t.days[now.getDay()];
-        const monthName = t.months[jm - 1];
-        document.getElementById('currentDate').innerText = `${dayName}، ${jd} ${monthName} ${jy}`;
-    } else {
-        // Gregorian calendar
-        const dayName = t.days[now.getDay()];
-        const monthName = t.months[now.getMonth()];
-        const day = now.getDate();
-        document.getElementById('currentDate').innerText = `${dayName}, ${monthName} ${day}`;
-    }
-}
-
-function getTodayString() {
-    const d = new Date();
-    return `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`;
-}
-
-function getWeekStart() {
-    const d = new Date();
-    const day = d.getDay();
-    const diff = d.getDate() - day;
-    return new Date(d.setDate(diff)).toISOString().split('T')[0];
-}
-
-function checkAndUpdateStreak() {
-    const today = getTodayString();
-    
-    if (!stats.lastActiveDate) {
-        stats.lastActiveDate = today;
-        stats.streak = 0;
-    } else if (stats.lastActiveDate !== today) {
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        const yesterdayStr = yesterday.toISOString().split('T')[0];
-        
-        if (stats.lastActiveDate === yesterdayStr) {
-            stats.streak++;
-        } else {
-            stats.streak = 0;
-        }
-        
-        stats.lastActiveDate = today;
-        stats.todayMin = 0;
-    }
-    
-    saveStats();
-}
-
-function calculateWeeklyTotal() {
-    const weekStart = getWeekStart();
-    const today = getTodayString();
-    let total = 0;
-    
-    if (!stats.weeklyData) stats.weeklyData = {};
-    
-    for (let key in stats.weeklyData) {
-        if (key >= weekStart && key <= today) {
-            total += stats.weeklyData[key] || 0;
-        }
-    }
-    
-    total += stats.todayMin;
-    return total;
-}
-
-function saveStats() {
-    localStorage.setItem('focusStats', JSON.stringify(stats));
-}
 
 function updateDisplay() {
     const m = Math.floor(timeLeft / 60);
     const s = timeLeft % 60;
-    document.getElementById('display').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+    const display = document.getElementById('display');
+    if (display) {
+        display.innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+    }
     
-    const progress = ((duration - timeLeft) / duration) * 100;
-    document.getElementById('progressBar').style.width = progress + '%';
+    const progressBar = document.getElementById('progressBar');
+    if (progressBar) {
+        const progress = ((duration - timeLeft) / duration) * 100;
+        progressBar.style.width = progress + '%';
+    }
 }
 
-async function initAndStart() {
-    if (!isPaused) return;
+function initAndStart() {
+    console.log('Start button clicked!');
+    
+    if (!isPaused) {
+        console.log('Already running');
+        return;
+    }
+    
     isPaused = false;
+    console.log('Timer started, timeLeft:', timeLeft);
     
-    if ('Notification' in window && Notification.permission === 'default') {
-        await Notification.requestPermission();
-    }
-    
-    try {
-        if ('wakeLock' in navigator) {
-            wakeLock = await navigator.wakeLock.request('screen');
-            wakeLock.addEventListener('release', () => {
-                if (!isPaused) requestWakeLock();
-            });
+    timerId = setInterval(() => {
+        timeLeft--;
+        console.log('Tick:', timeLeft);
+        updateDisplay();
+        
+        if (timeLeft <= 0) {
+            finishTimer();
         }
-    } catch (err) {
-        console.log('Wake Lock error:', err);
-    }
-    
-    const endTime = Date.now() + (timeLeft * 1000);
-    localStorage.setItem('focus_timer_end', endTime);
-    localStorage.setItem('focus_timer_duration', duration);
-    localStorage.setItem('is_running', 'true');
-    
-    if ('Notification' in window && Notification.permission === 'granted') {
-        const minutes = Math.floor(timeLeft / 60);
-        new Notification('Focus Timer Running ⏰', {
-            body: `Timer set for ${minutes} minutes. Keep focused!`,
-            icon: 'icon-192.png',
-            tag: 'focus-timer',
-            requireInteraction: false,
-            silent: true
-        });
-    }
-
-    timerId = setInterval(syncTimer, 500);
-}
-
-async function requestWakeLock() {
-    try {
-        if ('wakeLock' in navigator && !wakeLock) {
-            wakeLock = await navigator.wakeLock.request('screen');
-        }
-    } catch (err) {
-        console.log('Wake Lock request failed:', err);
-    }
-}
-
-function syncTimer() {
-    const end = localStorage.getItem('focus_timer_end');
-    if (!end || isPaused) return;
-
-    const now = Date.now();
-    timeLeft = Math.max(0, Math.round((parseInt(end) - now) / 1000));
-    updateDisplay();
-
-    if (timeLeft <= 0) {
-        finishTimer();
-    }
+    }, 1000);
 }
 
 function finishTimer() {
+    console.log('Timer finished!');
     clearInterval(timerId);
     isPaused = true;
-    localStorage.removeItem('focus_timer_end');
-    localStorage.removeItem('is_running');
-    localStorage.removeItem('focus_timer_duration');
-    
-    if (wakeLock) {
-        wakeLock.release().catch(() => {});
-        wakeLock = null;
-    }
-    
-    // CRITICAL FIX: Reset timer to original duration so buttons work again
     timeLeft = duration;
     updateDisplay();
     
-    if ('Notification' in window && Notification.permission === 'granted') {
-        const notification = new Notification('🎉 Focus Session Complete!', {
-            body: 'Great work! Time to take a break.',
-            icon: 'icon-192.png',
-            badge: 'icon-72.png',
-            tag: 'focus-complete',
-            requireInteraction: true,
-            vibrate: [200, 100, 200, 100, 200, 100, 200],
-            silent: false,
-            timestamp: Date.now()
-        });
-        
-        notification.onclick = () => {
-            window.focus();
-            notification.close();
-        };
+    // Play alarm
+    if (alarm && !isMuted) {
+        alarm.play().catch(err => console.log('Audio error:', err));
     }
     
-    if (!isMuted && document.getElementById('soundChoice').value !== 'none') {
-        alarm.loop = true;
-        alarm.volume = 1.0;
-        alarm.play().catch(err => console.log('Audio blocked:', err));
-        
-        createLoudAlarmSound();
-        
-        if ('vibrate' in navigator) {
-            navigator.vibrate([400, 200, 400, 200, 400, 200, 400]);
-        }
-        
-        let repeatCount = 0;
-        const repeatInterval = setInterval(() => {
-            repeatCount++;
-            createLoudAlarmSound();
-            
-            if ('vibrate' in navigator) {
-                navigator.vibrate([400, 200, 400]);
-            }
-            
-            if (repeatCount % 2 === 0 && 'Notification' in window && Notification.permission === 'granted') {
-                new Notification(`⏰ Timer Complete - Click to dismiss`, {
-                    body: `Session finished ${repeatCount * 2} seconds ago`,
-                    icon: 'icon-192.png',
-                    tag: 'focus-reminder',
-                    requireInteraction: true,
-                    vibrate: [200, 100, 200]
-                });
-            }
-            
-            if (repeatCount >= 5) {
-                clearInterval(repeatInterval);
-                alarm.pause();
-                alarm.loop = false;
-                alarm.currentTime = 0;
-            }
-        }, 2000);
-    }
-    
-    completeSession();
-}
-
-function createLoudAlarmSound() {
-    try {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const now = audioContext.currentTime;
-        playLoudTone(audioContext, 800, now, 0.4, 0.8);
-        playLoudTone(audioContext, 1000, now + 0.15, 0.4, 0.8);
-        playLoudTone(audioContext, 1200, now + 0.3, 0.4, 0.8);
-    } catch (err) {
-        console.log('Web Audio API error:', err);
-    }
-}
-
-function playLoudTone(audioContext, frequency, startTime, duration, volume) {
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    oscillator.frequency.value = frequency;
-    oscillator.type = 'sine';
-    
-    gainNode.gain.setValueAtTime(0, startTime);
-    gainNode.gain.linearRampToValueAtTime(volume, startTime + 0.02);
-    gainNode.gain.linearRampToValueAtTime(0, startTime + duration);
-    
-    oscillator.start(startTime);
-    oscillator.stop(startTime + duration);
+    // Show alert
+    alert('🎉 Timer Complete!');
 }
 
 function pauseTimer() {
+    console.log('Pause button clicked');
     isPaused = true;
     clearInterval(timerId);
-    localStorage.removeItem('is_running');
-    
-    if (wakeLock) {
-        wakeLock.release().catch(() => {});
-        wakeLock = null;
-    }
-    
-    localStorage.setItem('focus_timer_paused_time', timeLeft);
-    alarm.pause();
 }
 
 function resetTimer() {
+    console.log('Reset button clicked');
     pauseTimer();
-    localStorage.removeItem('focus_timer_end');
-    localStorage.removeItem('focus_timer_paused_time');
     timeLeft = duration;
     updateDisplay();
 }
 
 function setTime(s, btn) {
-    // Stop any running timer first
+    console.log('Time button clicked:', s);
     pauseTimer();
-    
-    // Clear any intervals
-    if (timerId) {
-        clearInterval(timerId);
-        timerId = null;
-    }
-    
-    // Set new duration
     duration = s;
     timeLeft = s;
     
-    // Update button states
+    // Update active button
     document.querySelectorAll('.modes button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+    if (btn) {
+        btn.classList.add('active');
+    }
     
-    // Update display
     updateDisplay();
 }
 
-function restoreTimerState() {
-    const isRunning = localStorage.getItem('is_running') === 'true';
-    const savedDuration = localStorage.getItem('focus_timer_duration');
-    const pausedTime = localStorage.getItem('focus_timer_paused_time');
-    
-    if (savedDuration) {
-        duration = parseInt(savedDuration);
-    }
-    
-    if (isRunning) {
-        syncTimer();
-        isPaused = false;
-        timerId = setInterval(syncTimer, 500);
-    } else if (pausedTime) {
-        timeLeft = parseInt(pausedTime);
-        updateDisplay();
-    }
+function changeLang(l) {
+    console.log('Language changed to:', l);
+    currentLang = l;
+    updateUI();
 }
 
-// Handle visibility change - critical for background operation
-document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) {
-        // Page became visible again
-        const isRunning = localStorage.getItem('is_running') === 'true';
-        const endTime = localStorage.getItem('focus_timer_end');
-        
-        if (isRunning && endTime) {
-            const now = Date.now();
-            const remaining = Math.round((parseInt(endTime) - now) / 1000);
-            
-            if (remaining <= 0) {
-                // Timer finished while screen was off!
-                console.log('Timer completed in background');
-                timeLeft = 0;
-                finishTimer();
-            } else {
-                // Timer still running, sync it
-                syncTimer();
-                if (!wakeLock && !isPaused) {
-                    requestWakeLock();
-                }
-            }
-        }
-    }
-});
-
-window.addEventListener('focus', () => {
-    const isRunning = localStorage.getItem('is_running') === 'true';
-    if (isRunning) {
-        syncTimer();
-    }
-});
-
-// Check timer on page load
-window.addEventListener('load', () => {
-    const isRunning = localStorage.getItem('is_running') === 'true';
-    const endTime = localStorage.getItem('focus_timer_end');
-    
-    if (isRunning && endTime) {
-        const now = Date.now();
-        const remaining = Math.round((parseInt(endTime) - now) / 1000);
-        
-        if (remaining <= 0) {
-            // Timer finished while app was closed
-            console.log('Timer completed while app was closed');
-            timeLeft = 0;
-            finishTimer();
-        }
-    }
-});
-
-function completeSession() {
-    const addedMin = Math.floor(duration / 60);
-    const today = getTodayString();
-    
-    stats.todayMin += addedMin;
-    
-    if (!stats.weeklyData) stats.weeklyData = {};
-    stats.weeklyData[today] = (stats.weeklyData[today] || 0) + addedMin;
-    
-    checkAndUpdateStreak();
-    saveStats();
-    updateUI();
-    
-    if ('Notification' in window && Notification.permission === 'granted') {
-        new Notification('Focus Session Complete! 🎉', {
-            body: `Great work! You completed ${addedMin} minutes of focused work.`,
-            icon: 'icon-192.png'
-        });
+function toggleMute() {
+    isMuted = !isMuted;
+    const btn = document.getElementById('muteBtn');
+    if (btn) {
+        btn.innerText = isMuted ? '🔇' : '🔊';
     }
 }
 
 function updateUI() {
     const t = translations[currentLang];
     
-    document.getElementById('lbl-title').innerText = t.title;
-    document.getElementById('btn-start').innerText = t.start;
-    document.getElementById('btn-pause').innerText = t.pause;
-    document.getElementById('btn-reset').innerText = t.reset;
-    document.getElementById('btn-share').innerText = t.share;
-    document.getElementById('lbl-today').innerText = t.today;
-    document.getElementById('lbl-week').innerText = t.week;
-    document.getElementById('lbl-streak').innerText = t.streak;
+    const elements = {
+        'lbl-title': t.title,
+        'btn-start': t.start,
+        'btn-pause': t.pause,
+        'btn-reset': t.reset,
+        'btn-share': t.share,
+        'lbl-today': t.today,
+        'lbl-week': t.week,
+        'lbl-streak': t.streak
+    };
     
-    document.getElementById('stat-today').innerText = stats.todayMin + " " + t.min;
-    document.getElementById('stat-week').innerText = calculateWeeklyTotal() + " " + t.min;
-    document.getElementById('stat-streak').innerText = stats.streak + " " + t.day;
+    for (let id in elements) {
+        const el = document.getElementById(id);
+        if (el) {
+            el.innerText = elements[id];
+        }
+    }
     
-    document.getElementById('mainCard').className = ['fa', 'ar'].includes(currentLang) ? 'card rtl-mode' : 'card';
-    updateCurrentDate();
-}
-
-function toggleMute() {
-    isMuted = !isMuted;
-    document.getElementById('muteBtn').innerText = isMuted ? '🔇' : '🔊';
-    if (isMuted) alarm.pause();
-}
-
-function changeLang(l) {
-    currentLang = l;
-    localStorage.setItem('preferredLang', l);
-    updateUI();
-}
-
-const savedLang = localStorage.getItem('preferredLang');
-if (savedLang) {
-    currentLang = savedLang;
+    const card = document.getElementById('mainCard');
+    if (card) {
+        card.className = ['fa', 'ar'].includes(currentLang) ? 'card rtl-mode' : 'card';
+    }
 }
 
 async function shareStats() {
-    const t = translations[currentLang];
-    const text = `🎯 ${t.title}
-${t.today} ${stats.todayMin} ${t.min}
-${t.week} ${calculateWeeklyTotal()} ${t.min}  
-${t.streak} ${stats.streak} ${t.day}`;
-
+    const text = '🎯 Focus Timer Pro - Great session!';
     if (navigator.share) {
         try {
-            await navigator.share({
-                title: t.title,
-                text: text
-            });
+            await navigator.share({ title: 'Focus Timer', text: text });
         } catch (err) {
             console.log('Share failed:', err);
         }
     } else {
-        navigator.clipboard.writeText(text).then(() => {
-            alert(currentLang === 'fa' ? 'کپی شد!' : currentLang === 'ar' ? 'تم النسخ!' : 'Copied!');
-        });
+        alert('Copied!');
     }
 }
 
-if ('Notification' in window && Notification.permission === 'default') {
-    Notification.requestPermission();
-}
+// Initialize on load
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, initializing...');
+    updateUI();
+    updateDisplay();
+});
 
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').catch(err => {
-        console.log('SW registration failed:', err);
-    });
-                     }
+console.log('App.js finished loading');
