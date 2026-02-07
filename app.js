@@ -411,18 +411,55 @@ function restoreTimerState() {
     }
 }
 
+// Handle visibility change - critical for background operation
 document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && localStorage.getItem('is_running') === 'true') {
-        syncTimer();
-        if (!wakeLock && !isPaused) {
-            requestWakeLock();
+    if (!document.hidden) {
+        // Page became visible again
+        const isRunning = localStorage.getItem('is_running') === 'true';
+        const endTime = localStorage.getItem('focus_timer_end');
+        
+        if (isRunning && endTime) {
+            const now = Date.now();
+            const remaining = Math.round((parseInt(endTime) - now) / 1000);
+            
+            if (remaining <= 0) {
+                // Timer finished while screen was off!
+                console.log('Timer completed in background');
+                timeLeft = 0;
+                finishTimer();
+            } else {
+                // Timer still running, sync it
+                syncTimer();
+                if (!wakeLock && !isPaused) {
+                    requestWakeLock();
+                }
+            }
         }
     }
 });
 
 window.addEventListener('focus', () => {
-    if (localStorage.getItem('is_running') === 'true') {
+    const isRunning = localStorage.getItem('is_running') === 'true';
+    if (isRunning) {
         syncTimer();
+    }
+});
+
+// Check timer on page load
+window.addEventListener('load', () => {
+    const isRunning = localStorage.getItem('is_running') === 'true';
+    const endTime = localStorage.getItem('focus_timer_end');
+    
+    if (isRunning && endTime) {
+        const now = Date.now();
+        const remaining = Math.round((parseInt(endTime) - now) / 1000);
+        
+        if (remaining <= 0) {
+            // Timer finished while app was closed
+            console.log('Timer completed while app was closed');
+            timeLeft = 0;
+            finishTimer();
+        }
     }
 });
 
@@ -515,4 +552,4 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(err => {
         console.log('SW registration failed:', err);
     });
-                }
+                     }
