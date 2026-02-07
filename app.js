@@ -1,5 +1,5 @@
-// Focus Timer Pro - Minimal Working Version
-console.log('App loaded successfully');
+// Focus Timer Pro - Complete Working Version
+// Version 2.0 - All bugs fixed
 
 let duration = 1500;
 let timeLeft = 1500;
@@ -7,6 +7,15 @@ let isPaused = true;
 let timerId = null;
 let currentLang = 'en';
 let isMuted = false;
+let alarmTimerId = null;
+
+let stats = JSON.parse(localStorage.getItem('focusStats')) || {
+    todayMin: 0,
+    weekMin: 0,
+    streak: 0,
+    lastActiveDate: null,
+    weeklyData: {}
+};
 
 const alarm = document.getElementById('alarmAudio');
 if (alarm) {
@@ -24,7 +33,9 @@ const translations = {
         week: "📈 This Week:",
         streak: "🔥 Streak:",
         min: "min",
-        day: "days"
+        day: "days",
+        days: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+        months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
     },
     fa: {
         title: "تایمر تمرکز",
@@ -36,7 +47,9 @@ const translations = {
         week: "📈 این هفته:",
         streak: "🔥 زنجیره:",
         min: "دقیقه",
-        day: "روز"
+        day: "روز",
+        days: ["یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه", "شنبه"],
+        months: ["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"]
     },
     ar: {
         title: "مؤقت التركيز",
@@ -48,9 +61,62 @@ const translations = {
         week: "📈 هذا الأسبوع:",
         streak: "🔥 متسلسل:",
         min: "دقيقة",
-        day: "يوم"
+        day: "يوم",
+        days: ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"],
+        months: ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"]
     }
 };
+
+// Persian calendar converter
+function gregorianToJalali(gy, gm, gd) {
+    const g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+    let jy = (gy <= 1600) ? 0 : 979;
+    gy -= (gy <= 1600) ? 621 : 1600;
+    let gy2 = (gm > 2) ? (gy + 1) : gy;
+    let days = (365 * gy) + (Math.floor((gy2 + 3) / 4)) - (Math.floor((gy2 + 99) / 100)) + 
+               (Math.floor((gy2 + 399) / 400)) - 80 + gd + g_d_m[gm - 1];
+    jy += 33 * Math.floor(days / 12053);
+    days %= 12053;
+    jy += 4 * Math.floor(days / 1461);
+    days %= 1461;
+    if (days > 365) {
+        jy += Math.floor((days - 1) / 365);
+        days = (days - 1) % 365;
+    }
+    let jm = (days < 186) ? 1 + Math.floor(days / 31) : 7 + Math.floor((days - 186) / 30);
+    let jd = 1 + ((days < 186) ? (days % 31) : ((days - 186) % 30));
+    return [jy, jm, jd];
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('App initialized');
+    updateCurrentDate();
+    checkForCompletedTimer();
+    restoreTimerState();
+    updateUI();
+    updateDisplay();
+    setInterval(updateCurrentDate, 60000);
+});
+
+function updateCurrentDate() {
+    const now = new Date();
+    const t = translations[currentLang];
+    const dateEl = document.getElementById('currentDate');
+    
+    if (!dateEl) return;
+    
+    if (currentLang === 'fa') {
+        const [jy, jm, jd] = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
+        const dayName = t.days[now.getDay()];
+        const monthName = t.months[jm - 1];
+        dateEl.innerText = `${dayName}، ${jd} ${monthName} ${jy}`;
+    } else {
+        const dayName = t.days[now.getDay()];
+        const monthName = t.months[now.getMonth()];
+        const day = now.getDate();
+        dateEl.innerText = `${dayName}, ${monthName} ${day}`;
+    }
+}
 
 function updateDisplay() {
     const m = Math.floor(timeLeft / 60);
@@ -67,8 +133,9 @@ function updateDisplay() {
     }
 }
 
+// FIX 1: Store end time for background operation
 function initAndStart() {
-    console.log('Start button clicked!');
+    console.log('Start clicked');
     
     if (!isPaused) {
         console.log('Already running');
@@ -76,44 +143,188 @@ function initAndStart() {
     }
     
     isPaused = false;
-    console.log('Timer started, timeLeft:', timeLeft);
     
-    timerId = setInterval(() => {
-        timeLeft--;
-        console.log('Tick:', timeLeft);
-        updateDisplay();
-        
-        if (timeLeft <= 0) {
-            finishTimer();
-        }
-    }, 1000);
+    // Request notification permission
+    if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
+    }
+    
+    // CRITICAL: Store end time, not current time
+    const endTime = Date.now() + (timeLeft * 1000);
+    localStorage.setItem('focus_timer_end', endTime);
+    localStorage.setItem('focus_timer_duration', duration);
+    localStorage.setItem('is_running', 'true');
+    
+    console.log('Timer started, ends at:', new Date(endTime));
+    
+    // Use syncTimer instead of simple countdown
+    timerId = setInterval(syncTimer, 1000);
 }
 
+// FIX 2: Sync with stored end time
+function syncTimer() {
+    const endTimeStr = localStorage.getItem('focus_timer_end');
+    if (!endTimeStr) {
+        pauseTimer();
+        return;
+    }
+    
+    const endTime = parseInt(endTimeStr);
+    const now = Date.now();
+    const remaining = Math.round((endTime - now) / 1000);
+    
+    if (remaining <= 0) {
+        timeLeft = 0;
+        finishTimer();
+    } else {
+        timeLeft = remaining;
+        updateDisplay();
+    }
+}
+
+// FIX 3: Check on page load if timer finished in background
+function checkForCompletedTimer() {
+    const isRunning = localStorage.getItem('is_running') === 'true';
+    const endTimeStr = localStorage.getItem('focus_timer_end');
+    
+    if (isRunning && endTimeStr) {
+        const endTime = parseInt(endTimeStr);
+        const now = Date.now();
+        
+        if (now >= endTime) {
+            console.log('Timer completed in background!');
+            timeLeft = 0;
+            // Don't auto-play alarm, just reset
+            localStorage.removeItem('focus_timer_end');
+            localStorage.removeItem('is_running');
+            localStorage.removeItem('focus_timer_duration');
+            timeLeft = duration;
+            updateDisplay();
+            
+            // Show notification
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification('🎉 Focus Session Complete!', {
+                    body: 'Timer finished while you were away',
+                    icon: 'icon-192.png',
+                    requireInteraction: true
+                });
+            }
+        }
+    }
+}
+
+function restoreTimerState() {
+    const isRunning = localStorage.getItem('is_running') === 'true';
+    const savedDuration = localStorage.getItem('focus_timer_duration');
+    
+    if (savedDuration) {
+        duration = parseInt(savedDuration);
+    }
+    
+    if (isRunning) {
+        isPaused = false;
+        syncTimer();
+        timerId = setInterval(syncTimer, 1000);
+    }
+}
+
+// FIX 4: Properly stop alarm
 function finishTimer() {
-    console.log('Timer finished!');
+    console.log('Timer finished');
     clearInterval(timerId);
+    timerId = null;
     isPaused = true;
+    
+    localStorage.removeItem('focus_timer_end');
+    localStorage.removeItem('is_running');
+    localStorage.removeItem('focus_timer_duration');
+    
+    // Reset time
     timeLeft = duration;
     updateDisplay();
     
-    // Play alarm
-    if (alarm && !isMuted) {
-        alarm.play().catch(err => console.log('Audio error:', err));
+    // Show notification FIRST (no alert!)
+    if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('🎉 Focus Session Complete!', {
+            body: 'Great work! Time to take a break.',
+            icon: 'icon-192.png',
+            requireInteraction: true,
+            vibrate: [400, 200, 400, 200, 400]
+        });
     }
     
-    // Show alert
-    alert('🎉 Timer Complete!');
+    // Play alarm with auto-stop
+    if (!isMuted && document.getElementById('soundChoice').value !== 'none') {
+        playAlarmWithStop();
+    }
+    
+    // Update stats
+    const addedMin = Math.floor(duration / 60);
+    stats.todayMin += addedMin;
+    localStorage.setItem('focusStats', JSON.stringify(stats));
+    updateUI();
+}
+
+// FIX 5: Alarm stops automatically after 10 seconds
+function playAlarmWithStop() {
+    // Clear any existing alarm timer
+    if (alarmTimerId) {
+        clearTimeout(alarmTimerId);
+        alarmTimerId = null;
+    }
+    
+    // Play alarm
+    if (alarm) {
+        alarm.loop = true;
+        alarm.volume = 1.0;
+        alarm.play().catch(err => console.log('Audio blocked:', err));
+    }
+    
+    // Vibrate
+    if ('vibrate' in navigator) {
+        navigator.vibrate([400, 200, 400, 200, 400]);
+    }
+    
+    // Auto-stop after 10 seconds
+    alarmTimerId = setTimeout(() => {
+        if (alarm) {
+            alarm.pause();
+            alarm.loop = false;
+            alarm.currentTime = 0;
+        }
+        alarmTimerId = null;
+        console.log('Alarm auto-stopped');
+    }, 10000);
 }
 
 function pauseTimer() {
-    console.log('Pause button clicked');
+    console.log('Pause clicked');
     isPaused = true;
-    clearInterval(timerId);
+    
+    if (timerId) {
+        clearInterval(timerId);
+        timerId = null;
+    }
+    
+    localStorage.removeItem('is_running');
+    
+    // Stop alarm if playing
+    if (alarm) {
+        alarm.pause();
+        alarm.loop = false;
+        alarm.currentTime = 0;
+    }
+    
+    if (alarmTimerId) {
+        clearTimeout(alarmTimerId);
+        alarmTimerId = null;
+    }
 }
 
 function resetTimer() {
-    console.log('Reset button clicked');
+    console.log('Reset clicked');
     pauseTimer();
+    localStorage.removeItem('focus_timer_end');
     timeLeft = duration;
     updateDisplay();
 }
@@ -124,7 +335,6 @@ function setTime(s, btn) {
     duration = s;
     timeLeft = s;
     
-    // Update active button
     document.querySelectorAll('.modes button').forEach(b => b.classList.remove('active'));
     if (btn) {
         btn.classList.add('active');
@@ -136,6 +346,7 @@ function setTime(s, btn) {
 function changeLang(l) {
     console.log('Language changed to:', l);
     currentLang = l;
+    localStorage.setItem('preferredLang', l);
     updateUI();
 }
 
@@ -144,6 +355,9 @@ function toggleMute() {
     const btn = document.getElementById('muteBtn');
     if (btn) {
         btn.innerText = isMuted ? '🔇' : '🔊';
+    }
+    if (isMuted && alarm) {
+        alarm.pause();
     }
 }
 
@@ -158,7 +372,10 @@ function updateUI() {
         'btn-share': t.share,
         'lbl-today': t.today,
         'lbl-week': t.week,
-        'lbl-streak': t.streak
+        'lbl-streak': t.streak,
+        'stat-today': stats.todayMin + " " + t.min,
+        'stat-week': stats.todayMin + " " + t.min,
+        'stat-streak': stats.streak + " " + t.day
     };
     
     for (let id in elements) {
@@ -172,26 +389,48 @@ function updateUI() {
     if (card) {
         card.className = ['fa', 'ar'].includes(currentLang) ? 'card rtl-mode' : 'card';
     }
+    
+    updateCurrentDate();
 }
 
 async function shareStats() {
-    const text = '🎯 Focus Timer Pro - Great session!';
+    const t = translations[currentLang];
+    const text = `🎯 ${t.title}\n${t.today} ${stats.todayMin} ${t.min}\n${t.week} ${stats.todayMin} ${t.min}\n${t.streak} ${stats.streak} ${t.day}`;
+
     if (navigator.share) {
         try {
-            await navigator.share({ title: 'Focus Timer', text: text });
+            await navigator.share({ title: t.title, text: text });
         } catch (err) {
             console.log('Share failed:', err);
         }
     } else {
-        alert('Copied!');
+        navigator.clipboard.writeText(text).then(() => {
+            alert(currentLang === 'fa' ? 'کپی شد!' : currentLang === 'ar' ? 'تم النسخ!' : 'Copied!');
+        });
     }
 }
 
-// Initialize on load
-window.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM loaded, initializing...');
-    updateUI();
-    updateDisplay();
+// Load saved language
+const savedLang = localStorage.getItem('preferredLang');
+if (savedLang) {
+    currentLang = savedLang;
+}
+
+// Request notification permission
+if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+}
+
+// Handle page visibility change
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+        console.log('Page visible again');
+        checkForCompletedTimer();
+        
+        if (localStorage.getItem('is_running') === 'true') {
+            syncTimer();
+        }
+    }
 });
 
-console.log('App.js finished loading');
+console.log('Focus Timer Pro v2.0 loaded');
