@@ -230,7 +230,7 @@ function restoreTimerState() {
 
 // FIX 4: Properly stop alarm
 function finishTimer() {
-    console.log('Timer finished');
+    console.log('Timer finished - PLAYING ALARM');
     clearInterval(timerId);
     timerId = null;
     isPaused = true;
@@ -243,7 +243,11 @@ function finishTimer() {
     timeLeft = duration;
     updateDisplay();
     
-    // Show notification FIRST (no alert!)
+    // ALWAYS PLAY ALARM - NO CHECKS
+    console.log('Playing alarm now...');
+    playAlarmWithStop();
+    
+    // Show notification
     if ('Notification' in window && Notification.permission === 'granted') {
         new Notification('🎉 Focus Session Complete!', {
             body: 'Great work! Time to take a break.',
@@ -253,11 +257,6 @@ function finishTimer() {
         });
     }
     
-    // Play alarm with auto-stop
-    if (!isMuted && document.getElementById('soundChoice').value !== 'none') {
-        playAlarmWithStop();
-    }
-    
     // Update stats
     const addedMin = Math.floor(duration / 60);
     stats.todayMin += addedMin;
@@ -265,36 +264,94 @@ function finishTimer() {
     updateUI();
 }
 
-// FIX 5: Alarm stops automatically after 10 seconds
+// FIX 5: Alarm always plays - simpler version
 function playAlarmWithStop() {
+    console.log('playAlarmWithStop called');
+    
     // Clear any existing alarm timer
     if (alarmTimerId) {
         clearTimeout(alarmTimerId);
         alarmTimerId = null;
     }
     
-    // Play alarm
+    // Stop any currently playing alarm first
+    if (alarm) {
+        alarm.pause();
+        alarm.currentTime = 0;
+    }
+    
+    // Play alarm - NO CONDITIONS
     if (alarm) {
         alarm.loop = true;
         alarm.volume = 1.0;
-        alarm.play().catch(err => console.log('Audio blocked:', err));
+        console.log('Alarm play() called');
+        
+        // Force play with user interaction workaround
+        const playPromise = alarm.play();
+        
+        if (playPromise !== undefined) {
+            playPromise
+                .then(() => {
+                    console.log('✅ Alarm playing successfully!');
+                })
+                .catch(error => {
+                    console.log('❌ Alarm blocked by browser:', error);
+                    // Try alternative sound method
+                    createWebAudioAlarm();
+                });
+        }
     }
     
     // Vibrate
     if ('vibrate' in navigator) {
-        navigator.vibrate([400, 200, 400, 200, 400]);
+        navigator.vibrate([400, 200, 400, 200, 400, 200, 400, 200, 400]);
+        console.log('Vibration triggered');
     }
     
-    // Auto-stop after 10 seconds
+    // Auto-stop after 15 seconds (longer for safety)
     alarmTimerId = setTimeout(() => {
+        console.log('Auto-stopping alarm after 15 seconds');
         if (alarm) {
             alarm.pause();
             alarm.loop = false;
             alarm.currentTime = 0;
         }
         alarmTimerId = null;
-        console.log('Alarm auto-stopped');
-    }, 10000);
+    }, 15000);
+}
+
+// Backup alarm using Web Audio API
+function createWebAudioAlarm() {
+    console.log('Using Web Audio API as backup');
+    try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const duration = 0.5;
+        
+        // Play 6 beeps
+        for (let i = 0; i < 6; i++) {
+            setTimeout(() => {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 800;
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.5, audioContext.currentTime + 0.01);
+                gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + duration);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + duration);
+                
+                console.log('Web Audio beep', i + 1);
+            }, i * 1000);
+        }
+    } catch (err) {
+        console.log('Web Audio API error:', err);
+    }
 }
 
 function pauseTimer() {
