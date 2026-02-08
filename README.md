@@ -1,8 +1,8 @@
-# 🎯 Focus Timer Pro
+# 🎯 Focus champion Pro
 
 <div align="center">
 
-![Focus Timer Pro](icon-192.png)
+![Focus champion Pro](icon-192.png)
 
 **A beautiful, multilingual Pomodoro timer to boost your productivity**
 
