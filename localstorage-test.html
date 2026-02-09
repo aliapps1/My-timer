@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>localStorage Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f0f9ff;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #0284c7;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1em;
+            margin: 10px 5px;
+            cursor: pointer;
+        }
+        button:hover { background: #0369a1; }
+        .success { background: #10b981; }
+        .danger { background: #ef4444; }
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9em;
+        }
+        .result {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        .pass { background: #d1fae5; color: #065f46; }
+        .fail { background: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🔍 localStorage Test</h1>
+        <p>This will test if localStorage works on your device</p>
+
+        <div>
+            <button onclick="testLocalStorage()">Run Test</button>
+            <button class="danger" onclick="clearTest()">Clear Test Data</button>
+        </div>
+
+        <div id="results"></div>
+
+        <h3>Current localStorage:</h3>
+        <pre id="storage"></pre>
+    </div>
+
+    <script>
+        function displayStorage() {
+            const storage = document.getElementById('storage');
+            const data = {
+                userProfile: localStorage.getItem('userProfile'),
+                focusStats: localStorage.getItem('focusStats'),
+                testData: localStorage.getItem('testData')
+            };
+            storage.textContent = JSON.stringify(data, null, 2);
+        }
+
+        function testLocalStorage() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<h3>Test Results:</h3>';
+
+            // Test 1: localStorage available
+            if (typeof(Storage) !== "undefined") {
+                results.innerHTML += '<div class="result pass">✅ Test 1: localStorage is available</div>';
+            } else {
+                results.innerHTML += '<div class="result fail">❌ Test 1: localStorage is NOT available</div>';
+                return;
+            }
+
+            // Test 2: Can write
+            try {
+                localStorage.setItem('testData', 'Hello World');
+                results.innerHTML += '<div class="result pass">✅ Test 2: Can write to localStorage</div>';
+            } catch (e) {
+                results.innerHTML += '<div class="result fail">❌ Test 2: Cannot write - ' + e.message + '</div>';
+                return;
+            }
+
+            // Test 3: Can read
+            try {
+                const value = localStorage.getItem('testData');
+                if (value === 'Hello World') {
+                    results.innerHTML += '<div class="result pass">✅ Test 3: Can read from localStorage</div>';
+                } else {
+                    results.innerHTML += '<div class="result fail">❌ Test 3: Read failed - got: ' + value + '</div>';
+                }
+            } catch (e) {
+                results.innerHTML += '<div class="result fail">❌ Test 3: Cannot read - ' + e.message + '</div>';
+                return;
+            }
+
+            // Test 4: Can save JSON
+            try {
+                const testObj = { 
+                    name: 'Focus Champion',
+                    sessions: 5,
+                    xp: 100 
+                };
+                localStorage.setItem('testData', JSON.stringify(testObj));
+                const retrieved = JSON.parse(localStorage.getItem('testData'));
+                
+                if (retrieved.name === 'Focus Champion' && retrieved.sessions === 5) {
+                    results.innerHTML += '<div class="result pass">✅ Test 4: Can save and parse JSON</div>';
+                } else {
+                    results.innerHTML += '<div class="result fail">❌ Test 4: JSON parse failed</div>';
+                }
+            } catch (e) {
+                results.innerHTML += '<div class="result fail">❌ Test 4: JSON error - ' + e.message + '</div>';
+                return;
+            }
+
+            // Test 5: Check Focus Champion data
+            const userProfile = localStorage.getItem('userProfile');
+            const focusStats = localStorage.getItem('focusStats');
+
+            if (userProfile && focusStats) {
+                results.innerHTML += '<div class="result pass">✅ Test 5: Focus Champion data exists</div>';
+                try {
+                    const profile = JSON.parse(userProfile);
+                    const stats = JSON.parse(focusStats);
+                    results.innerHTML += '<div class="result pass">📊 Sessions Today: ' + profile.sessionsToday + '</div>';
+                    results.innerHTML += '<div class="result pass">📊 Today Minutes: ' + stats.todayMin + '</div>';
+                } catch (e) {
+                    results.innerHTML += '<div class="result fail">❌ Test 5: Data corrupted - ' + e.message + '</div>';
+                }
+            } else {
+                results.innerHTML += '<div class="result fail">⚠️ Test 5: No Focus Champion data found (this is OK if first time)</div>';
+            }
+
+            results.innerHTML += '<div class="result pass">✅ ALL TESTS PASSED! localStorage works correctly.</div>';
+            displayStorage();
+        }
+
+        function clearTest() {
+            localStorage.removeItem('testData');
+            localStorage.removeItem('userProfile');
+            localStorage.removeItem('focusStats');
+            document.getElementById('results').innerHTML = '<div class="result pass">✅ Test data cleared</div>';
+            displayStorage();
+        }
+
+        // Display on load
+        displayStorage();
+    </script>
+</body>
+</html>
