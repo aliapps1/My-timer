@@ -1,5 +1,5 @@
-// Focus Champion - Premium Gamified Timer
-// Version 2.0 - Monetization Ready
+// Focus Champion v3.0 - Complete Working Version
+// Based on successful quick-test logic
 
 let duration = 1500;
 let timeLeft = 1500;
@@ -9,18 +9,17 @@ let currentLang = 'en';
 let isMuted = false;
 let alarmTimerId = null;
 
-// User profile with premium status
+// User profile
 let userProfile = JSON.parse(localStorage.getItem('userProfile')) || {
     isPremium: false,
     sessionsToday: 0,
     totalSessions: 0,
     level: 1,
     xp: 0,
-    badges: [],
     lastResetDate: null
 };
 
-// Stats tracking
+// Stats
 let stats = JSON.parse(localStorage.getItem('focusStats')) || {
     todayMin: 0,
     weekMin: 0,
@@ -46,7 +45,6 @@ const translations = {
         today: "📅 Today:",
         week: "📈 This Week:",
         streak: "🔥 Streak:",
-        level: "⭐ Level:",
         min: "min",
         day: "days",
         sessions: "sessions",
@@ -62,7 +60,6 @@ const translations = {
         today: "📅 امروز:",
         week: "📈 این هفته:",
         streak: "🔥 زنجیره:",
-        level: "⭐ سطح:",
         min: "دقیقه",
         day: "روز",
         sessions: "جلسه",
@@ -78,7 +75,6 @@ const translations = {
         today: "📅 اليوم:",
         week: "📈 هذا الأسبوع:",
         streak: "🔥 متسلسل:",
-        level: "⭐ المستوى:",
         min: "دقيقة",
         day: "يوم",
         sessions: "جلسات",
@@ -87,7 +83,7 @@ const translations = {
     }
 };
 
-// Persian calendar converter
+// Persian calendar
 function gregorianToJalali(gy, gm, gd) {
     const g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
     let jy = (gy <= 1600) ? 0 : 979;
@@ -109,14 +105,14 @@ function gregorianToJalali(gy, gm, gd) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Focus Champion v2.0 initialized');
+    console.log('🚀 Focus Champion v3.0 loaded');
     resetDailySessionsIfNeeded();
     updateCurrentDate();
-    checkForCompletedTimer();
-    restoreTimerState();
     updateUI();
     updateDisplay();
     setInterval(updateCurrentDate, 60000);
+    console.log('📊 Current stats:', stats);
+    console.log('👤 User profile:', userProfile);
 });
 
 function getTodayString() {
@@ -132,23 +128,34 @@ function getWeekStart() {
     return `${weekStart.getFullYear()}-${(weekStart.getMonth()+1).toString().padStart(2,'0')}-${weekStart.getDate().toString().padStart(2,'0')}`;
 }
 
-// Reset daily sessions at midnight
 function resetDailySessionsIfNeeded() {
     const today = getTodayString();
     if (userProfile.lastResetDate !== today) {
+        console.log('🔄 Resetting daily sessions for:', today);
         userProfile.sessionsToday = 0;
         userProfile.lastResetDate = today;
+        stats.todayMin = 0;
         saveUserProfile();
-        console.log('Daily sessions reset for:', today);
+        saveStats();
     }
 }
 
 function saveUserProfile() {
-    localStorage.setItem('userProfile', JSON.stringify(userProfile));
+    try {
+        localStorage.setItem('userProfile', JSON.stringify(userProfile));
+        console.log('✅ User profile saved');
+    } catch (e) {
+        console.error('❌ Failed to save user profile:', e);
+    }
 }
 
 function saveStats() {
-    localStorage.setItem('focusStats', JSON.stringify(stats));
+    try {
+        localStorage.setItem('focusStats', JSON.stringify(stats));
+        console.log('✅ Stats saved:', stats);
+    } catch (e) {
+        console.error('❌ Failed to save stats:', e);
+    }
 }
 
 function updateCurrentDate() {
@@ -186,14 +193,14 @@ function updateDisplay() {
     }
 }
 
-// Check session limit for free users
 function canStartSession() {
     if (userProfile.isPremium) {
-        return true; // Premium users have unlimited sessions
+        return true;
     }
     
     const FREE_LIMIT = 3;
     if (userProfile.sessionsToday >= FREE_LIMIT) {
+        console.log('⚠️ Free session limit reached');
         showPremiumPrompt();
         return false;
     }
@@ -207,226 +214,117 @@ function showPremiumPrompt() {
         : `You've completed ${userProfile.sessionsToday} sessions today.\n\n🔒 Upgrade to Premium for unlimited sessions!\n\nOnly $1.99/month\n\nUpgrade now?`;
     
     if (confirm(message)) {
-        // Redirect to premium page
-        window.location.href = '#premium';
-        showPremiumPage();
+        alert('🚀 Premium feature coming soon!\n\nFor now, enjoy unlimited access! 😊');
+        userProfile.isPremium = true;
+        saveUserProfile();
+        updateUI();
     }
-}
-
-function showPremiumPage() {
-    alert('🚀 Premium features coming soon!\n\nFor now, I\'ll give you unlimited access 😊');
-    // Temporary: unlock premium
-    userProfile.isPremium = true;
-    saveUserProfile();
-    updateUI();
 }
 
 function initAndStart() {
-    console.log('Start clicked');
+    console.log('▶️ Start button clicked');
     
     if (!isPaused) {
-        console.log('Already running');
+        console.log('⚠️ Already running');
         return;
     }
     
-    // Check session limit
     if (!canStartSession()) {
         return;
     }
     
     isPaused = false;
+    console.log('✅ Timer started, duration:', duration, 'seconds');
     
     if ('Notification' in window && Notification.permission === 'default') {
         Notification.requestPermission();
     }
     
-    const endTime = Date.now() + (timeLeft * 1000);
-    localStorage.setItem('focus_timer_end', endTime);
-    localStorage.setItem('focus_timer_duration', duration);
-    localStorage.setItem('is_running', 'true');
-    
-    console.log('Timer started, ends at:', new Date(endTime));
-    
-    timerId = setInterval(syncTimer, 1000);
-    
-    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-        navigator.serviceWorker.controller.postMessage({
-            type: 'TIMER_STARTED',
-            endTime: endTime,
-            duration: duration
-        });
-    }
-}
-
-function syncTimer() {
-    const endTimeStr = localStorage.getItem('focus_timer_end');
-    if (!endTimeStr) {
-        pauseTimer();
-        return;
-    }
-    
-    const endTime = parseInt(endTimeStr);
-    const now = Date.now();
-    const remaining = Math.round((endTime - now) / 1000);
-    
-    if (remaining <= 0) {
-        timeLeft = 0;
-        finishTimer();
-    } else {
-        timeLeft = remaining;
+    // Simple countdown timer (like quick-test)
+    timerId = setInterval(() => {
+        timeLeft--;
         updateDisplay();
-    }
-}
-
-function checkForCompletedTimer() {
-    const isRunning = localStorage.getItem('is_running') === 'true';
-    const endTimeStr = localStorage.getItem('focus_timer_end');
-    
-    if (isRunning && endTimeStr) {
-        const endTime = parseInt(endTimeStr);
-        const now = Date.now();
         
-        if (now >= endTime) {
-            console.log('Timer completed in background!');
-            timeLeft = 0;
-            localStorage.removeItem('focus_timer_end');
-            localStorage.removeItem('is_running');
-            localStorage.removeItem('focus_timer_duration');
-            timeLeft = duration;
-            updateDisplay();
-            
-            if ('Notification' in window && Notification.permission === 'granted') {
-                new Notification('🎉 Focus Session Complete!', {
-                    body: 'Timer finished while you were away',
-                    icon: 'icon-192.png',
-                    requireInteraction: true
-                });
-            }
+        if (timeLeft <= 0) {
+            finishTimer();
         }
-    }
-}
-
-function restoreTimerState() {
-    const isRunning = localStorage.getItem('is_running') === 'true';
-    const savedDuration = localStorage.getItem('focus_timer_duration');
-    
-    if (savedDuration) {
-        duration = parseInt(savedDuration);
-    }
-    
-    if (isRunning) {
-        isPaused = false;
-        syncTimer();
-        timerId = setInterval(syncTimer, 1000);
-    }
+    }, 1000);
 }
 
 function finishTimer() {
-    console.log('Timer finished - PLAYING ALARM');
+    console.log('🎉 Timer finished!');
     clearInterval(timerId);
     timerId = null;
     isPaused = true;
     
-    localStorage.removeItem('focus_timer_end');
-    localStorage.removeItem('is_running');
-    localStorage.removeItem('focus_timer_duration');
-    
+    // Reset display
     timeLeft = duration;
     updateDisplay();
     
-    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-        navigator.serviceWorker.controller.postMessage({
-            type: 'TIMER_COMPLETE',
-            duration: duration
-        });
-    }
-    
-    console.log('Playing alarm now...');
-    playAlarmWithStop();
-    
-    if ('Notification' in window && Notification.permission === 'granted') {
-        new Notification('🎉 Focus Session Complete!', {
-            body: 'Great work! Time to take a break.',
-            icon: 'icon-192.png',
-            requireInteraction: true,
-            vibrate: [400, 200, 400, 200, 400]
-        });
-    }
-    
-    // Update all stats
-    updateStatsAfterSession();
-}
-
-function updateStatsAfterSession() {
-    const today = getTodayString();
+    // Update stats - SIMPLE AND DIRECT (like quick-test)
     const addedMin = Math.floor(duration / 60);
+    const today = getTodayString();
     
-    // Update daily sessions count
+    console.log('📊 Updating stats...');
+    console.log('- Adding minutes:', addedMin);
+    console.log('- Today:', today);
+    
+    // Update session count
     userProfile.sessionsToday++;
     userProfile.totalSessions++;
+    console.log('- Sessions today:', userProfile.sessionsToday);
+    console.log('- Total sessions:', userProfile.totalSessions);
     
-    // Update stats
+    // Update minutes
     stats.todayMin += addedMin;
     stats.totalMin += addedMin;
+    console.log('- Today minutes:', stats.todayMin);
+    console.log('- Total minutes:', stats.totalMin);
     
     // Update weekly data
     if (!stats.weeklyData) stats.weeklyData = {};
     stats.weeklyData[today] = (stats.weeklyData[today] || 0) + addedMin;
+    console.log('- Weekly data updated');
     
-    // Update daily sessions tracking
+    // Update daily sessions
     if (!stats.dailySessions) stats.dailySessions = {};
     stats.dailySessions[today] = (stats.dailySessions[today] || 0) + 1;
     
     // Update last active date
     stats.lastActiveDate = today;
     
-    // Calculate XP and level
-    const xpGained = addedMin * 2; // 2 XP per minute
+    // XP and level
+    const xpGained = addedMin * 2;
     userProfile.xp += xpGained;
-    checkLevelUp();
-    
-    // Save everything
-    saveStats();
-    saveUserProfile();
-    
-    console.log('✅ Stats updated:');
-    console.log('- Today:', stats.todayMin, 'min');
-    console.log('- Sessions today:', userProfile.sessionsToday);
-    console.log('- Total sessions:', userProfile.totalSessions);
     console.log('- XP gained:', xpGained);
     console.log('- Total XP:', userProfile.xp);
-    console.log('- Level:', userProfile.level);
     
+    // SAVE EVERYTHING
+    saveStats();
+    saveUserProfile();
+    console.log('💾 Stats saved successfully!');
+    
+    // Update UI
     updateUI();
-}
-
-function checkLevelUp() {
-    const xpThresholds = [0, 500, 1500, 3500, 7000, 15000]; // XP needed for each level
-    let newLevel = 1;
     
-    for (let i = 0; i < xpThresholds.length; i++) {
-        if (userProfile.xp >= xpThresholds[i]) {
-            newLevel = i + 1;
-        }
+    // Show notification
+    if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('🎉 Focus Session Complete!', {
+            body: `Great work! You completed ${addedMin} minutes.`,
+            icon: 'icon-192.png',
+            requireInteraction: true,
+            vibrate: [400, 200, 400, 200, 400]
+        });
     }
     
-    if (newLevel > userProfile.level) {
-        userProfile.level = newLevel;
-        showLevelUpAnimation(newLevel);
-    }
-}
-
-function showLevelUpAnimation(level) {
-    const message = currentLang === 'fa'
-        ? `🎉 تبریک! به سطح ${level} رسیدید!`
-        : `🎉 Congratulations! You reached Level ${level}!`;
+    // Play alarm
+    playAlarmWithStop();
     
-    alert(message);
-    // TODO: Add confetti animation
+    console.log('✅ Session complete!');
 }
 
 function playAlarmWithStop() {
-    console.log('playAlarmWithStop called');
+    console.log('🔔 Playing alarm');
     
     if (alarmTimerId) {
         clearTimeout(alarmTimerId);
@@ -436,34 +334,23 @@ function playAlarmWithStop() {
     if (alarm) {
         alarm.pause();
         alarm.currentTime = 0;
-    }
-    
-    if (alarm) {
         alarm.loop = true;
         alarm.volume = 1.0;
-        console.log('Alarm play() called');
         
-        const playPromise = alarm.play();
-        
-        if (playPromise !== undefined) {
-            playPromise
-                .then(() => {
-                    console.log('✅ Alarm playing successfully!');
-                })
-                .catch(error => {
-                    console.log('❌ Alarm blocked by browser:', error);
-                    createWebAudioAlarm();
-                });
-        }
+        alarm.play()
+            .then(() => console.log('✅ Alarm playing'))
+            .catch(err => {
+                console.log('❌ Alarm blocked:', err);
+                createWebAudioAlarm();
+            });
     }
     
     if ('vibrate' in navigator) {
         navigator.vibrate([400, 200, 400, 200, 400, 200, 400, 200, 400]);
-        console.log('Vibration triggered');
     }
     
     alarmTimerId = setTimeout(() => {
-        console.log('Auto-stopping alarm after 15 seconds');
+        console.log('⏹️ Auto-stopping alarm');
         if (alarm) {
             alarm.pause();
             alarm.loop = false;
@@ -474,7 +361,7 @@ function playAlarmWithStop() {
 }
 
 function createWebAudioAlarm() {
-    console.log('Using Web Audio API as backup');
+    console.log('🔊 Using Web Audio API');
     try {
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
         const duration = 0.5;
@@ -496,25 +383,21 @@ function createWebAudioAlarm() {
                 
                 oscillator.start(audioContext.currentTime);
                 oscillator.stop(audioContext.currentTime + duration);
-                
-                console.log('Web Audio beep', i + 1);
             }, i * 1000);
         }
     } catch (err) {
-        console.log('Web Audio API error:', err);
+        console.log('❌ Web Audio error:', err);
     }
 }
 
 function pauseTimer() {
-    console.log('Pause clicked');
+    console.log('⏸️ Pause clicked');
     isPaused = true;
     
     if (timerId) {
         clearInterval(timerId);
         timerId = null;
     }
-    
-    localStorage.removeItem('is_running');
     
     if (alarm) {
         alarm.pause();
@@ -529,15 +412,14 @@ function pauseTimer() {
 }
 
 function resetTimer() {
-    console.log('Reset clicked');
+    console.log('🔄 Reset clicked');
     pauseTimer();
-    localStorage.removeItem('focus_timer_end');
     timeLeft = duration;
     updateDisplay();
 }
 
 function setTime(s, btn) {
-    console.log('Time button clicked:', s);
+    console.log('⏱️ Time button clicked:', s);
     pauseTimer();
     duration = s;
     timeLeft = s;
@@ -551,7 +433,7 @@ function setTime(s, btn) {
 }
 
 function changeLang(l) {
-    console.log('Language changed to:', l);
+    console.log('🌐 Language changed to:', l);
     currentLang = l;
     localStorage.setItem('preferredLang', l);
     updateUI();
@@ -588,7 +470,6 @@ function updateUI() {
     const t = translations[currentLang];
     const weekTotal = calculateWeekTotal();
     
-    // Show session count for free users
     let sessionInfo = '';
     if (!userProfile.isPremium) {
         sessionInfo = ` (${userProfile.sessionsToday}/3 ${t.sessions})`;
@@ -621,13 +502,13 @@ function updateUI() {
     }
     
     updateCurrentDate();
-    console.log('UI updated - Today:', stats.todayMin, 'Week:', weekTotal, 'Sessions:', userProfile.sessionsToday);
+    console.log('🔄 UI updated - Today:', stats.todayMin, 'Week:', weekTotal, 'Sessions:', userProfile.sessionsToday);
 }
 
 async function shareStats() {
     const t = translations[currentLang];
     const weekTotal = calculateWeekTotal();
-    const text = `🎯 ${t.title}\n${t.level} ${userProfile.level}\n${t.today} ${stats.todayMin} ${t.min}\n${t.week} ${weekTotal} ${t.min}\n${t.streak} ${stats.streak} ${t.day}`;
+    const text = `🎯 ${t.title}\n${t.today} ${stats.todayMin} ${t.min}\n${t.week} ${weekTotal} ${t.min}\n${t.streak} ${stats.streak} ${t.day}`;
 
     if (navigator.share) {
         try {
@@ -653,26 +534,12 @@ if ('Notification' in window && Notification.permission === 'default') {
 
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js?v=3').then(reg => {
-        console.log('Service Worker registered:', reg);
+        console.log('Service Worker registered');
     }).catch(err => {
         console.log('SW registration failed:', err);
     });
 }
 
-document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) {
-        console.log('Page visible again');
-        resetDailySessionsIfNeeded();
-        checkForCompletedTimer();
-        
-        if (localStorage.getItem('is_running') === 'true') {
-            syncTimer();
-        }
-    }
-});
-
-console.log('Focus Champion v2.0 loaded');
-console.log('Premium status:', userProfile.isPremium);
-console.log('Sessions today:', userProfile.sessionsToday);
-console.log('Total sessions:', userProfile.totalSessions);
-console.log('Level:', userProfile.level, 'XP:', userProfile.xp);
+console.log('✅ Focus Champion v3.0 ready!');
+console.log('📊 Stats:', stats);
+console.log('👤 Profile:', userProfile);
