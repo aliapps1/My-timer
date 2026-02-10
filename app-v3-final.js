@@ -332,15 +332,19 @@ function getWeekTotal() {
     return total;
 }
 
+
 function updateUI() {
     const t = translations[currentLang];
-    const weekTotal = getWeekTotal();
+    const weekTotal = calculateWeekTotal();
     
-    let sessionInfo = '';
-    if (!userProfile.isPremium) {
-        sessionInfo = ` (${userProfile.sessionsToday}/3 ${t.sessions})`;
-    }
+    // خواندن آمار امروز طبق عکس شما
+    const today = getTodayString();
+    const sessionsToday = userProfile.sessionsToday || 0;
+    const minsToday = stats.todayMin || 0;
     
+    // فرمت دهی متن امروز: 10 min (1/3 sessions)
+    const sessionsText = `(${sessionsToday}/3 ${t.sessions})`;
+
     const elements = {
         'lbl-title': t.title,
         'btn-start': t.start,
@@ -350,9 +354,9 @@ function updateUI() {
         'lbl-today': t.today,
         'lbl-week': t.week,
         'lbl-streak': t.streak,
-        'stat-today': stats.todayMin + " " + t.min + sessionInfo,
-        'stat-week': weekTotal + " " + t.min,
-        'stat-streak': "0 " + t.day
+        'stat-today': `${minsToday} ${t.min} ${sessionsText}`,
+        'stat-week': `${weekTotal} ${t.min}`,
+        'stat-streak': `${stats.streak} ${t.day}`
     };
     
     for (let id in elements) {
@@ -364,10 +368,16 @@ function updateUI() {
     if (card) {
         card.className = ['fa', 'ar'].includes(currentLang) ? 'card rtl-mode' : 'card';
     }
-    
     updateCurrentDate();
-    console.log('UI updated - Today:', stats.todayMin, 'Week:', weekTotal);
 }
+
+// اصلاح ثبت Service Worker در انتهای فایل app-v3-final.js:
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw-v3.js').then(reg => {
+        console.log('SW registered');
+    });
+}
+
 
 async function shareStats() {
     const t = translations[currentLang];
