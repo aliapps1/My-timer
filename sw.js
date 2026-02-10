@@ -5,34 +5,25 @@ const urlsToCache = [
   '/My-timer/index.html',
   '/My-timer/app.js',
   '/My-timer/manifest.json'
-];
-
-self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache)));
-  self.skipWaiting();
-});
-
-self.addEventListener('activate', event => {
-  event.waitUntil(self.clients.claim());
-});
-
-// این بخش مسئول زنده نگه داشتن تایمر در پس‌زمینه است
+  
 self.addEventListener('message', event => {
-  if (event.data.type === 'START_TIMER') {
-    const endTime = event.data.endTime;
-    
-    // ایجاد یک حلقه انتظار در پس‌زمینه
-    const checkTimer = () => {
-      const now = Date.now();
-      if (now >= endTime) {
-        showFinishedNotification();
-      } else {
-        // هر ۵ ثانیه چک کن که زمان تمام شده یا نه
-        setTimeout(checkTimer, 5000);
-      }
-    };
-    checkTimer();
-  }
+    if (event.data.type === 'TIMER_STARTED') {
+        const endTime = event.data.endTime;
+        
+        const checkTimer = setInterval(() => {
+            if (Date.now() >= endTime) {
+                self.registration.showNotification('زمان تمرکز به پایان رسید!', {
+                    body: 'آمار شما با موفقیت ثبت شد.',
+                    icon: '/My-timer/icon-192.png',
+                    vibrate: [1000, 500, 1000], // لرزش قوی برای متوجه شدن در جیب
+                    requireInteraction: true, // اعلان تا باز نشود باقی می‌ماند
+                    tag: 'focus-timer',
+                    renotify: true
+                });
+                clearInterval(checkTimer);
+            }
+        }, 1000);
+    }
 });
 
 function showFinishedNotification() {
