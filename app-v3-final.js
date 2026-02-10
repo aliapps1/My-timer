@@ -1,5 +1,5 @@
-// Focus Champion v3.0 - Complete Working Version
-// Based on successful quick-test logic
+// Focus Champion - Final Working Version
+// Simple, Clean, Guaranteed to Work
 
 let duration = 1500;
 let timeLeft = 1500;
@@ -9,25 +9,18 @@ let currentLang = 'en';
 let isMuted = false;
 let alarmTimerId = null;
 
-// User profile
+// Initialize stats
+let stats = JSON.parse(localStorage.getItem('focusStats')) || {
+    todayMin: 0,
+    weeklyData: {},
+    lastDate: null
+};
+
+// Initialize user profile
 let userProfile = JSON.parse(localStorage.getItem('userProfile')) || {
     isPremium: false,
     sessionsToday: 0,
-    totalSessions: 0,
-    level: 1,
-    xp: 0,
-    lastResetDate: null
-};
-
-// Stats
-let stats = JSON.parse(localStorage.getItem('focusStats')) || {
-    todayMin: 0,
-    weekMin: 0,
-    totalMin: 0,
-    streak: 0,
-    lastActiveDate: null,
-    weeklyData: {},
-    dailySessions: {}
+    totalSessions: 0
 };
 
 const alarm = document.getElementById('alarmAudio');
@@ -83,7 +76,6 @@ const translations = {
     }
 };
 
-// Persian calendar
 function gregorianToJalali(gy, gm, gd) {
     const g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
     let jy = (gy <= 1600) ? 0 : 979;
@@ -105,14 +97,12 @@ function gregorianToJalali(gy, gm, gd) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 Focus Champion v3.0 loaded');
-    resetDailySessionsIfNeeded();
+    console.log('🚀 Focus Champion loaded');
+    resetDailyIfNeeded();
     updateCurrentDate();
     updateUI();
     updateDisplay();
     setInterval(updateCurrentDate, 60000);
-    console.log('📊 Current stats:', stats);
-    console.log('👤 User profile:', userProfile);
 });
 
 function getTodayString() {
@@ -120,41 +110,15 @@ function getTodayString() {
     return `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`;
 }
 
-function getWeekStart() {
-    const d = new Date();
-    const day = d.getDay();
-    const diff = d.getDate() - day;
-    const weekStart = new Date(d.setDate(diff));
-    return `${weekStart.getFullYear()}-${(weekStart.getMonth()+1).toString().padStart(2,'0')}-${weekStart.getDate().toString().padStart(2,'0')}`;
-}
-
-function resetDailySessionsIfNeeded() {
+function resetDailyIfNeeded() {
     const today = getTodayString();
-    if (userProfile.lastResetDate !== today) {
-        console.log('🔄 Resetting daily sessions for:', today);
-        userProfile.sessionsToday = 0;
-        userProfile.lastResetDate = today;
+    if (stats.lastDate !== today) {
         stats.todayMin = 0;
-        saveUserProfile();
-        saveStats();
-    }
-}
-
-function saveUserProfile() {
-    try {
-        localStorage.setItem('userProfile', JSON.stringify(userProfile));
-        console.log('✅ User profile saved');
-    } catch (e) {
-        console.error('❌ Failed to save user profile:', e);
-    }
-}
-
-function saveStats() {
-    try {
+        stats.lastDate = today;
+        userProfile.sessionsToday = 0;
         localStorage.setItem('focusStats', JSON.stringify(stats));
-        console.log('✅ Stats saved:', stats);
-    } catch (e) {
-        console.error('❌ Failed to save stats:', e);
+        localStorage.setItem('userProfile', JSON.stringify(userProfile));
+        console.log('✅ Daily reset done');
     }
 }
 
@@ -193,54 +157,36 @@ function updateDisplay() {
     }
 }
 
-function canStartSession() {
-    if (userProfile.isPremium) {
-        return true;
-    }
-    
-    const FREE_LIMIT = 3;
-    if (userProfile.sessionsToday >= FREE_LIMIT) {
-        console.log('⚠️ Free session limit reached');
-        showPremiumPrompt();
-        return false;
-    }
-    
-    return true;
-}
-
-function showPremiumPrompt() {
-    const message = currentLang === 'fa' 
-        ? `شما امروز ${userProfile.sessionsToday} جلسه کامل کردید.\n\n🔒 نسخه Premium برای جلسات نامحدود!\n\nقیمت: فقط $1.99/ماه\n\nآیا می‌خواهید ارتقا دهید؟`
-        : `You've completed ${userProfile.sessionsToday} sessions today.\n\n🔒 Upgrade to Premium for unlimited sessions!\n\nOnly $1.99/month\n\nUpgrade now?`;
-    
-    if (confirm(message)) {
-        alert('🚀 Premium feature coming soon!\n\nFor now, enjoy unlimited access! 😊');
-        userProfile.isPremium = true;
-        saveUserProfile();
-        updateUI();
-    }
-}
-
 function initAndStart() {
-    console.log('▶️ Start button clicked');
+    console.log('▶️ Start clicked');
     
     if (!isPaused) {
-        console.log('⚠️ Already running');
+        console.log('Already running');
         return;
     }
     
-    if (!canStartSession()) {
-        return;
+    // Check session limit
+    if (!userProfile.isPremium && userProfile.sessionsToday >= 3) {
+        const msg = currentLang === 'fa' 
+            ? 'شما امروز 3 جلسه کامل کردید!\n\n🔒 Premium برای جلسات نامحدود\nقیمت: $1.99/ماه'
+            : 'You completed 3 sessions today!\n\n🔒 Upgrade to Premium\nOnly $1.99/month';
+        
+        if (confirm(msg + '\n\nUpgrade now?')) {
+            userProfile.isPremium = true;
+            localStorage.setItem('userProfile', JSON.stringify(userProfile));
+            updateUI();
+        } else {
+            return;
+        }
     }
     
     isPaused = false;
-    console.log('✅ Timer started, duration:', duration, 'seconds');
+    console.log('Timer started');
     
     if ('Notification' in window && Notification.permission === 'default') {
         Notification.requestPermission();
     }
     
-    // Simple countdown timer (like quick-test)
     timerId = setInterval(() => {
         timeLeft--;
         updateDisplay();
@@ -256,184 +202,108 @@ function finishTimer() {
     clearInterval(timerId);
     timerId = null;
     isPaused = true;
-    
-    // Reset display
     timeLeft = duration;
     updateDisplay();
     
-    // Update stats - SIMPLE AND DIRECT (like quick-test)
-    const addedMin = Math.floor(duration / 60);
+    // SAVE STATS - SIMPLE AND DIRECT
+    const minutes = Math.floor(duration / 60);
     const today = getTodayString();
     
-    console.log('📊 Updating stats...');
-    console.log('- Adding minutes:', addedMin);
-    console.log('- Today:', today);
+    // Update today
+    stats.todayMin += minutes;
+    stats.lastDate = today;
     
-    // Update session count
+    // Update weekly
+    if (!stats.weeklyData) stats.weeklyData = {};
+    stats.weeklyData[today] = (stats.weeklyData[today] || 0) + minutes;
+    
+    // Update sessions
     userProfile.sessionsToday++;
     userProfile.totalSessions++;
-    console.log('- Sessions today:', userProfile.sessionsToday);
-    console.log('- Total sessions:', userProfile.totalSessions);
     
-    // Update minutes
-    stats.todayMin += addedMin;
-    stats.totalMin += addedMin;
-    console.log('- Today minutes:', stats.todayMin);
-    console.log('- Total minutes:', stats.totalMin);
+    // SAVE NOW
+    localStorage.setItem('focusStats', JSON.stringify(stats));
+    localStorage.setItem('userProfile', JSON.stringify(userProfile));
     
-    // Update weekly data
-    if (!stats.weeklyData) stats.weeklyData = {};
-    stats.weeklyData[today] = (stats.weeklyData[today] || 0) + addedMin;
-    console.log('- Weekly data updated');
-    
-    // Update daily sessions
-    if (!stats.dailySessions) stats.dailySessions = {};
-    stats.dailySessions[today] = (stats.dailySessions[today] || 0) + 1;
-    
-    // Update last active date
-    stats.lastActiveDate = today;
-    
-    // XP and level
-    const xpGained = addedMin * 2;
-    userProfile.xp += xpGained;
-    console.log('- XP gained:', xpGained);
-    console.log('- Total XP:', userProfile.xp);
-    
-    // SAVE EVERYTHING
-    saveStats();
-    saveUserProfile();
-    console.log('💾 Stats saved successfully!');
+    console.log('💾 Stats saved:', {
+        todayMin: stats.todayMin,
+        sessions: userProfile.sessionsToday
+    });
     
     // Update UI
     updateUI();
     
     // Show notification
     if ('Notification' in window && Notification.permission === 'granted') {
-        new Notification('🎉 Focus Session Complete!', {
-            body: `Great work! You completed ${addedMin} minutes.`,
+        new Notification('🎉 Session Complete!', {
+            body: `Great! You completed ${minutes} minutes.`,
             icon: 'icon-192.png',
-            requireInteraction: true,
             vibrate: [400, 200, 400, 200, 400]
         });
     }
     
     // Play alarm
-    playAlarmWithStop();
-    
-    console.log('✅ Session complete!');
+    playAlarm();
 }
 
-function playAlarmWithStop() {
+function playAlarm() {
     console.log('🔔 Playing alarm');
     
-    if (alarmTimerId) {
-        clearTimeout(alarmTimerId);
-        alarmTimerId = null;
-    }
-    
     if (alarm) {
-        alarm.pause();
-        alarm.currentTime = 0;
         alarm.loop = true;
         alarm.volume = 1.0;
-        
         alarm.play()
             .then(() => console.log('✅ Alarm playing'))
-            .catch(err => {
-                console.log('❌ Alarm blocked:', err);
-                createWebAudioAlarm();
-            });
+            .catch(() => console.log('❌ Alarm blocked'));
     }
     
     if ('vibrate' in navigator) {
         navigator.vibrate([400, 200, 400, 200, 400, 200, 400, 200, 400]);
     }
     
-    alarmTimerId = setTimeout(() => {
-        console.log('⏹️ Auto-stopping alarm');
+    setTimeout(() => {
         if (alarm) {
             alarm.pause();
-            alarm.loop = false;
             alarm.currentTime = 0;
+            alarm.loop = false;
         }
-        alarmTimerId = null;
     }, 15000);
 }
 
-function createWebAudioAlarm() {
-    console.log('🔊 Using Web Audio API');
-    try {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const duration = 0.5;
-        
-        for (let i = 0; i < 6; i++) {
-            setTimeout(() => {
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                oscillator.frequency.value = 800;
-                oscillator.type = 'sine';
-                
-                gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-                gainNode.gain.linearRampToValueAtTime(0.5, audioContext.currentTime + 0.01);
-                gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + duration);
-                
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + duration);
-            }, i * 1000);
-        }
-    } catch (err) {
-        console.log('❌ Web Audio error:', err);
-    }
-}
-
 function pauseTimer() {
-    console.log('⏸️ Pause clicked');
+    console.log('⏸️ Pause');
     isPaused = true;
-    
     if (timerId) {
         clearInterval(timerId);
         timerId = null;
     }
-    
     if (alarm) {
         alarm.pause();
-        alarm.loop = false;
         alarm.currentTime = 0;
-    }
-    
-    if (alarmTimerId) {
-        clearTimeout(alarmTimerId);
-        alarmTimerId = null;
     }
 }
 
 function resetTimer() {
-    console.log('🔄 Reset clicked');
+    console.log('🔄 Reset');
     pauseTimer();
     timeLeft = duration;
     updateDisplay();
 }
 
 function setTime(s, btn) {
-    console.log('⏱️ Time button clicked:', s);
+    console.log('Time set:', s);
     pauseTimer();
     duration = s;
     timeLeft = s;
     
     document.querySelectorAll('.modes button').forEach(b => b.classList.remove('active'));
-    if (btn) {
-        btn.classList.add('active');
-    }
+    if (btn) btn.classList.add('active');
     
     updateDisplay();
 }
 
 function changeLang(l) {
-    console.log('🌐 Language changed to:', l);
+    console.log('Language:', l);
     currentLang = l;
     localStorage.setItem('preferredLang', l);
     updateUI();
@@ -442,33 +312,29 @@ function changeLang(l) {
 function toggleMute() {
     isMuted = !isMuted;
     const btn = document.getElementById('muteBtn');
-    if (btn) {
-        btn.innerText = isMuted ? '🔇' : '🔊';
-    }
-    if (isMuted && alarm) {
-        alarm.pause();
-    }
+    if (btn) btn.innerText = isMuted ? '🔇' : '🔊';
 }
 
-function calculateWeekTotal() {
-    let weekTotal = 0;
-    const today = getTodayString();
-    const weekStart = getWeekStart();
+function getWeekTotal() {
+    if (!stats.weeklyData) return 0;
     
-    if (stats.weeklyData) {
-        for (let date in stats.weeklyData) {
-            if (date >= weekStart && date <= today) {
-                weekTotal += stats.weeklyData[date] || 0;
-            }
+    const today = getTodayString();
+    const weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+    const weekStartStr = weekStart.toISOString().split('T')[0];
+    
+    let total = 0;
+    for (let date in stats.weeklyData) {
+        if (date >= weekStartStr && date <= today) {
+            total += stats.weeklyData[date];
         }
     }
-    
-    return weekTotal;
+    return total;
 }
 
 function updateUI() {
     const t = translations[currentLang];
-    const weekTotal = calculateWeekTotal();
+    const weekTotal = getWeekTotal();
     
     let sessionInfo = '';
     if (!userProfile.isPremium) {
@@ -486,14 +352,12 @@ function updateUI() {
         'lbl-streak': t.streak,
         'stat-today': stats.todayMin + " " + t.min + sessionInfo,
         'stat-week': weekTotal + " " + t.min,
-        'stat-streak': stats.streak + " " + t.day
+        'stat-streak': "0 " + t.day
     };
     
     for (let id in elements) {
         const el = document.getElementById(id);
-        if (el) {
-            el.innerText = elements[id];
-        }
+        if (el) el.innerText = elements[id];
     }
     
     const card = document.getElementById('mainCard');
@@ -502,44 +366,36 @@ function updateUI() {
     }
     
     updateCurrentDate();
-    console.log('🔄 UI updated - Today:', stats.todayMin, 'Week:', weekTotal, 'Sessions:', userProfile.sessionsToday);
+    console.log('UI updated - Today:', stats.todayMin, 'Week:', weekTotal);
 }
 
 async function shareStats() {
     const t = translations[currentLang];
-    const weekTotal = calculateWeekTotal();
-    const text = `🎯 ${t.title}\n${t.today} ${stats.todayMin} ${t.min}\n${t.week} ${weekTotal} ${t.min}\n${t.streak} ${stats.streak} ${t.day}`;
+    const weekTotal = getWeekTotal();
+    const text = `🎯 ${t.title}\n${t.today} ${stats.todayMin} ${t.min}\n${t.week} ${weekTotal} ${t.min}`;
 
     if (navigator.share) {
         try {
             await navigator.share({ title: t.title, text: text });
         } catch (err) {
-            console.log('Share failed:', err);
+            console.log('Share failed');
         }
     } else {
         navigator.clipboard.writeText(text).then(() => {
-            alert(currentLang === 'fa' ? 'کپی شد!' : currentLang === 'ar' ? 'تم النسخ!' : 'Copied!');
+            alert(currentLang === 'fa' ? 'کپی شد!' : 'Copied!');
         });
     }
 }
 
+// Load saved language
 const savedLang = localStorage.getItem('preferredLang');
-if (savedLang) {
-    currentLang = savedLang;
-}
+if (savedLang) currentLang = savedLang;
 
+// Request notifications
 if ('Notification' in window && Notification.permission === 'default') {
     Notification.requestPermission();
 }
 
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js?v=3').then(reg => {
-        console.log('Service Worker registered');
-    }).catch(err => {
-        console.log('SW registration failed:', err);
-    });
-}
-
-console.log('✅ Focus Champion v3.0 ready!');
-console.log('📊 Stats:', stats);
-console.log('👤 Profile:', userProfile);
+console.log('✅ Focus Champion ready');
+console.log('Stats:', stats);
+console.log('Profile:', userProfile);
