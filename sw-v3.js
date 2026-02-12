@@ -70,16 +70,13 @@ self.addEventListener('message', event => {
     console.log('Service Worker v3: Timer completed');
     
     // Show notification
-
-self.registration.showNotification('🎉 Focus Session Complete!', {
-  body: 'Great work! Time to take a break.',
-  icon: '/My-timer/icon-192.png',
-  requireInteraction: true,
-  // لرزش ممتد و قوی برای متوجه شدن در سایر برنامه‌ها
-  vibrate: [1000, 500, 1000, 500, 1000, 500, 1000], 
-  tag: 'focus-complete'
-});
-
+    self.registration.showNotification('🎉 Focus Session Complete!', {
+      body: 'Great work! Time to take a break.',
+      icon: '/My-timer/icon-192.png',
+      badge: '/My-timer/icon-192.png',
+      requireInteraction: true,
+      vibrate: [400, 200, 400, 200, 400, 200, 400, 200, 400],
+      tag: 'focus-complete',
       data: { 
         type: 'timer-complete',
         timestamp: Date.now()
