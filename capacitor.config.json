@@ -1,0 +1,16 @@
+{
+  "appId": "com.focuschampion.app",
+  "appName": "Focus Champion",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": true,
+    "backgroundColor": "#0284c7"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "backgroundColor": "#0284c7",
+      "showSpinner": false
+    }
+  }
+}
