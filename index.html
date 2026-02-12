@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title id="pageTitle">Focus Champion</title>
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0284c7">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Focus Champion">
+    <link rel="apple-touch-icon" href="icon-192.png">
     <style>
         * {
             margin: 0;
@@ -824,6 +833,25 @@
         }
 
         console.log('✅ Ready!');
+
+        // Register Service Worker for PWA install
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('✅ SW registered'))
+                .catch(err => console.log('SW error:', err));
+        }
+
+        // Listen for install prompt
+        let installPrompt = null;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            installPrompt = e;
+            console.log('✅ Install prompt ready');
+            
+            // Show install button
+            const installBtn = document.getElementById('installBtn');
+            if (installBtn) installBtn.style.display = 'block';
+        });
     </script>
 </body>
 </html>
