@@ -195,6 +195,7 @@
         .start-btn {
             background: #f59e0b;
             color: white;
+            transition: all 0.3s ease;
         }
 
         .start-btn:hover {
@@ -635,7 +636,7 @@
             console.log('Time set:', seconds);
         }
 
-        async function startTimer() {
+        function startTimer() {
             if (!isPaused) return;
             
             if (stats.sessionsToday >= 15 && !isPremiumUser()) {
@@ -644,50 +645,23 @@
             }
             
             isPaused = false;
-            console.log('Started');
             
-            // Request notification permission
-            if ('Notification' in window && Notification.permission === 'default') {
-                Notification.requestPermission();
-            }
+            // Visual feedback - Start button changes to green "Running"
+            const btn = document.getElementById('startBtn');
+            btn.innerText = '▶ Running...';
+            btn.style.background = '#16a34a';
+            btn.style.transform = 'scale(0.97)';
             
-            // Request wake lock to prevent sleep
-            try {
-                if ('wakeLock' in navigator) {
-                    wakeLock = await navigator.wakeLock.request('screen');
-                    console.log('✅ Wake Lock acquired');
-                }
-            } catch (err) {
-                console.log('Wake Lock not supported:', err);
-            }
-            
-            // Calculate end time and save to localStorage
-            const endTime = Date.now() + (timeLeft * 1000);
-            localStorage.setItem('timer_endTime', endTime.toString());
-            localStorage.setItem('timer_running', 'true');
-            localStorage.setItem('timer_duration', duration.toString());
-            console.log('⏰ Timer will end at:', new Date(endTime).toLocaleTimeString());
-            
-            // Show persistent notification
-            if ('Notification' in window && Notification.permission === 'granted') {
-                new Notification('⏱️ Timer Started', {
-                    body: `${Math.floor(timeLeft / 60)} minutes timer is running...`,
-                    tag: 'focus-timer',
-                    requireInteraction: false
-                });
-            }
-            
+            // Start timer IMMEDIATELY
             timerId = setInterval(function() {
                 timeLeft--;
                 updateDisplay();
                 
-                // Update notification every minute
                 if (timeLeft % 60 === 0 && timeLeft > 0) {
                     if ('Notification' in window && Notification.permission === 'granted') {
                         new Notification('⏱️ Timer Update', {
                             body: `${Math.floor(timeLeft / 60)} minutes remaining...`,
-                            tag: 'focus-timer',
-                            requireInteraction: false
+                            tag: 'focus-timer'
                         });
                     }
                 }
@@ -696,6 +670,33 @@
                     finishTimer();
                 }
             }, 1000);
+            
+            // Save end time to localStorage
+            const endTime = Date.now() + (timeLeft * 1000);
+            localStorage.setItem('timer_endTime', endTime.toString());
+            localStorage.setItem('timer_running', 'true');
+            localStorage.setItem('timer_duration', duration.toString());
+            
+            // Request notification permission
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
+            
+            // Wake lock separately (non-blocking)
+            if ('wakeLock' in navigator) {
+                navigator.wakeLock.request('screen')
+                    .then(lock => { wakeLock = lock; })
+                    .catch(err => {});
+            }
+        }
+
+        function resetStartBtn() {
+            const btn = document.getElementById('startBtn');
+            if (btn) {
+                btn.innerText = translations[currentLang].start || 'Start';
+                btn.style.background = '#f59e0b';
+                btn.style.transform = 'scale(1)';
+            }
         }
 
         function pauseTimer() {
@@ -704,6 +705,7 @@
                 clearInterval(timerId);
                 timerId = null;
             }
+            resetStartBtn();
             
             // Clear background timer data
             localStorage.removeItem('timer_endTime');
@@ -735,7 +737,7 @@
 
         function finishTimer() {
             console.log('🎉 Timer Finished!');
-            pauseTimer();
+            pauseTimer(); // this already calls resetStartBtn
             
             // Clear background timer data
             localStorage.removeItem('timer_endTime');
@@ -829,7 +831,7 @@
             const weekTotal = getWeekTotal();
             
             document.getElementById('title').innerText = t.title;
-            document.getElementById('startBtn').innerText = t.start;
+            document.getElementById('startBtn').innerText = isPaused ? t.start : '▶ Running...';
             document.getElementById('pauseBtn').innerText = t.pause;
             document.getElementById('resetBtn').innerText = t.reset;
             document.getElementById('shareBtn').innerText = t.share;
