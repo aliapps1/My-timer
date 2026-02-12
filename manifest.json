@@ -1,13 +1,16 @@
 {
-  "name": "Focus Timer Pro",
-  "short_name": "Focus Timer",
-  "description": "Boost your productivity with Pomodoro technique",
+  "name": "Focus Champion - Productivity Timer",
+  "short_name": "Focus Champion",
+  "description": "A gamified Pomodoro timer to boost your productivity and track your focus sessions with multilingual support.",
   "start_url": "/My-timer/",
+  "scope": "/My-timer/",
   "display": "standalone",
-  "background_color": "#f8fafc",
+  "background_color": "#0284c7",
   "theme_color": "#0284c7",
   "orientation": "portrait",
-  "scope": "/",
+  "dir": "ltr",
+  "lang": "en",
+  "categories": ["productivity", "lifestyle", "education"],
   "icons": [
     {
       "src": "/My-timer/icon-72.png",
@@ -58,12 +61,13 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["productivity", "utilities"],
-  "screenshots": [
+  "shortcuts": [
     {
-      "src": "screenshot1.png",
-      "sizes": "540x720",
-      "type": "image/png"
+      "name": "Start 25 min session",
+      "short_name": "25 min",
+      "description": "Start a 25-minute focus session",
+      "url": "/My-timer/?time=25",
+      "icons": [{ "src": "/My-timer/icon-96.png", "sizes": "96x96" }]
     }
   ]
 }
