@@ -327,6 +327,59 @@
         <button class="share-btn" id="shareBtn" onclick="shareStats()">Share Result</button>
     </div>
 
+    <!-- Premium Modal -->
+    <div id="premiumModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000; justify-content:center; align-items:center;">
+        <div style="background:white; border-radius:30px; padding:40px 30px; max-width:420px; width:90%; text-align:center; position:relative;">
+            <button onclick="closePremiumModal()" style="position:absolute; top:15px; right:20px; background:none; border:none; font-size:24px; cursor:pointer; color:#94a3b8;">✕</button>
+            
+            <div style="font-size:50px; margin-bottom:15px;">👑</div>
+            <h2 style="color:#1e293b; font-size:28px; margin-bottom:10px;">Focus Champion Premium</h2>
+            <p style="color:#64748b; font-size:16px; margin-bottom:30px;">You've reached today's limit!<br>Upgrade for unlimited sessions.</p>
+            
+            <!-- Features -->
+            <div style="background:#f0f9ff; border-radius:20px; padding:20px; margin-bottom:25px; text-align:left;">
+                <div style="padding:8px 0; font-size:16px; color:#1e293b;">✅ Unlimited daily sessions</div>
+                <div style="padding:8px 0; font-size:16px; color:#1e293b;">✅ All sound effects unlocked</div>
+                <div style="padding:8px 0; font-size:16px; color:#1e293b;">✅ Advanced statistics</div>
+                <div style="padding:8px 0; font-size:16px; color:#1e293b;">✅ Priority support</div>
+                <div style="padding:8px 0; font-size:16px; color:#1e293b;">✅ No ads</div>
+            </div>
+            
+            <!-- Price -->
+            <div style="margin-bottom:25px;">
+                <div style="font-size:40px; font-weight:bold; color:#0284c7;">$1.99</div>
+                <div style="color:#64748b; font-size:14px;">per month</div>
+            </div>
+            
+            <!-- Payment buttons -->
+            <a href="https://paypal.me/focuschampion/1.99" target="_blank" 
+               style="display:block; background:#0070ba; color:white; padding:18px; border-radius:15px; text-decoration:none; font-size:18px; font-weight:bold; margin-bottom:15px;"
+               onclick="trackPayment('paypal')">
+                💳 Pay with PayPal
+            </a>
+            
+            <button onclick="showActivationInput()" 
+               style="width:100%; background:#10b981; color:white; padding:18px; border-radius:15px; border:none; font-size:18px; font-weight:bold; cursor:pointer; margin-bottom:15px;">
+                🔑 I have an activation code
+            </button>
+            
+            <!-- Activation code input (hidden by default) -->
+            <div id="activationDiv" style="display:none; margin-bottom:15px;">
+                <input id="activationCode" type="text" placeholder="Enter your code" 
+                    style="width:100%; padding:15px; border:2px solid #e0e0e0; border-radius:15px; font-size:16px; text-align:center; margin-bottom:10px; box-sizing:border-box;">
+                <button onclick="activatePremium()" 
+                    style="width:100%; background:#0284c7; color:white; padding:15px; border-radius:15px; border:none; font-size:16px; font-weight:bold; cursor:pointer;">
+                    ✅ Activate
+                </button>
+            </div>
+            
+            <button onclick="closePremiumModal()" 
+               style="width:100%; background:none; border:none; color:#94a3b8; font-size:16px; cursor:pointer; padding:10px;">
+                Maybe later
+            </button>
+        </div>
+    </div>
+
     <audio id="alarm" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
 
     <script>
@@ -588,8 +641,8 @@
         async function startTimer() {
             if (!isPaused) return;
             
-            if (stats.sessionsToday >= 3) {
-                alert('You completed 3 sessions today!\n\n🔒 Demo limit\n\nIn full version: upgrade to Premium');
+            if (stats.sessionsToday >= 15 && !isPremiumUser()) {
+                showPremiumModal();
                 return;
             }
             
@@ -788,7 +841,12 @@
             document.getElementById('lblWeek').innerText = t.week;
             document.getElementById('lblStreak').innerText = t.streak;
             
-            document.getElementById('statToday').innerText = `${stats.todayMin} ${t.min} (${stats.sessionsToday}/3 ${t.sessions})`;
+            const isPremium = localStorage.getItem('isPremium') === 'true';
+            if (isPremium) {
+                document.getElementById('statToday').innerText = `${stats.todayMin} ${t.min} 👑 Premium`;
+            } else {
+                document.getElementById('statToday').innerText = `${stats.todayMin} ${t.min} (${stats.sessionsToday}/15 ${t.sessions})`;
+            }
             document.getElementById('statWeek').innerText = `${weekTotal} ${t.min}`;
             document.getElementById('statStreak').innerText = `0 ${t.day}`;
             
@@ -830,6 +888,52 @@
                     alert(currentLang === 'fa' ? 'کپی شد!' : 'Copied!');
                 });
             }
+        }
+
+        // Premium system
+        const PREMIUM_CODES = ['FOCUS2024', 'CHAMPION99', 'PREMIUM01', 'VIP2024'];
+
+        function showPremiumModal() {
+            const isPremium = localStorage.getItem('isPremium') === 'true';
+            if (isPremium) {
+                stats.sessionsToday = 0;
+                localStorage.setItem('focusStats', JSON.stringify(stats));
+                updateUI();
+                startTimer();
+                return;
+            }
+            document.getElementById('premiumModal').style.display = 'flex';
+        }
+
+        function closePremiumModal() {
+            document.getElementById('premiumModal').style.display = 'none';
+        }
+
+        function showActivationInput() {
+            const div = document.getElementById('activationDiv');
+            div.style.display = div.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function activatePremium() {
+            const code = document.getElementById('activationCode').value.trim().toUpperCase();
+            
+            if (PREMIUM_CODES.includes(code)) {
+                localStorage.setItem('isPremium', 'true');
+                closePremiumModal();
+                alert('🎉 Premium Activated!\n\nWelcome to Focus Champion Premium!\n\nEnjoy unlimited sessions!');
+                updateUI();
+            } else {
+                alert('❌ Invalid code.\n\nPlease check your code and try again.\n\nIf you just paid, please wait a few minutes.');
+            }
+        }
+
+        function trackPayment(method) {
+            console.log('Payment initiated via:', method);
+            alert('You will be redirected to payment.\n\nAfter payment, you will receive an activation code by email.\n\nEnter the code in "I have an activation code".');
+        }
+
+        function isPremiumUser() {
+            return localStorage.getItem('isPremium') === 'true';
         }
 
         console.log('✅ Ready!');
