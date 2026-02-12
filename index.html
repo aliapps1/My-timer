@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="pageTitle">Focus Champion</title>
+    <title>Focus Champion</title>
 
     <!-- PWA -->
     <link rel="manifest" href="manifest.json">
@@ -614,12 +614,9 @@
             
             document.getElementById('display').innerText = timeStr;
             
-            // Update page title so user can see timer in browser tabs
-            if (!isPaused) {
-                document.getElementById('pageTitle').innerText = `⏱️ ${timeStr} - Focus Champion`;
-            } else {
-                document.getElementById('pageTitle').innerText = 'Focus Champion';
-            }
+            try {
+                document.title = isPaused ? 'Focus Champion' : `⏱️ ${timeStr} - Focus Champion`;
+            } catch(e) {}
             
             const progress = ((duration - timeLeft) / duration) * 100;
             document.getElementById('progressBar').style.width = progress + '%';
