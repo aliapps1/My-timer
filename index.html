@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Focus Champion</title>
-
-    <!-- PWA -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0284c7">
     <meta name="mobile-web-app-capable" content="yes">
@@ -14,12 +12,7 @@
     <meta name="apple-mobile-web-app-title" content="Focus Champion">
     <link rel="apple-touch-icon" href="icon-192.png">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -29,7 +22,6 @@
             align-items: center;
             padding: 20px;
         }
-
         .container {
             background: white;
             border-radius: 30px;
@@ -39,247 +31,52 @@
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             position: relative;
         }
-
-        .lang-buttons {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-
-        .lang-btn {
-            padding: 10px 25px;
-            border: 2px solid #e0e0e0;
-            background: white;
-            border-radius: 25px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .lang-btn:hover {
-            border-color: #0284c7;
-        }
-
-        .lang-btn.active {
-            background: #0284c7;
-            color: white;
-            border-color: #0284c7;
-        }
-
-        .mute-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: white;
-            border: 2px solid #e0e0e0;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            font-size: 20px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .date {
-            text-align: center;
-            color: #0284c7;
-            font-size: 18px;
-            margin-bottom: 10px;
-        }
-
-        h1 {
-            text-align: center;
-            font-size: 36px;
-            color: #1e293b;
-            margin-bottom: 30px;
-        }
-
-        .sound-selector-wrapper {
-            margin-bottom: 30px;
-        }
-
-        #soundSelect {
-            width: 100%;
-            background: #f8f9fa;
-            padding: 15px 20px;
-            border-radius: 20px;
-            border: 2px solid #e0e0e0;
-            font-size: 16px;
-            text-align: center;
-            color: #64748b;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        #soundSelect:hover {
-            border-color: #0284c7;
-        }
-
-        #soundSelect:focus {
-            outline: none;
-            border-color: #0284c7;
-        }
-
-        .time-buttons {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 40px;
-        }
-
-        .time-btn {
-            padding: 18px;
-            background: white;
-            border: 2px solid #e0e0e0;
-            border-radius: 20px;
-            font-size: 20px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .time-btn:hover {
-            border-color: #0284c7;
-        }
-
-        .time-btn.active {
-            background: #0284c7;
-            color: white;
-            border-color: #0284c7;
-        }
-
-        .timer-display {
-            text-align: center;
-            font-size: 80px;
-            font-weight: bold;
-            color: #0284c7;
-            margin: 40px 0;
-            font-family: 'Courier New', monospace;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 10px;
-            background: #e0e0e0;
-            border-radius: 10px;
-            overflow: hidden;
-            margin-bottom: 30px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: #0284c7;
-            width: 0%;
-            transition: width 0.5s;
-        }
-
-        .control-buttons {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .control-btn {
-            padding: 20px;
-            border: none;
-            border-radius: 20px;
-            font-size: 20px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .start-btn {
-            background: #f59e0b;
-            color: white;
-            transition: all 0.3s ease;
-        }
-
-        .start-btn:hover {
-            background: #d97706;
-        }
-
-        .pause-btn {
-            background: #94a3b8;
-            color: white;
-        }
-
-        .pause-btn:hover {
-            background: #64748b;
-        }
-
-        .reset-btn {
-            background: #ef4444;
-            color: white;
-        }
-
-        .reset-btn:hover {
-            background: #dc2626;
-        }
-
-        .stats {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 20px;
-            margin-bottom: 20px;
-        }
-
-        .stat-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            font-size: 18px;
-        }
-
-        .stat-label {
-            font-weight: 600;
-            color: #64748b;
-        }
-
-        .stat-value {
-            font-weight: bold;
-            color: #1e293b;
-        }
-
-        .share-btn {
-            width: 100%;
-            padding: 20px;
-            background: #3b82f6;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            font-size: 20px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .share-btn:hover {
-            background: #2563eb;
-        }
-
-        .rtl-mode {
-            direction: rtl;
-        }
+        .lang-buttons { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
+        .lang-btn { padding: 10px 25px; border: 2px solid #e0e0e0; background: white; border-radius: 25px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .lang-btn:hover { border-color: #0284c7; }
+        .lang-btn.active { background: #0284c7; color: white; border-color: #0284c7; }
+        .mute-btn { position: absolute; top: 20px; right: 20px; background: white; border: 2px solid #e0e0e0; border-radius: 50%; width: 50px; height: 50px; font-size: 20px; cursor: pointer; transition: all 0.3s; }
+        .date { text-align: center; color: #0284c7; font-size: 18px; margin-bottom: 10px; }
+        h1 { text-align: center; font-size: 36px; color: #1e293b; margin-bottom: 30px; }
+        .sound-selector-wrapper { margin-bottom: 30px; }
+        #soundSelect { width: 100%; background: #f8f9fa; padding: 15px 20px; border-radius: 20px; border: 2px solid #e0e0e0; font-size: 16px; text-align: center; color: #64748b; cursor: pointer; transition: all 0.3s; }
+        #soundSelect:hover { border-color: #0284c7; }
+        #soundSelect:focus { outline: none; border-color: #0284c7; }
+        .time-buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 40px; }
+        .time-btn { padding: 18px; background: white; border: 2px solid #e0e0e0; border-radius: 20px; font-size: 20px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .time-btn:hover { border-color: #0284c7; }
+        .time-btn.active { background: #0284c7; color: white; border-color: #0284c7; }
+        .timer-display { text-align: center; font-size: 80px; font-weight: bold; color: #0284c7; margin: 40px 0; font-family: 'Courier New', monospace; }
+        .progress-bar { width: 100%; height: 10px; background: #e0e0e0; border-radius: 10px; overflow: hidden; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: #0284c7; width: 0%; transition: width 0.5s; }
+        /* FIX: دکمه‌ها همیشه یک اندازه */
+        .control-buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 30px; }
+        .control-btn { padding: 20px 5px; border: none; border-radius: 20px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.3s; width: 100%; height: 65px; white-space: nowrap; overflow: hidden; }
+        .start-btn { background: #f59e0b; color: white; }
+        .start-btn:hover { background: #d97706; }
+        .pause-btn { background: #94a3b8; color: white; }
+        .pause-btn:hover { background: #64748b; }
+        .reset-btn { background: #ef4444; color: white; }
+        .reset-btn:hover { background: #dc2626; }
+        .stats { background: #f8f9fa; padding: 25px; border-radius: 20px; margin-bottom: 20px; }
+        .stat-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; font-size: 18px; }
+        .stat-label { font-weight: 600; color: #64748b; }
+        .stat-value { font-weight: bold; color: #1e293b; }
+        .share-btn { width: 100%; padding: 20px; background: #3b82f6; color: white; border: none; border-radius: 20px; font-size: 20px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .share-btn:hover { background: #2563eb; }
+        .rtl-mode { direction: rtl; }
     </style>
 </head>
 <body>
     <div class="container" id="mainContainer">
         <button class="mute-btn" id="muteBtn" onclick="toggleMute()">🔊</button>
-
         <div class="lang-buttons">
             <button class="lang-btn active" id="btnEn" onclick="changeLang('en')">EN</button>
             <button class="lang-btn" id="btnAr" onclick="changeLang('ar')">AR</button>
             <button class="lang-btn" id="btnFa" onclick="changeLang('fa')">FA</button>
         </div>
-
-        <div class="date" id="currentDate">Sunday, February 8</div>
+        <div class="date" id="currentDate">Thursday, February 13</div>
         <h1 id="title">Focus Champion</h1>
-
         <div class="sound-selector-wrapper">
             <select id="soundSelect" onchange="changeSound()">
                 <option value="melodic">Soft Chime (Melodic)</option>
@@ -288,7 +85,6 @@
                 <option value="none">No Sound</option>
             </select>
         </div>
-
         <div class="time-buttons">
             <button class="time-btn active" onclick="setTime(300, this)">5m</button>
             <button class="time-btn" onclick="setTime(900, this)">15m</button>
@@ -297,23 +93,17 @@
             <button class="time-btn" onclick="setTime(3600, this)">60m</button>
             <button class="time-btn" onclick="setTime(5400, this)">90m</button>
         </div>
-
         <div class="timer-display" id="display">5:00</div>
-
-        <div class="progress-bar">
-            <div class="progress-fill" id="progressBar"></div>
-        </div>
-
+        <div class="progress-bar"><div class="progress-fill" id="progressBar"></div></div>
         <div class="control-buttons">
             <button class="control-btn start-btn" id="startBtn" onclick="startTimer()">Start</button>
             <button class="control-btn pause-btn" id="pauseBtn" onclick="pauseTimer()">Pause</button>
             <button class="control-btn reset-btn" id="resetBtn" onclick="resetTimer()">Reset</button>
         </div>
-
         <div class="stats">
             <div class="stat-item">
                 <span class="stat-label" id="lblToday">📅 Today:</span>
-                <span class="stat-value" id="statToday">0 min (0/3 sessions)</span>
+                <span class="stat-value" id="statToday">0 min (0/15 sessions)</span>
             </div>
             <div class="stat-item">
                 <span class="stat-label" id="lblWeek">📈 This Week:</span>
@@ -324,7 +114,6 @@
                 <span class="stat-value" id="statStreak">0 days</span>
             </div>
         </div>
-
         <button class="share-btn" id="shareBtn" onclick="shareStats()">Share Result</button>
     </div>
 
@@ -332,12 +121,9 @@
     <div id="premiumModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000; justify-content:center; align-items:center;">
         <div style="background:white; border-radius:30px; padding:40px 30px; max-width:420px; width:90%; text-align:center; position:relative;">
             <button onclick="closePremiumModal()" style="position:absolute; top:15px; right:20px; background:none; border:none; font-size:24px; cursor:pointer; color:#94a3b8;">✕</button>
-            
             <div style="font-size:50px; margin-bottom:15px;">👑</div>
             <h2 style="color:#1e293b; font-size:28px; margin-bottom:10px;">Focus Champion Premium</h2>
             <p style="color:#64748b; font-size:16px; margin-bottom:30px;">You've reached today's limit!<br>Upgrade for unlimited sessions.</p>
-            
-            <!-- Features -->
             <div style="background:#f0f9ff; border-radius:20px; padding:20px; margin-bottom:25px; text-align:left;">
                 <div style="padding:8px 0; font-size:16px; color:#1e293b;">✅ Unlimited daily sessions</div>
                 <div style="padding:8px 0; font-size:16px; color:#1e293b;">✅ All sound effects unlocked</div>
@@ -345,60 +131,28 @@
                 <div style="padding:8px 0; font-size:16px; color:#1e293b;">✅ Priority support</div>
                 <div style="padding:8px 0; font-size:16px; color:#1e293b;">✅ No ads</div>
             </div>
-            
-            <!-- Price -->
             <div style="margin-bottom:25px;">
                 <div style="font-size:40px; font-weight:bold; color:#0284c7;">$1.99</div>
                 <div style="color:#64748b; font-size:14px;">per month</div>
             </div>
-            
-            <!-- Payment buttons -->
-            <a href="https://paypal.me/focuschampion/1.99" target="_blank" 
-               style="display:block; background:#0070ba; color:white; padding:18px; border-radius:15px; text-decoration:none; font-size:18px; font-weight:bold; margin-bottom:15px;"
-               onclick="trackPayment('paypal')">
-                💳 Pay with PayPal
-            </a>
-            
-            <button onclick="showActivationInput()" 
-               style="width:100%; background:#10b981; color:white; padding:18px; border-radius:15px; border:none; font-size:18px; font-weight:bold; cursor:pointer; margin-bottom:15px;">
-                🔑 I have an activation code
-            </button>
-            
-            <!-- Activation code input (hidden by default) -->
+            <a href="https://paypal.me/focuschampion/1.99" target="_blank" style="display:block; background:#0070ba; color:white; padding:18px; border-radius:15px; text-decoration:none; font-size:18px; font-weight:bold; margin-bottom:15px;" onclick="trackPayment('paypal')">💳 Pay with PayPal</a>
+            <button onclick="showActivationInput()" style="width:100%; background:#10b981; color:white; padding:18px; border-radius:15px; border:none; font-size:18px; font-weight:bold; cursor:pointer; margin-bottom:15px;">🔑 I have an activation code</button>
             <div id="activationDiv" style="display:none; margin-bottom:15px;">
-                <input id="activationCode" type="text" placeholder="Enter your code" 
-                    style="width:100%; padding:15px; border:2px solid #e0e0e0; border-radius:15px; font-size:16px; text-align:center; margin-bottom:10px; box-sizing:border-box;">
-                <button onclick="activatePremium()" 
-                    style="width:100%; background:#0284c7; color:white; padding:15px; border-radius:15px; border:none; font-size:16px; font-weight:bold; cursor:pointer;">
-                    ✅ Activate
-                </button>
+                <input id="activationCode" type="text" placeholder="Enter your code" style="width:100%; padding:15px; border:2px solid #e0e0e0; border-radius:15px; font-size:16px; text-align:center; margin-bottom:10px; box-sizing:border-box;">
+                <button onclick="activatePremium()" style="width:100%; background:#0284c7; color:white; padding:15px; border-radius:15px; border:none; font-size:16px; font-weight:bold; cursor:pointer;">✅ Activate</button>
             </div>
-            
-            <button onclick="closePremiumModal()" 
-               style="width:100%; background:none; border:none; color:#94a3b8; font-size:16px; cursor:pointer; padding:10px;">
-                Maybe later
-            </button>
+            <button onclick="closePremiumModal()" style="width:100%; background:none; border:none; color:#94a3b8; font-size:16px; cursor:pointer; padding:10px;">Maybe later</button>
         </div>
     </div>
 
     <audio id="alarm" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
 
     <script>
-        // Focus Champion - Simple Working Version
-        let duration = 300;
-        let timeLeft = 300;
-        let isPaused = true;
-        let timerId = null;
-        let currentLang = 'en';
-        let isMuted = false;
-        let currentSound = 'melodic';
-        let wakeLock = null;
+        let duration = 300, timeLeft = 300, isPaused = true, timerId = null;
+        let currentLang = 'en', isMuted = false, currentSound = 'melodic', wakeLock = null;
 
         let stats = JSON.parse(localStorage.getItem('focusStats')) || {
-            todayMin: 0,
-            weeklyData: {},
-            sessionsToday: 0,
-            lastDate: null
+            todayMin: 0, weeklyData: {}, sessionsToday: 0, lastDate: null
         };
 
         const soundUrls = {
@@ -409,151 +163,58 @@
         };
 
         const alarm = document.getElementById('alarm');
-        alarm.src = soundUrls.melodic;
 
-        const translations = {
-            en: {
-                title: "Focus Champion",
-                start: "Start",
-                pause: "Pause",
-                reset: "Reset",
-                share: "Share Result",
-                today: "📅 Today:",
-                week: "📈 This Week:",
-                streak: "🔥 Streak:",
-                min: "min",
-                day: "days",
-                sessions: "sessions",
-                days: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-                months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
-            },
-            fa: {
-                title: "قهرمان تمرکز",
-                start: "شروع",
-                pause: "توقف",
-                reset: "بازنشانی",
-                share: "اشتراک‌گذاری",
-                today: "📅 امروز:",
-                week: "📈 این هفته:",
-                streak: "🔥 زنجیره:",
-                min: "دقیقه",
-                day: "روز",
-                sessions: "جلسه",
-                days: ["یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه", "شنبه"],
-                months: ["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"]
-            },
-            ar: {
-                title: "بطل التركيز",
-                start: "بدء",
-                pause: "إيقاف",
-                reset: "إعادة ضبط",
-                share: "مشاركة",
-                today: "📅 اليوم:",
-                week: "📈 هذا الأسبوع:",
-                streak: "🔥 متسلسل:",
-                min: "دقيقة",
-                day: "يوم",
-                sessions: "جلسات",
-                days: ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"],
-                months: ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"]
-            }
+        const T = {
+            en: { title:"Focus Champion", start:"Start", pause:"Pause", reset:"Reset", share:"Share Result", today:"📅 Today:", week:"📈 This Week:", streak:"🔥 Streak:", min:"min", day:"days", sessions:"sessions", days:["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"], months:["January","February","March","April","May","June","July","August","September","October","November","December"] },
+            fa: { title:"قهرمان تمرکز", start:"شروع", pause:"توقف", reset:"بازنشانی", share:"اشتراک‌گذاری", today:"📅 امروز:", week:"📈 این هفته:", streak:"🔥 زنجیره:", min:"دقیقه", day:"روز", sessions:"جلسه", days:["یکشنبه","دوشنبه","سه‌شنبه","چهارشنبه","پنج‌شنبه","جمعه","شنبه"], months:["فروردین","اردیبهشت","خرداد","تیر","مرداد","شهریور","مهر","آبان","آذر","دی","بهمن","اسفند"] },
+            ar: { title:"بطل التركيز", start:"بدء", pause:"إيقاف", reset:"إعادة ضبط", share:"مشاركة", today:"📅 اليوم:", week:"📈 هذا الأسبوع:", streak:"🔥 متسلسل:", min:"دقيقة", day:"يوم", sessions:"جلسات", days:["الأحد","الإثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"], months:["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"] }
         };
 
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('✅ Focus Champion Ultimate loaded');
-            
-            // Check if timer completed in background
             checkBackgroundTimer();
-            
             resetDailyIfNeeded();
-            updateDate();
-            updateUI();
-            updateDisplay();
-            
-            const savedLang = localStorage.getItem('preferredLang');
-            if (savedLang && savedLang !== 'en') changeLang(savedLang);
-            
-            const savedSound = localStorage.getItem('preferredSound');
-            if (savedSound) {
-                currentSound = savedSound;
-                document.getElementById('soundSelect').value = savedSound;
-                alarm.src = soundUrls[savedSound];
-            }
-            
-            // Restore running timer if exists
+            updateDate(); updateUI(); updateDisplay();
+            const sl = localStorage.getItem('preferredLang');
+            if (sl && sl !== 'en') changeLang(sl);
+            const ss = localStorage.getItem('preferredSound');
+            if (ss) { currentSound = ss; document.getElementById('soundSelect').value = ss; alarm.src = soundUrls[ss] || ''; }
             restoreTimer();
         });
 
-        // Check visibility change to sync timer
         document.addEventListener('visibilitychange', function() {
-            if (!document.hidden) {
-                console.log('Page visible - syncing timer');
-                checkBackgroundTimer();
-                syncTimerFromStorage();
-            }
+            if (!document.hidden) { checkBackgroundTimer(); syncTimerFromStorage(); }
         });
 
         function checkBackgroundTimer() {
             const endTime = localStorage.getItem('timer_endTime');
             const wasRunning = localStorage.getItem('timer_running') === 'true';
-            
-            if (endTime && wasRunning) {
-                const end = parseInt(endTime);
-                const now = Date.now();
-                
-                if (now >= end) {
-                    console.log('🎉 Timer completed in background!');
-                    localStorage.removeItem('timer_endTime');
-                    localStorage.removeItem('timer_running');
-                    localStorage.removeItem('timer_duration');
-                    
-                    // Timer finished while away
-                    const savedDuration = parseInt(localStorage.getItem('timer_duration')) || duration;
-                    duration = savedDuration;
-                    timeLeft = savedDuration;
-                    isPaused = true;
-                    
-                    updateDisplay();
-                    finishTimer();
-                }
+            if (endTime && wasRunning && Date.now() >= parseInt(endTime)) {
+                localStorage.removeItem('timer_endTime');
+                localStorage.removeItem('timer_running');
+                const sd = parseInt(localStorage.getItem('timer_duration')) || duration;
+                localStorage.removeItem('timer_duration');
+                duration = sd; timeLeft = sd; isPaused = true;
+                updateDisplay(); finishTimer();
             }
         }
 
         function syncTimerFromStorage() {
             const endTime = localStorage.getItem('timer_endTime');
             const wasRunning = localStorage.getItem('timer_running') === 'true';
-            
             if (endTime && wasRunning && !timerId) {
-                const end = parseInt(endTime);
-                const now = Date.now();
-                const remaining = Math.floor((end - now) / 1000);
-                
+                const remaining = Math.floor((parseInt(endTime) - Date.now()) / 1000);
                 if (remaining > 0) {
-                    console.log('Syncing timer - remaining:', remaining, 'seconds');
-                    timeLeft = remaining;
-                    isPaused = false;
+                    timeLeft = remaining; isPaused = false;
+                    const btn = document.getElementById('startBtn');
+                    btn.innerText = '▶'; btn.style.background = '#16a34a';
                     updateDisplay();
-                    
-                    // Restart interval
                     if (timerId) clearInterval(timerId);
-                    timerId = setInterval(function() {
-                        timeLeft--;
-                        updateDisplay();
-                        
-                        if (timeLeft <= 0) {
-                            finishTimer();
-                        }
-                    }, 1000);
+                    timerId = setInterval(function() { timeLeft--; updateDisplay(); if (timeLeft <= 0) finishTimer(); }, 1000);
                 }
             }
         }
 
-        function restoreTimer() {
-            const wasRunning = localStorage.getItem('timer_running') === 'true';
-            if (wasRunning) {
-                syncTimerFromStorage();
-            }
-        }
+        function restoreTimer() { if (localStorage.getItem('timer_running') === 'true') syncTimerFromStorage(); }
 
         function getTodayString() {
             const d = new Date();
@@ -562,399 +223,194 @@
 
         function resetDailyIfNeeded() {
             const today = getTodayString();
-            if (stats.lastDate !== today) {
-                stats.todayMin = 0;
-                stats.sessionsToday = 0;
-                stats.lastDate = today;
-                localStorage.setItem('focusStats', JSON.stringify(stats));
-            }
+            if (stats.lastDate !== today) { stats.todayMin = 0; stats.sessionsToday = 0; stats.lastDate = today; localStorage.setItem('focusStats', JSON.stringify(stats)); }
         }
 
         function toJalali(gy, gm, gd) {
-            var g_d_m = [0,31,59,90,120,151,181,212,243,273,304,334];
-            var jy = (gy <= 1600) ? 0 : 979;
-            gy -= (gy <= 1600) ? 621 : 1600;
-            var gy2 = (gm > 2) ? (gy + 1) : gy;
-            var days = (365 * gy) + (parseInt((gy2 + 3) / 4)) - (parseInt((gy2 + 99) / 100)) +
-                (parseInt((gy2 + 399) / 400)) - 80 + gd + g_d_m[gm - 1];
-            jy += 33 * parseInt(days / 12053);
-            days %= 12053;
-            jy += 4 * parseInt(days / 1461);
-            days %= 1461;
-            jy += parseInt(Math.max(0, days - 365) / 365);
-            days = (days > 365) ? ((days - 1) % 365) : (days - 1);
-            var jm = parseInt((days + 6) / 30.59) + 1;
-            var jd = days + 1 - parseInt((jm > 6 ? (6 * 31 + (jm - 7) * 30) : (jm - 1) * 31));
-            return [jy, jm, jd];
+            var g_d_m=[0,31,59,90,120,151,181,212,243,273,304,334], jy=(gy<=1600)?0:979;
+            gy-=(gy<=1600)?621:1600;
+            var gy2=(gm>2)?(gy+1):gy;
+            var days=(365*gy)+(parseInt((gy2+3)/4))-(parseInt((gy2+99)/100))+(parseInt((gy2+399)/400))-80+gd+g_d_m[gm-1];
+            jy+=33*parseInt(days/12053); days%=12053; jy+=4*parseInt(days/1461); days%=1461;
+            jy+=parseInt(Math.max(0,days-365)/365); days=(days>365)?((days-1)%365):(days-1);
+            var jm=parseInt((days+6)/30.59)+1;
+            var jd=days+1-parseInt((jm>6?(6*31+(jm-7)*30):(jm-1)*31));
+            return [jy,jm,jd];
         }
 
         function updateDate() {
-            const now = new Date();
-            const t = translations[currentLang];
-            const dayName = t.days[now.getDay()];
-
+            const now = new Date(), t = T[currentLang], dn = t.days[now.getDay()];
             if (currentLang === 'fa') {
-                const [jy, jm, jd] = toJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
-                const monthName = t.months[jm - 1];
-                document.getElementById('currentDate').innerText = `${dayName}، ${jd} ${monthName} ${jy}`;
+                const [jy,jm,jd] = toJalali(now.getFullYear(), now.getMonth()+1, now.getDate());
+                document.getElementById('currentDate').innerText = `${dn}، ${jd} ${t.months[jm-1]} ${jy}`;
             } else if (currentLang === 'ar') {
-                const monthName = t.months[now.getMonth()];
-                const day = now.getDate();
-                document.getElementById('currentDate').innerText = `${dayName}، ${day} ${monthName}`;
+                document.getElementById('currentDate').innerText = `${dn}، ${now.getDate()} ${t.months[now.getMonth()]}`;
             } else {
-                const monthName = t.months[now.getMonth()];
-                const day = now.getDate();
-                document.getElementById('currentDate').innerText = `${dayName}, ${monthName} ${day}`;
+                document.getElementById('currentDate').innerText = `${dn}, ${t.months[now.getMonth()]} ${now.getDate()}`;
             }
         }
 
         function updateDisplay() {
-            const m = Math.floor(timeLeft / 60);
-            const s = timeLeft % 60;
-            const timeStr = `${m}:${s < 10 ? '0' : ''}${s}`;
-            
-            document.getElementById('display').innerText = timeStr;
-            
-            try {
-                document.title = isPaused ? 'Focus Champion' : `⏱️ ${timeStr} - Focus Champion`;
-            } catch(e) {}
-            
-            const progress = ((duration - timeLeft) / duration) * 100;
-            document.getElementById('progressBar').style.width = progress + '%';
+            const m = Math.floor(timeLeft/60), s = timeLeft%60;
+            const ts = `${m}:${s<10?'0':''}${s}`;
+            document.getElementById('display').innerText = ts;
+            try { document.title = isPaused ? 'Focus Champion' : `⏱️ ${ts}`; } catch(e) {}
+            document.getElementById('progressBar').style.width = ((duration-timeLeft)/duration*100) + '%';
         }
 
         function setTime(seconds, btn) {
             if (!isPaused) return;
-            
-            duration = seconds;
-            timeLeft = seconds;
-            
+            duration = seconds; timeLeft = seconds;
             document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            
             updateDisplay();
-            console.log('Time set:', seconds);
         }
 
         function startTimer() {
             if (!isPaused) return;
-            
-            if (stats.sessionsToday >= 15 && !isPremiumUser()) {
-                showPremiumModal();
-                return;
-            }
-            
+            if (stats.sessionsToday >= 15 && !isPremiumUser()) { showPremiumModal(); return; }
             isPaused = false;
-            
-            // Visual feedback - Start button changes to green "Running"
+            // FIX: فقط یک فلش کوچیک - اندازه دکمه عوض نمیشه
             const btn = document.getElementById('startBtn');
-            btn.innerText = '▶ Running...';
-            btn.style.background = '#16a34a';
-            btn.style.transform = 'scale(0.97)';
-            
-            // Start timer IMMEDIATELY
+            btn.innerText = '▶'; btn.style.background = '#16a34a';
             timerId = setInterval(function() {
-                timeLeft--;
-                updateDisplay();
-                
-                if (timeLeft % 60 === 0 && timeLeft > 0) {
-                    if ('Notification' in window && Notification.permission === 'granted') {
-                        new Notification('⏱️ Timer Update', {
-                            body: `${Math.floor(timeLeft / 60)} minutes remaining...`,
-                            tag: 'focus-timer'
-                        });
-                    }
+                timeLeft--; updateDisplay();
+                if (timeLeft%60===0 && timeLeft>0 && Notification.permission==='granted') {
+                    new Notification('⏱️ Focus Champion', { body: `${Math.floor(timeLeft/60)} min remaining`, tag: 'focus-timer' });
                 }
-                
-                if (timeLeft <= 0) {
-                    finishTimer();
-                }
+                if (timeLeft <= 0) finishTimer();
             }, 1000);
-            
-            // Save end time to localStorage
-            const endTime = Date.now() + (timeLeft * 1000);
+            const endTime = Date.now() + (timeLeft*1000);
             localStorage.setItem('timer_endTime', endTime.toString());
             localStorage.setItem('timer_running', 'true');
             localStorage.setItem('timer_duration', duration.toString());
-            
-            // Request notification permission
-            if ('Notification' in window && Notification.permission === 'default') {
-                Notification.requestPermission();
-            }
-            
-            // Wake lock separately (non-blocking)
-            if ('wakeLock' in navigator) {
-                navigator.wakeLock.request('screen')
-                    .then(lock => { wakeLock = lock; })
-                    .catch(err => {});
-            }
+            if (Notification.permission === 'default') Notification.requestPermission();
+            if ('wakeLock' in navigator) navigator.wakeLock.request('screen').then(l => { wakeLock=l; }).catch(()=>{});
         }
 
         function resetStartBtn() {
             const btn = document.getElementById('startBtn');
-            if (btn) {
-                btn.innerText = translations[currentLang].start || 'Start';
-                btn.style.background = '#f59e0b';
-                btn.style.transform = 'scale(1)';
-            }
+            if (btn) { btn.innerText = T[currentLang].start || 'Start'; btn.style.background = '#f59e0b'; }
         }
 
         function pauseTimer() {
             isPaused = true;
-            if (timerId) {
-                clearInterval(timerId);
-                timerId = null;
-            }
+            if (timerId) { clearInterval(timerId); timerId = null; }
             resetStartBtn();
-            
-            // Clear background timer data
-            localStorage.removeItem('timer_endTime');
-            localStorage.removeItem('timer_running');
-            
-            // Release wake lock
-            if (wakeLock) {
-                wakeLock.release().then(() => {
-                    console.log('Wake Lock released');
-                    wakeLock = null;
-                });
-            }
-            
-            console.log('Paused');
+            localStorage.removeItem('timer_endTime'); localStorage.removeItem('timer_running');
+            if (wakeLock) { wakeLock.release().catch(()=>{}); wakeLock = null; }
         }
 
         function resetTimer() {
-            pauseTimer();
-            timeLeft = duration;
-            updateDisplay();
-            
-            // Clear all timer data
-            localStorage.removeItem('timer_endTime');
-            localStorage.removeItem('timer_running');
-            localStorage.removeItem('timer_duration');
-            
-            console.log('Reset');
+            pauseTimer(); timeLeft = duration; updateDisplay();
+            localStorage.removeItem('timer_endTime'); localStorage.removeItem('timer_running'); localStorage.removeItem('timer_duration');
         }
 
         function finishTimer() {
-            console.log('🎉 Timer Finished!');
-            pauseTimer(); // this already calls resetStartBtn
-            
-            // Clear background timer data
-            localStorage.removeItem('timer_endTime');
-            localStorage.removeItem('timer_running');
-            localStorage.removeItem('timer_duration');
-            
-            timeLeft = duration;
-            updateDisplay();
-            
-            const minutes = Math.floor(duration / 60);
-            const today = getTodayString();
-            
-            // Update stats
-            stats.todayMin += minutes;
-            stats.sessionsToday++;
-            
+            pauseTimer();
+            localStorage.removeItem('timer_endTime'); localStorage.removeItem('timer_running'); localStorage.removeItem('timer_duration');
+            timeLeft = duration; updateDisplay();
+            const minutes = Math.floor(duration/60), today = getTodayString();
+            stats.todayMin += minutes; stats.sessionsToday++;
             if (!stats.weeklyData) stats.weeklyData = {};
-            stats.weeklyData[today] = (stats.weeklyData[today] || 0) + minutes;
+            stats.weeklyData[today] = (stats.weeklyData[today]||0) + minutes;
             stats.lastDate = today;
-            
             localStorage.setItem('focusStats', JSON.stringify(stats));
             updateUI();
-            
-            // Play selected sound
             if (!isMuted && currentSound !== 'none' && alarm.src) {
                 alarm.loop = true;
-                alarm.play()
-                    .then(() => {
-                        console.log('✅ Alarm playing');
-                        // Auto-stop after 15 seconds
-                        setTimeout(() => {
-                            alarm.pause();
-                            alarm.loop = false;
-                            alarm.currentTime = 0;
-                        }, 15000);
-                    })
-                    .catch(e => console.log('❌ Alarm blocked:', e));
+                alarm.play().then(() => { setTimeout(() => { alarm.pause(); alarm.loop=false; alarm.currentTime=0; }, 15000); }).catch(()=>{});
             }
-            
-            // Vibrate pattern
-            if ('vibrate' in navigator) {
-                navigator.vibrate([400, 200, 400, 200, 400, 200, 400, 200, 400]);
+            if ('vibrate' in navigator) navigator.vibrate([400,200,400,200,400,200,400,200,400]);
+            if (Notification.permission==='granted') {
+                new Notification('🎉 Session Complete!', { body: `Great work! You completed ${minutes} minutes!`, icon: 'icon-192.png', tag: 'focus-complete', requireInteraction: true });
             }
-            
-            // Show notification
-            if ('Notification' in window && Notification.permission === 'granted') {
-                new Notification('🎉 Session Complete!', {
-                    body: `Congratulations! You completed ${minutes} minutes of focused work!`,
-                    icon: '/icon-192.png',
-                    badge: '/icon-192.png',
-                    tag: 'focus-complete',
-                    requireInteraction: true,
-                    vibrate: [400, 200, 400, 200, 400]
-                });
-            }
-            
-            alert('🎉 Session Complete!\n\nGreat work! You completed ' + minutes + ' minutes!');
+            alert(`🎉 Session Complete!\n\nGreat work! You completed ${minutes} minutes!`);
         }
 
         function changeSound() {
             currentSound = document.getElementById('soundSelect').value;
-            alarm.src = soundUrls[currentSound];
+            alarm.src = soundUrls[currentSound] || '';
             localStorage.setItem('preferredSound', currentSound);
-            console.log('Sound changed to:', currentSound);
-            
-            // Play preview
-            if (currentSound !== 'none' && !isMuted) {
-                alarm.play().catch(e => {});
-            }
+            if (currentSound !== 'none' && !isMuted) alarm.play().catch(()=>{});
         }
 
         function getWeekTotal() {
             if (!stats.weeklyData) return 0;
-            
             const today = getTodayString();
-            const weekStart = new Date();
-            weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-            const weekStartStr = weekStart.toISOString().split('T')[0];
-            
+            const ws = new Date(); ws.setDate(ws.getDate()-ws.getDay());
+            const wsStr = ws.toISOString().split('T')[0];
             let total = 0;
-            for (let date in stats.weeklyData) {
-                if (date >= weekStartStr && date <= today) {
-                    total += stats.weeklyData[date];
-                }
-            }
+            for (let d in stats.weeklyData) { if (d>=wsStr && d<=today) total+=stats.weeklyData[d]; }
             return total;
         }
 
         function updateUI() {
-            const t = translations[currentLang];
-            const weekTotal = getWeekTotal();
-            
+            const t = T[currentLang], wt = getWeekTotal();
             document.getElementById('title').innerText = t.title;
-            document.getElementById('startBtn').innerText = isPaused ? t.start : '▶ Running...';
+            document.getElementById('startBtn').innerText = isPaused ? t.start : '▶';
             document.getElementById('pauseBtn').innerText = t.pause;
             document.getElementById('resetBtn').innerText = t.reset;
             document.getElementById('shareBtn').innerText = t.share;
-            
             document.getElementById('lblToday').innerText = t.today;
             document.getElementById('lblWeek').innerText = t.week;
             document.getElementById('lblStreak').innerText = t.streak;
-            
-            const isPremium = localStorage.getItem('isPremium') === 'true';
-            if (isPremium) {
-                document.getElementById('statToday').innerText = `${stats.todayMin} ${t.min} 👑 Premium`;
-            } else {
-                document.getElementById('statToday').innerText = `${stats.todayMin} ${t.min} (${stats.sessionsToday}/15 ${t.sessions})`;
-            }
-            document.getElementById('statWeek').innerText = `${weekTotal} ${t.min}`;
+            const ip = localStorage.getItem('isPremium')==='true';
+            document.getElementById('statToday').innerText = ip ? `${stats.todayMin} ${t.min} 👑` : `${stats.todayMin} ${t.min} (${stats.sessionsToday}/15 ${t.sessions})`;
+            document.getElementById('statWeek').innerText = `${wt} ${t.min}`;
             document.getElementById('statStreak').innerText = `0 ${t.day}`;
-            
-            const container = document.getElementById('mainContainer');
-            if (currentLang === 'fa' || currentLang === 'ar') {
-                container.classList.add('rtl-mode');
-            } else {
-                container.classList.remove('rtl-mode');
-            }
-            
+            const c = document.getElementById('mainContainer');
+            if (currentLang==='fa'||currentLang==='ar') c.classList.add('rtl-mode'); else c.classList.remove('rtl-mode');
             updateDate();
         }
 
         function changeLang(lang) {
             currentLang = lang;
             localStorage.setItem('preferredLang', lang);
-            
-            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById('btn' + lang.charAt(0).toUpperCase() + lang.slice(1)).classList.add('active');
-            
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('btn'+lang.charAt(0).toUpperCase()+lang.slice(1)).classList.add('active');
             updateUI();
-            console.log('Language:', lang);
         }
 
-        function toggleMute() {
-            isMuted = !isMuted;
-            document.getElementById('muteBtn').innerText = isMuted ? '🔇' : '🔊';
-        }
+        function toggleMute() { isMuted=!isMuted; document.getElementById('muteBtn').innerText=isMuted?'🔇':'🔊'; }
 
+        // FIX: Share - پنجره اشتراک‌گذاری Android
         function shareStats() {
-            const t = translations[currentLang];
-            const weekTotal = getWeekTotal();
-            const text = `🎯 ${t.title}\n${t.today} ${stats.todayMin} ${t.min}\n${t.week} ${weekTotal} ${t.min}`;
-
+            const t = T[currentLang], wt = getWeekTotal();
+            const text = `🎯 ${t.title}\n${t.today} ${stats.todayMin} ${t.min}\n${t.week} ${wt} ${t.min}\n\nhttps://aliapps1.github.io/My-timer/`;
             if (navigator.share) {
-                navigator.share({ title: t.title, text: text }).catch(() => {});
+                navigator.share({ title: t.title, text: text }).catch(() => fallbackCopy(text));
             } else {
-                navigator.clipboard.writeText(text).then(() => {
-                    alert(currentLang === 'fa' ? 'کپی شد!' : 'Copied!');
-                });
+                fallbackCopy(text);
             }
         }
 
-        // Premium system
-        const PREMIUM_CODES = ['FOCUS2024', 'CHAMPION99', 'PREMIUM01', 'VIP2024'];
+        function fallbackCopy(text) {
+            try {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert(currentLang==='fa'?'✅ کپی شد!': currentLang==='ar'?'✅ تم النسخ!':'✅ Copied!');
+                });
+            } catch(e) { alert(text); }
+        }
 
+        const PREMIUM_CODES = ['FOCUS2024','CHAMPION99','PREMIUM01','VIP2024'];
         function showPremiumModal() {
-            const isPremium = localStorage.getItem('isPremium') === 'true';
-            if (isPremium) {
-                stats.sessionsToday = 0;
-                localStorage.setItem('focusStats', JSON.stringify(stats));
-                updateUI();
-                startTimer();
-                return;
-            }
+            if (localStorage.getItem('isPremium')==='true') { stats.sessionsToday=0; localStorage.setItem('focusStats',JSON.stringify(stats)); updateUI(); startTimer(); return; }
             document.getElementById('premiumModal').style.display = 'flex';
         }
-
-        function closePremiumModal() {
-            document.getElementById('premiumModal').style.display = 'none';
-        }
-
-        function showActivationInput() {
-            const div = document.getElementById('activationDiv');
-            div.style.display = div.style.display === 'none' ? 'block' : 'none';
-        }
-
+        function closePremiumModal() { document.getElementById('premiumModal').style.display='none'; }
+        function showActivationInput() { const d=document.getElementById('activationDiv'); d.style.display=d.style.display==='none'?'block':'none'; }
         function activatePremium() {
             const code = document.getElementById('activationCode').value.trim().toUpperCase();
-            
-            if (PREMIUM_CODES.includes(code)) {
-                localStorage.setItem('isPremium', 'true');
-                closePremiumModal();
-                alert('🎉 Premium Activated!\n\nWelcome to Focus Champion Premium!\n\nEnjoy unlimited sessions!');
-                updateUI();
-            } else {
-                alert('❌ Invalid code.\n\nPlease check your code and try again.\n\nIf you just paid, please wait a few minutes.');
-            }
+            if (PREMIUM_CODES.includes(code)) { localStorage.setItem('isPremium','true'); closePremiumModal(); alert('🎉 Premium Activated!\nEnjoy unlimited sessions!'); updateUI(); }
+            else alert('❌ Invalid code. Please try again.');
         }
+        function trackPayment(m) { alert('After payment, you will receive an activation code.\nEnter it in "I have an activation code".'); }
+        function isPremiumUser() { return localStorage.getItem('isPremium')==='true'; }
 
-        function trackPayment(method) {
-            console.log('Payment initiated via:', method);
-            alert('You will be redirected to payment.\n\nAfter payment, you will receive an activation code by email.\n\nEnter the code in "I have an activation code".');
-        }
-
-        function isPremiumUser() {
-            return localStorage.getItem('isPremium') === 'true';
-        }
-
-        console.log('✅ Ready!');
-
-        // Register Service Worker for PWA install
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js')
-                .then(reg => console.log('✅ SW registered'))
-                .catch(err => console.log('SW error:', err));
-        }
-
-        // Listen for install prompt
-        let installPrompt = null;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            installPrompt = e;
-            console.log('✅ Install prompt ready');
-            
-            // Show install button
-            const installBtn = document.getElementById('installBtn');
-            if (installBtn) installBtn.style.display = 'block';
-        });
+        if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+        window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); });
+        console.log('✅ Focus Champion Ready!');
     </script>
 </body>
 </html>
