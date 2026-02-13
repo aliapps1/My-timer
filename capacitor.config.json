@@ -4,13 +4,7 @@
   "webDir": "www",
   "android": {
     "allowMixedContent": true,
-    "backgroundColor": "#0284c7"
-  },
-  "plugins": {
-    "SplashScreen": {
-      "launchShowDuration": 2000,
-      "backgroundColor": "#0284c7",
-      "showSpinner": false
-    }
+    "backgroundColor": "#0284c7",
+    "icon": "icon-512.png"
   }
 }
