@@ -38,7 +38,7 @@ Session 3+:     Interstitial Ad (triggered by user click ✅)
 ### 2. Optional Donation (Secondary Income)
 ```
 Users who want to support the creator
-Via PayPal.me/aliapps
+Via PayPal.me/aliapps1
 In the "Support Creator" section of the app
 ```
 > **Note:** PayPal is NOT used for Premium purchase (Google Play policy) ✅
@@ -137,7 +137,7 @@ My-timer/
 ## 📞 Support & Links
 
 - **Live App:** https://aliapps1.github.io/My-timer/
-- **Support Creator:** https://paypal.me/aliapps
+- **Support Creator:** https://paypal.me/aliapps1
 
 ---
 
