@@ -36,6 +36,9 @@ jobs:
         run: |
           mkdir -p www
           [ -f index.html ] && cp index.html www/ || echo "no index.html"
+          [ -f manifest.json ] && cp manifest.json www/ || true
+          [ -f sw.js ] && cp sw.js www/ || true
+          for f in *.png; do [ -f "$f" ] && cp "$f" www/ || true; done
 
       - name: Capacitor Sync
         run: |
@@ -43,6 +46,27 @@ jobs:
             npx cap add android
           fi
           npx cap sync android
+
+      - name: Copy App Icon
+        run: |
+          mkdir -p android/app/src/main/res/mipmap-xxxhdpi
+          mkdir -p android/app/src/main/res/mipmap-xxhdpi
+          mkdir -p android/app/src/main/res/mipmap-xhdpi
+          mkdir -p android/app/src/main/res/mipmap-hdpi
+          mkdir -p android/app/src/main/res/mipmap-mdpi
+          if [ -f "icon-512.png" ]; then
+            cp icon-512.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+            cp icon-512.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png
+            cp icon-192.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
+            cp icon-192.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png
+            cp icon-192.png android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
+            cp icon-192.png android/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png
+            cp icon-192.png android/app/src/main/res/mipmap-hdpi/ic_launcher.png
+            cp icon-192.png android/app/src/main/res/mipmap-hdpi/ic_launcher_round.png
+            cp icon-192.png android/app/src/main/res/mipmap-mdpi/ic_launcher.png
+            cp icon-192.png android/app/src/main/res/mipmap-mdpi/ic_launcher_round.png
+            echo "✅ Icons copied!"
+          fi
 
       - name: Build APK
         run: |
