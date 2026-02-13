@@ -1,73 +1,30 @@
 {
-  "name": "Focus Champion - Productivity Timer",
-  "short_name": "Focus Champion",
-  "description": "A gamified Pomodoro timer to boost your productivity and track your focus sessions with multilingual support.",
+  "name": "Focus Champion",
+  "short_name": "Focus",
+  "description": "Gamified Pomodoro Timer - Stay focused and build great habits",
   "start_url": "/My-timer/",
   "scope": "/My-timer/",
   "display": "standalone",
   "background_color": "#0284c7",
   "theme_color": "#0284c7",
   "orientation": "portrait",
-  "dir": "ltr",
   "lang": "en",
-  "categories": ["productivity", "lifestyle", "education"],
   "icons": [
-    {
-      "src": "/My-timer/icon-72.png",
-      "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/My-timer/icon-96.png",
-      "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/My-timer/icon-128.png",
-      "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/My-timer/icon-144.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/My-timer/icon-152.png",
-      "sizes": "152x152",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/My-timer/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/My-timer/icon-384.png",
-      "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/My-timer/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
+    { "src": "icon-72.png",  "sizes": "72x72",   "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-96.png",  "sizes": "96x96",   "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-128.png", "sizes": "128x128", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-144.png", "sizes": "144x144", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-152.png", "sizes": "152x152", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-384.png", "sizes": "384x384", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ],
-  "shortcuts": [
+  "categories": ["productivity", "lifestyle", "health"],
+  "screenshots": [
     {
-      "name": "Start 25 min session",
-      "short_name": "25 min",
-      "description": "Start a 25-minute focus session",
-      "url": "/My-timer/?time=25",
-      "icons": [{ "src": "/My-timer/icon-96.png", "sizes": "96x96" }]
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
     }
   ]
 }
