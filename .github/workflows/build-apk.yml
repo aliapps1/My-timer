@@ -31,6 +31,7 @@ jobs:
         run: |
           npm install
           npm install -g @capacitor/cli
+          pip install Pillow
 
       - name: Prepare WWW folder
         run: |
@@ -47,26 +48,34 @@ jobs:
           fi
           npx cap sync android
 
-      - name: Copy App Icon
+      - name: Generate App Icons
         run: |
-          mkdir -p android/app/src/main/res/mipmap-xxxhdpi
-          mkdir -p android/app/src/main/res/mipmap-xxhdpi
-          mkdir -p android/app/src/main/res/mipmap-xhdpi
-          mkdir -p android/app/src/main/res/mipmap-hdpi
-          mkdir -p android/app/src/main/res/mipmap-mdpi
-          if [ -f "icon-512.png" ]; then
-            cp icon-512.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
-            cp icon-512.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png
-            cp icon-192.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
-            cp icon-192.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png
-            cp icon-192.png android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
-            cp icon-192.png android/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png
-            cp icon-192.png android/app/src/main/res/mipmap-hdpi/ic_launcher.png
-            cp icon-192.png android/app/src/main/res/mipmap-hdpi/ic_launcher_round.png
-            cp icon-192.png android/app/src/main/res/mipmap-mdpi/ic_launcher.png
-            cp icon-192.png android/app/src/main/res/mipmap-mdpi/ic_launcher_round.png
-            echo "✅ Icons copied!"
-          fi
+          python3 << 'PYEOF'
+          from PIL import Image
+          import os
+
+          # Source icon
+          src = "icon-512.png" if os.path.exists("icon-512.png") else "icon-192.png"
+          img = Image.open(src).convert("RGBA")
+
+          sizes = {
+              "android/app/src/main/res/mipmap-mdpi": 48,
+              "android/app/src/main/res/mipmap-hdpi": 72,
+              "android/app/src/main/res/mipmap-xhdpi": 96,
+              "android/app/src/main/res/mipmap-xxhdpi": 144,
+              "android/app/src/main/res/mipmap-xxxhdpi": 192,
+          }
+
+          for folder, size in sizes.items():
+              os.makedirs(folder, exist_ok=True)
+              resized = img.resize((size, size), Image.LANCZOS)
+              resized.save(f"{folder}/ic_launcher.png")
+              resized.save(f"{folder}/ic_launcher_round.png")
+              resized.save(f"{folder}/ic_launcher_foreground.png")
+              print(f"✅ {size}x{size} saved to {folder}")
+
+          print("🎉 All icons generated!")
+          PYEOF
 
       - name: Build APK
         run: |
