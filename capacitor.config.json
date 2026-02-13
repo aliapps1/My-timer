@@ -4,7 +4,12 @@
   "webDir": "www",
   "android": {
     "allowMixedContent": true,
-    "backgroundColor": "#0284c7",
-    "icon": "icon-512.png"
+    "backgroundColor": "#0284c7"
+  },
+  "plugins": {
+    "AdMob": {
+      "appId": "YOUR_ADMOB_APP_ID",
+      "isTesting": true
+    }
   }
 }
