@@ -36,9 +36,9 @@ jobs:
       - name: Prepare WWW folder
         run: |
           mkdir -p www
-          [ -f index.html ] && cp index.html www/ || echo "no index.html"
+          [ -f index.html ]    && cp index.html www/    || echo "no index.html"
           [ -f manifest.json ] && cp manifest.json www/ || true
-          [ -f sw.js ] && cp sw.js www/ || true
+          [ -f sw.js ]         && cp sw.js www/         || true
           for f in *.png; do [ -f "$f" ] && cp "$f" www/ || true; done
 
       - name: Capacitor Sync
@@ -53,11 +53,8 @@ jobs:
           python3 << 'PYEOF'
           from PIL import Image
           import os
-
-          # Source icon
           src = "icon-512.png" if os.path.exists("icon-512.png") else "icon-192.png"
           img = Image.open(src).convert("RGBA")
-
           sizes = {
               "android/app/src/main/res/mipmap-mdpi": 48,
               "android/app/src/main/res/mipmap-hdpi": 72,
@@ -65,16 +62,14 @@ jobs:
               "android/app/src/main/res/mipmap-xxhdpi": 144,
               "android/app/src/main/res/mipmap-xxxhdpi": 192,
           }
-
           for folder, size in sizes.items():
               os.makedirs(folder, exist_ok=True)
               resized = img.resize((size, size), Image.LANCZOS)
               resized.save(f"{folder}/ic_launcher.png")
               resized.save(f"{folder}/ic_launcher_round.png")
               resized.save(f"{folder}/ic_launcher_foreground.png")
-              print(f"✅ {size}x{size} saved to {folder}")
-
-          print("🎉 All icons generated!")
+              print(f"✅ {size}x{size} → {folder}")
+          print("🎉 Icons done!")
           PYEOF
 
       - name: Build APK
