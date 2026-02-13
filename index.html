@@ -117,6 +117,31 @@
         <button class="share-btn" id="shareBtn" onclick="shareStats()">Share Result</button>
     </div>
 
+    <!-- Share Modal -->
+    <div id="shareModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:999; justify-content:center; align-items:flex-end;">
+        <div style="background:white; border-radius:30px 30px 0 0; padding:30px; width:100%; max-width:500px;">
+            <div style="text-align:center; font-size:22px; font-weight:bold; color:#1e293b; margin-bottom:20px;">📤 Share Result</div>
+            <div id="shareText" style="background:#f0f9ff; border-radius:15px; padding:15px; font-size:16px; color:#1e293b; margin-bottom:20px; line-height:1.8;"></div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:15px;">
+                <button onclick="shareVia('whatsapp')" style="background:#25D366; color:white; border:none; border-radius:15px; padding:15px; font-size:16px; font-weight:bold; cursor:pointer;">
+                    💬 WhatsApp
+                </button>
+                <button onclick="shareVia('telegram')" style="background:#0088cc; color:white; border:none; border-radius:15px; padding:15px; font-size:16px; font-weight:bold; cursor:pointer;">
+                    ✈️ Telegram
+                </button>
+                <button onclick="shareVia('copy')" style="background:#6366f1; color:white; border:none; border-radius:15px; padding:15px; font-size:16px; font-weight:bold; cursor:pointer;">
+                    📋 Copy Text
+                </button>
+                <button onclick="shareVia('native')" style="background:#f59e0b; color:white; border:none; border-radius:15px; padding:15px; font-size:16px; font-weight:bold; cursor:pointer;">
+                    📱 More...
+                </button>
+            </div>
+            <button onclick="closeShareModal()" style="width:100%; background:#f1f5f9; color:#64748b; border:none; border-radius:15px; padding:15px; font-size:16px; font-weight:bold; cursor:pointer;">
+                Cancel
+            </button>
+        </div>
+    </div>
+
     <!-- Premium Modal -->
     <div id="premiumModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000; justify-content:center; align-items:center;">
         <div style="background:white; border-radius:30px; padding:40px 30px; max-width:420px; width:90%; text-align:center; position:relative;">
@@ -374,23 +399,48 @@
 
         function toggleMute() { isMuted=!isMuted; document.getElementById('muteBtn').innerText=isMuted?'🔇':'🔊'; }
 
-        // FIX: Share - پنجره اشتراک‌گذاری Android
+        // FIX: Share Modal با WhatsApp و Telegram
+        let currentShareText = '';
+
         function shareStats() {
             const t = T[currentLang], wt = getWeekTotal();
-            const text = `🎯 ${t.title}\n${t.today} ${stats.todayMin} ${t.min}\n${t.week} ${wt} ${t.min}\n\nhttps://aliapps1.github.io/My-timer/`;
-            if (navigator.share) {
-                navigator.share({ title: t.title, text: text }).catch(() => fallbackCopy(text));
-            } else {
-                fallbackCopy(text);
-            }
+            currentShareText = `🎯 ${t.title}\n${t.today} ${stats.todayMin} ${t.min}\n${t.week} ${wt} ${t.min}\n\nhttps://aliapps1.github.io/My-timer/`;
+            
+            document.getElementById('shareText').innerText = currentShareText;
+            document.getElementById('shareModal').style.display = 'flex';
         }
 
-        function fallbackCopy(text) {
-            try {
-                navigator.clipboard.writeText(text).then(() => {
-                    alert(currentLang==='fa'?'✅ کپی شد!': currentLang==='ar'?'✅ تم النسخ!':'✅ Copied!');
-                });
-            } catch(e) { alert(text); }
+        function closeShareModal() {
+            document.getElementById('shareModal').style.display = 'none';
+        }
+
+        function shareVia(method) {
+            const encoded = encodeURIComponent(currentShareText);
+            
+            if (method === 'whatsapp') {
+                window.open(`whatsapp://send?text=${encoded}`, '_blank');
+            } else if (method === 'telegram') {
+                window.open(`tg://msg?text=${encoded}`, '_blank');
+            } else if (method === 'copy') {
+                try {
+                    navigator.clipboard.writeText(currentShareText).then(() => {
+                        alert(currentLang==='fa'?'✅ کپی شد!': currentLang==='ar'?'✅ تم النسخ!':'✅ Copied!');
+                        closeShareModal();
+                    }).catch(() => {
+                        alert(currentShareText);
+                    });
+                } catch(e) {
+                    alert(currentShareText);
+                }
+            } else if (method === 'native') {
+                if (navigator.share) {
+                    navigator.share({ title: T[currentLang].title, text: currentShareText })
+                        .then(() => closeShareModal())
+                        .catch(() => {});
+                } else {
+                    alert(currentLang==='fa'?'گزینه‌های بیشتر در این دستگاه موجود نیست':'No more options available');
+                }
+            }
         }
 
         const PREMIUM_CODES = ['FOCUS2024','CHAMPION99','PREMIUM01','VIP2024'];
