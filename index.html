@@ -115,6 +115,14 @@
             </div>
         </div>
         <button class="share-btn" id="shareBtn" onclick="shareStats()">Share Result</button>
+        
+        <!-- Support Creator - PayPal Donation -->
+        <div style="text-align:center; margin-top:15px;">
+            <a href="https://paypal.me/aliapps" target="_blank" 
+               style="color:#94a3b8; font-size:14px; text-decoration:none;">
+                ☕ Support the Creator
+            </a>
+        </div>
     </div>
 
     <!-- Share Modal -->
@@ -148,25 +156,60 @@
             <button onclick="closePremiumModal()" style="position:absolute; top:15px; right:20px; background:none; border:none; font-size:24px; cursor:pointer; color:#94a3b8;">✕</button>
             <div style="font-size:50px; margin-bottom:15px;">👑</div>
             <h2 style="color:#1e293b; font-size:28px; margin-bottom:10px;">Focus Champion Premium</h2>
-            <p style="color:#64748b; font-size:16px; margin-bottom:30px;">You've reached today's limit!<br>Upgrade for unlimited sessions.</p>
-            <div style="background:#f0f9ff; border-radius:20px; padding:20px; margin-bottom:25px; text-align:left;">
-                <div style="padding:8px 0; font-size:16px; color:#1e293b;">✅ Unlimited daily sessions</div>
-                <div style="padding:8px 0; font-size:16px; color:#1e293b;">✅ All sound effects unlocked</div>
-                <div style="padding:8px 0; font-size:16px; color:#1e293b;">✅ Advanced statistics</div>
-                <div style="padding:8px 0; font-size:16px; color:#1e293b;">✅ Priority support</div>
-                <div style="padding:8px 0; font-size:16px; color:#1e293b;">✅ No ads</div>
+            <p style="color:#64748b; font-size:16px; margin-bottom:20px;">Remove ads & unlock everything!</p>
+            <div style="background:#f0f9ff; border-radius:20px; padding:20px; margin-bottom:20px; text-align:left;">
+                <div style="padding:6px 0; font-size:16px; color:#1e293b;">✅ No ads - ever!</div>
+                <div style="padding:6px 0; font-size:16px; color:#1e293b;">✅ Unlimited daily sessions</div>
+                <div style="padding:6px 0; font-size:16px; color:#1e293b;">✅ All sound effects</div>
+                <div style="padding:6px 0; font-size:16px; color:#1e293b;">✅ Advanced statistics</div>
+                <div style="padding:6px 0; font-size:16px; color:#1e293b;">✅ Priority support</div>
             </div>
-            <div style="margin-bottom:25px;">
-                <div style="font-size:40px; font-weight:bold; color:#0284c7;">$1.99</div>
-                <div style="color:#64748b; font-size:14px;">per month</div>
+            <div style="margin-bottom:20px;">
+                <div style="font-size:44px; font-weight:bold; color:#0284c7;">$5</div>
+                <div style="color:#64748b; font-size:14px;">per month · via Google Play</div>
             </div>
-            <a href="https://paypal.me/focuschampion/1.99" target="_blank" style="display:block; background:#0070ba; color:white; padding:18px; border-radius:15px; text-decoration:none; font-size:18px; font-weight:bold; margin-bottom:15px;" onclick="trackPayment('paypal')">💳 Pay with PayPal</a>
+            <!-- Google Play Billing (فعلاً placeholder تا Google Play آماده بشه) -->
+            <button onclick="alert('Coming soon on Google Play!\n\nFor now, enjoy 2 free sessions per cycle.')" 
+               style="display:block; width:100%; background:#01875f; color:white; padding:18px; border-radius:15px; border:none; font-size:18px; font-weight:bold; margin-bottom:15px; cursor:pointer;">
+                🛒 Get Premium on Google Play
+            </button>
             <button onclick="showActivationInput()" style="width:100%; background:#10b981; color:white; padding:18px; border-radius:15px; border:none; font-size:18px; font-weight:bold; cursor:pointer; margin-bottom:15px;">🔑 I have an activation code</button>
             <div id="activationDiv" style="display:none; margin-bottom:15px;">
                 <input id="activationCode" type="text" placeholder="Enter your code" style="width:100%; padding:15px; border:2px solid #e0e0e0; border-radius:15px; font-size:16px; text-align:center; margin-bottom:10px; box-sizing:border-box;">
                 <button onclick="activatePremium()" style="width:100%; background:#0284c7; color:white; padding:15px; border-radius:15px; border:none; font-size:16px; font-weight:bold; cursor:pointer;">✅ Activate</button>
             </div>
             <button onclick="closePremiumModal()" style="width:100%; background:none; border:none; color:#94a3b8; font-size:16px; cursor:pointer; padding:10px;">Maybe later</button>
+        </div>
+    </div>
+
+    <!-- Ad Modal - نمایش قبل/بعد از جلسه سوم به بعد -->
+    <div id="adModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1000; justify-content:center; align-items:center;">
+        <div style="background:white; border-radius:30px; padding:30px; max-width:420px; width:90%; text-align:center; position:relative;">
+            
+            <!-- Ad Label -->
+            <div style="position:absolute; top:12px; left:15px; background:#e2e8f0; color:#94a3b8; font-size:11px; padding:3px 8px; border-radius:10px;">Advertisement</div>
+            
+            <!-- Skip timer -->
+            <div id="skipTimer" style="position:absolute; top:12px; right:15px; background:#f1f5f9; color:#64748b; font-size:13px; padding:5px 12px; border-radius:10px; font-weight:600;">5s</div>
+
+            <!-- Ad content - placeholder تا AdMob وصل بشه -->
+            <div style="background: linear-gradient(135deg, #667eea, #764ba2); border-radius:20px; padding:40px 20px; margin:30px 0 20px 0;">
+                <div style="font-size:40px; margin-bottom:10px;">🎯</div>
+                <div style="color:white; font-size:20px; font-weight:bold; margin-bottom:8px;">Focus Champion Pro</div>
+                <div style="color:rgba(255,255,255,0.85); font-size:15px;">Remove ads for just $5/month</div>
+            </div>
+
+            <!-- Skip button - disabled at first -->
+            <button id="skipAdBtn" onclick="skipAd()" disabled
+                style="width:100%; background:#e2e8f0; color:#94a3b8; border:none; border-radius:15px; padding:15px; font-size:16px; font-weight:bold; cursor:not-allowed; margin-bottom:12px;">
+                Skip Ad (5s)
+            </button>
+
+            <!-- Remove ads -->
+            <button onclick="showPremiumFromAd()" 
+                style="width:100%; background: linear-gradient(135deg, #667eea, #764ba2); color:white; border:none; border-radius:15px; padding:15px; font-size:16px; font-weight:bold; cursor:pointer;">
+                👑 Remove Ads - $5/month
+            </button>
         </div>
     </div>
 
@@ -294,8 +337,27 @@
         function startTimer() {
             if (!isPaused) return;
             if (stats.sessionsToday >= 15 && !isPremiumUser()) { showPremiumModal(); return; }
+            
+            // کاربر Start زد → ما چک می‌کنیم
+            let usageCount = parseInt(localStorage.getItem('usage_count')) || 0;
+
+            if (isPremiumUser() || usageCount < 2) {
+                // جلسه 1 و 2: مستقیم شروع
+                usageCount++;
+                localStorage.setItem('usage_count', usageCount);
+                doStartTimer();
+            } else {
+                // جلسه 3+: تبلیغ (triggered by click ✅)
+                showInterstitialAd(() => {
+                    // بعد از بستن تبلیغ، تایمر شروع میشه
+                    localStorage.setItem('usage_count', 0);
+                    doStartTimer();
+                });
+            }
+        }
+
+        function doStartTimer() {
             isPaused = false;
-            // FIX: فقط یک فلش کوچیک - اندازه دکمه عوض نمیشه
             const btn = document.getElementById('startBtn');
             btn.innerText = '▶'; btn.style.background = '#16a34a';
             timerId = setInterval(function() {
@@ -342,6 +404,7 @@
             stats.lastDate = today;
             localStorage.setItem('focusStats', JSON.stringify(stats));
             updateUI();
+
             if (!isMuted && currentSound !== 'none' && alarm.src) {
                 alarm.loop = true;
                 alarm.play().then(() => { setTimeout(() => { alarm.pause(); alarm.loop=false; alarm.currentTime=0; }, 15000); }).catch(()=>{});
@@ -350,7 +413,8 @@
             if (Notification.permission==='granted') {
                 new Notification('🎉 Session Complete!', { body: `Great work! You completed ${minutes} minutes!`, icon: 'icon-192.png', tag: 'focus-complete', requireInteraction: true });
             }
-            alert(`🎉 Session Complete!\n\nGreat work! You completed ${minutes} minutes!`);
+            // تبلیغ فقط موقع کلیک Start نشون داده میشه (Google-compliant)
+            alert(`🎉 Session Complete!\n\nGreat work! You completed ${minutes} minutes!\n\n${!isPremiumUser() ? '💡 Tip: Next Start will show an ad. Upgrade to Premium to remove ads!' : ''}`);
         }
 
         function changeSound() {
@@ -444,6 +508,66 @@
         }
 
         const PREMIUM_CODES = ['FOCUS2024','CHAMPION99','PREMIUM01','VIP2024'];
+
+        // === AdMob تنظیمات ===
+        // مرحله 1: از admob.google.com حساب بسازید
+        // مرحله 2: AD_UNIT_ID واقعی رو اینجا بگذارید
+        const AD_UNIT_ID = 'ca-app-pub-3940256099942544/1033173712'; // TEST ID فعلاً
+
+        // === سیستم تبلیغات (Google-compliant) ===
+        // تبلیغ فقط در واکنش به کلیک کاربر نشون داده میشه ✅
+        let adSkipTimer = null;
+        let adCallback = null;
+
+        function showInterstitialAd(callback) {
+            adCallback = callback;
+            let secondsLeft = 5;
+
+            const modal = document.getElementById('adModal');
+            const skipBtn = document.getElementById('skipAdBtn');
+            const timerLabel = document.getElementById('skipTimer');
+
+            modal.style.display = 'flex';
+            skipBtn.disabled = true;
+            skipBtn.style.background = '#e2e8f0';
+            skipBtn.style.color = '#94a3b8';
+            skipBtn.style.cursor = 'not-allowed';
+            skipBtn.innerText = `Skip Ad (${secondsLeft}s)`;
+            timerLabel.innerText = `${secondsLeft}s`;
+
+            adSkipTimer = setInterval(() => {
+                secondsLeft--;
+                if (secondsLeft > 0) {
+                    skipBtn.innerText = `Skip Ad (${secondsLeft}s)`;
+                    timerLabel.innerText = `${secondsLeft}s`;
+                } else {
+                    clearInterval(adSkipTimer);
+                    skipBtn.disabled = false;
+                    skipBtn.style.background = '#0284c7';
+                    skipBtn.style.color = 'white';
+                    skipBtn.style.cursor = 'pointer';
+                    skipBtn.innerText = 'Skip Ad ▶';
+                    timerLabel.innerText = '✓';
+                }
+            }, 1000);
+        }
+
+        function skipAd() {
+            clearInterval(adSkipTimer);
+            document.getElementById('adModal').style.display = 'none';
+            if (adCallback) { adCallback(); adCallback = null; }
+        }
+
+        function closeAdModal() {
+            clearInterval(adSkipTimer);
+            document.getElementById('adModal').style.display = 'none';
+            adCallback = null;
+        }
+
+        function showPremiumFromAd() {
+            closeAdModal();
+            document.getElementById('premiumModal').style.display = 'flex';
+        }
         function showPremiumModal() {
             if (localStorage.getItem('isPremium')==='true') { stats.sessionsToday=0; localStorage.setItem('focusStats',JSON.stringify(stats)); updateUI(); startTimer(); return; }
             document.getElementById('premiumModal').style.display = 'flex';
