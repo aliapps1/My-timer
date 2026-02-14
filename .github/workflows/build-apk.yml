@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Android APK + AAB
 
 on:
   push:
@@ -36,16 +36,14 @@ jobs:
       - name: Prepare WWW folder
         run: |
           mkdir -p www
-          [ -f index.html ]    && cp index.html www/    || echo "no index.html"
+          [ -f index.html ]    && cp index.html www/    || true
           [ -f manifest.json ] && cp manifest.json www/ || true
           [ -f sw.js ]         && cp sw.js www/         || true
           for f in *.png; do [ -f "$f" ] && cp "$f" www/ || true; done
 
       - name: Capacitor Sync
         run: |
-          if [ ! -d "android" ]; then
-            npx cap add android
-          fi
+          if [ ! -d "android" ]; then npx cap add android; fi
           npx cap sync android
 
       - name: Generate App Icons
@@ -68,27 +66,78 @@ jobs:
               resized.save(f"{folder}/ic_launcher.png")
               resized.save(f"{folder}/ic_launcher_round.png")
               resized.save(f"{folder}/ic_launcher_foreground.png")
-              print(f"✅ {size}x{size} → {folder}")
-          print("🎉 Icons done!")
+              print(f"✅ {size}x{size} done")
           PYEOF
+
+      - name: Generate Keystore (only if not exists in secrets)
+        run: |
+          if [ -z "${{ secrets.KEYSTORE_BASE64 }}" ]; then
+            echo "⚠️ No Keystore in secrets - generating new one..."
+            keytool -genkeypair \
+              -alias focuschampion \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -keystore focuschampion.keystore \
+              -storepass "Ali@191349" \
+              -keypass "Ali@191349" \
+              -dname "CN=aliapps, OU=aliapps, O=aliapps, L=Dubai, ST=Dubai, C=AE" \
+              -noprompt
+            echo "✅ Keystore generated!"
+            base64 focuschampion.keystore > keystore_base64.txt
+            echo "📋 Add this to GitHub Secrets as KEYSTORE_BASE64:"
+            cat keystore_base64.txt
+          else
+            echo "✅ Using Keystore from GitHub Secrets"
+            echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > focuschampion.keystore
+          fi
+
+      - name: Configure Signing
+        run: |
+          cat >> android/app/build.gradle << 'GRADLE'
+
+          android {
+              signingConfigs {
+                  release {
+                      storeFile file("../../../focuschampion.keystore")
+                      storePassword "Ali@191349"
+                      keyAlias "focuschampion"
+                      keyPassword "Ali@191349"
+                  }
+              }
+              buildTypes {
+                  release {
+                      signingConfig signingConfigs.release
+                      minifyEnabled false
+                  }
+              }
+          }
+          GRADLE
 
       - name: Build APK and AAB
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
-          ./gradlew bundleDebug
+          ./gradlew assembleRelease
+          ./gradlew bundleRelease
 
-      - name: Upload APK artifact
+      - name: Upload Keystore (⚠️ SAVE THIS OFFLINE!)
         uses: actions/upload-artifact@v4
         with:
-          name: FocusChampion-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: KEYSTORE-BACKUP-SAVE-OFFLINE
+          path: focuschampion.keystore
+          retention-days: 1
+
+      - name: Upload Release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: FocusChampion-Release-APK
+          path: android/app/build/outputs/apk/release/app-release.apk
           retention-days: 30
 
-      - name: Upload AAB artifact
+      - name: Upload Release AAB (for Google Play)
         uses: actions/upload-artifact@v4
         with:
-          name: FocusChampion-AAB
-          path: android/app/build/outputs/bundle/debug/app-debug.aab
+          name: FocusChampion-Release-AAB
+          path: android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 30
