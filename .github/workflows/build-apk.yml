@@ -83,6 +83,21 @@ jobs:
             -noprompt
           echo "✅ Keystore generated!"
 
+      - name: Set Version
+        run: |
+          python3 << 'PYEOF'
+          import re
+
+          VERSION_CODE = 1
+          VERSION_NAME = "1.0.0"
+
+          gradle = open("android/app/build.gradle").read()
+          gradle = re.sub(r'versionCode\s+\d+', f'versionCode {VERSION_CODE}', gradle)
+          gradle = re.sub(r'versionName\s+"[^"]+"', f'versionName "{VERSION_NAME}"', gradle)
+          open("android/app/build.gradle", "w").write(gradle)
+          print(f"✅ versionCode={VERSION_CODE} versionName={VERSION_NAME}")
+          PYEOF
+
       - name: Build Release APK and AAB
         run: |
           cd android
