@@ -447,15 +447,22 @@
         }
 
         function toJalali(gy, gm, gd) {
-            var g_d_m=[0,31,59,90,120,151,181,212,243,273,304,334], jy=(gy<=1600)?0:979;
-            gy-=(gy<=1600)?621:1600;
-            var gy2=(gm>2)?(gy+1):gy;
-            var days=(365*gy)+(parseInt((gy2+3)/4))-(parseInt((gy2+99)/100))+(parseInt((gy2+399)/400))-80+gd+g_d_m[gm-1];
-            jy+=33*parseInt(days/12053); days%=12053; jy+=4*parseInt(days/1461); days%=1461;
-            jy+=parseInt(Math.max(0,days-365)/365); days=(days>365)?((days-1)%365):(days-1);
-            var jm=parseInt((days+6)/30.59)+1;
-            var jd=days+1-parseInt((jm>6?(6*31+(jm-7)*30):(jm-1)*31));
-            return [jy,jm,jd];
+            var g_day_no, j_day_no, j_np, jy, jm, jd;
+            gm -= 1; gd -= 1;
+            g_day_no = 365*gy + ~~((gy+3)/4) - ~~((gy+99)/100) + ~~((gy+399)/400);
+            var gLeap = [31,28+(gy%4==0&&(gy%100!=0||gy%400==0)?1:0),31,30,31,30,31,31,30,31,30,31];
+            for (var i = 0; i < gm; i++) g_day_no += gLeap[i];
+            g_day_no += gd;
+            j_day_no = g_day_no - 79;
+            j_np = ~~(j_day_no/12053); j_day_no %= 12053;
+            jy = 979 + 33*j_np + 4*~~(j_day_no/1461);
+            j_day_no %= 1461;
+            if (j_day_no >= 366) { jy += ~~((j_day_no-1)/365); j_day_no = (j_day_no-1)%365; }
+            var jm_days = [31,31,31,31,31,31,30,30,30,30,30,29];
+            for (jm = 0; jm < 11 && j_day_no >= jm_days[jm]; jm++) j_day_no -= jm_days[jm];
+            jd = j_day_no + 1;
+            jm += 1;
+            return [jy - 1600, jm, jd]; // jy - 1600 = سال جلالی درست
         }
 
         function updateDate() {
