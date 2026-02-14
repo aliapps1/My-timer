@@ -69,64 +69,85 @@ jobs:
               print(f"✅ {size}x{size} done")
           PYEOF
 
-      - name: Generate Keystore (only if not exists in secrets)
+      - name: Generate Keystore
         run: |
-          if [ -z "${{ secrets.KEYSTORE_BASE64 }}" ]; then
-            echo "⚠️ No Keystore in secrets - generating new one..."
-            keytool -genkeypair \
-              -alias focuschampion \
-              -keyalg RSA \
-              -keysize 2048 \
-              -validity 10000 \
-              -keystore focuschampion.keystore \
-              -storepass "Ali@191349" \
-              -keypass "Ali@191349" \
-              -dname "CN=aliapps, OU=aliapps, O=aliapps, L=Dubai, ST=Dubai, C=AE" \
-              -noprompt
-            echo "✅ Keystore generated!"
-            base64 focuschampion.keystore > keystore_base64.txt
-            echo "📋 Add this to GitHub Secrets as KEYSTORE_BASE64:"
-            cat keystore_base64.txt
-          else
-            echo "✅ Using Keystore from GitHub Secrets"
-            echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > focuschampion.keystore
-          fi
+          keytool -genkeypair \
+            -alias focuschampion \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -keystore focuschampion.keystore \
+            -storepass "Ali@191349" \
+            -keypass "Ali@191349" \
+            -dname "CN=aliapps, OU=aliapps, O=aliapps, L=Dubai, ST=Dubai, C=AE" \
+            -noprompt
+          echo "✅ Keystore generated!"
+          base64 focuschampion.keystore > keystore_base64.txt
+          echo "=== KEYSTORE BASE64 (copy for GitHub Secrets) ==="
+          cat keystore_base64.txt
 
-      - name: Configure Signing
+      - name: Create keystore.properties
         run: |
-          cat >> android/app/build.gradle << 'GRADLE'
+          cat > android/keystore.properties << 'PROPS'
+          storeFile=../../focuschampion.keystore
+          storePassword=Ali@191349
+          keyAlias=focuschampion
+          keyPassword=Ali@191349
+          PROPS
+          echo "✅ keystore.properties created"
 
-          android {
-              signingConfigs {
-                  release {
-                      storeFile file("../../../focuschampion.keystore")
-                      storePassword "Ali@191349"
-                      keyAlias "focuschampion"
-                      keyPassword "Ali@191349"
-                  }
-              }
-              buildTypes {
-                  release {
-                      signingConfig signingConfigs.release
-                      minifyEnabled false
-                  }
-              }
-          }
-          GRADLE
+      - name: Update build.gradle for signing
+        run: |
+          # خواندن محتوای فعلی build.gradle
+          GRADLE_FILE="android/app/build.gradle"
+          
+          # اضافه کردن signing config به صورت صحیح
+          python3 << 'PYEOF'
+          import re
 
-      - name: Build APK and AAB
+          with open("android/app/build.gradle", "r") as f:
+              content = f.read()
+
+          signing_config = """
+          signingConfigs {
+              release {
+                  storeFile file("../../focuschampion.keystore")
+                  storePassword "Ali@191349"
+                  keyAlias "focuschampion"
+                  keyPassword "Ali@191349"
+              }
+          }"""
+
+          # اضافه کردن signingConfig به buildTypes release
+          content = content.replace(
+              'buildTypes {',
+              'signingConfigs {\n        release {\n            storeFile file("../../focuschampion.keystore")\n            storePassword "Ali@191349"\n            keyAlias "focuschampion"\n            keyPassword "Ali@191349"\n        }\n    }\n    buildTypes {'
+          )
+          content = content.replace(
+              'release {',
+              'release {\n            signingConfig signingConfigs.release',
+              1
+          )
+
+          with open("android/app/build.gradle", "w") as f:
+              f.write(content)
+
+          print("✅ build.gradle updated with signing config")
+          PYEOF
+
+      - name: Build Release APK and AAB
         run: |
           cd android
           chmod +x gradlew
           ./gradlew assembleRelease
           ./gradlew bundleRelease
 
-      - name: Upload Keystore (⚠️ SAVE THIS OFFLINE!)
+      - name: Upload Keystore Backup
         uses: actions/upload-artifact@v4
         with:
           name: KEYSTORE-BACKUP-SAVE-OFFLINE
           path: focuschampion.keystore
-          retention-days: 1
+          retention-days: 7
 
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
@@ -135,7 +156,7 @@ jobs:
           path: android/app/build/outputs/apk/release/app-release.apk
           retention-days: 30
 
-      - name: Upload Release AAB (for Google Play)
+      - name: Upload Release AAB
         uses: actions/upload-artifact@v4
         with:
           name: FocusChampion-Release-AAB
