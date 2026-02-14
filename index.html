@@ -168,7 +168,7 @@
                 <span class="stat-value" id="statStreak">0 days</span>
             </div>
             <div class="stat-item">
-                <span class="stat-label">🏆 Total Sessions:</span>
+                <span class="stat-label" id="lblTotal">🏆 Total Sessions:</span>
                 <span class="stat-value" id="statTotal">0</span>
             </div>
         </div>
@@ -315,9 +315,9 @@
         const alarm = document.getElementById('alarm');
 
         const T = {
-            en: { title:"Focus Champion", start:"Start", pause:"Pause", reset:"Reset", share:"Share Result", today:"📅 Today:", week:"📈 This Week:", streak:"🔥 Streak:", min:"min", day:"days", sessions:"sessions", days:["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"], months:["January","February","March","April","May","June","July","August","September","October","November","December"] },
-            fa: { title:"قهرمان تمرکز", start:"شروع", pause:"توقف", reset:"بازنشانی", share:"اشتراک‌گذاری", today:"📅 امروز:", week:"📈 این هفته:", streak:"🔥 زنجیره:", min:"دقیقه", day:"روز", sessions:"جلسه", days:["یکشنبه","دوشنبه","سه‌شنبه","چهارشنبه","پنج‌شنبه","جمعه","شنبه"], months:["فروردین","اردیبهشت","خرداد","تیر","مرداد","شهریور","مهر","آبان","آذر","دی","بهمن","اسفند"] },
-            ar: { title:"بطل التركيز", start:"بدء", pause:"إيقاف", reset:"إعادة ضبط", share:"مشاركة", today:"📅 اليوم:", week:"📈 هذا الأسبوع:", streak:"🔥 متسلسل:", min:"دقيقة", day:"يوم", sessions:"جلسات", days:["الأحد","الإثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"], months:["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"] }
+            en: { title:"Focus Champion", start:"Start", pause:"Pause", reset:"Reset", share:"Share Result", today:"📅 Today:", week:"📈 This Week:", streak:"🔥 Streak:", total:"🏆 Total Sessions:", min:"min", day:"days", sessions:"sessions", days:["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"], months:["January","February","March","April","May","June","July","August","September","October","November","December"] },
+            fa: { title:"قهرمان تمرکز", start:"شروع", pause:"توقف", reset:"بازنشانی", share:"اشتراک‌گذاری", today:"📅 امروز:", week:"📈 این هفته:", streak:"🔥 زنجیره:", total:"🏆 کل جلسات:", min:"دقیقه", day:"روز", sessions:"جلسه", days:["یکشنبه","دوشنبه","سه‌شنبه","چهارشنبه","پنج‌شنبه","جمعه","شنبه"], months:["فروردین","اردیبهشت","خرداد","تیر","مرداد","شهریور","مهر","آبان","آذر","دی","بهمن","اسفند"] },
+            ar: { title:"بطل التركيز", start:"بدء", pause:"إيقاف", reset:"إعادة ضبط", share:"مشاركة", today:"📅 اليوم:", week:"📈 هذا الأسبوع:", streak:"🔥 متسلسل:", total:"🏆 إجمالي الجلسات:", min:"دقيقة", day:"يوم", sessions:"جلسات", days:["الأحد","الإثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"], months:["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"] }
         };
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -420,12 +420,20 @@
             document.getElementById('levelName').innerText = current.name;
             document.getElementById('levelXpBar').style.width = pct + '%';
 
+            // متن XP بدون عدد در ابتدا تا RTL مشکل نداشته باشه
             if (next) {
+                const remaining = next.sessions - total;
                 document.getElementById('levelXpText').innerText =
-                    `${total} sessions · ${next.sessions - total} more to next · XP: ${xp}`;
+                    currentLang === 'fa'
+                    ? `${total} جلسه · ${remaining} جلسه تا سطح بعدی`
+                    : currentLang === 'ar'
+                    ? `${total} جلسة · ${remaining} للمستوى التالي`
+                    : `${total} sessions · ${remaining} more to next level`;
             } else {
                 document.getElementById('levelXpText').innerText =
-                    `👑 ${total} sessions · MAX LEVEL! · XP: ${xp}`;
+                    currentLang === 'fa' ? `👑 ${total} جلسه · بالاترین سطح!`
+                    : currentLang === 'ar' ? `👑 ${total} جلسة · أعلى مستوى!`
+                    : `👑 ${total} sessions · MAX LEVEL!`;
             }
 
             const earned = LEVELS.slice(0, levelIndex + 1).map(l => l.badge);
@@ -434,19 +442,37 @@
         }
 
         // === Session History ===
+        function formatHistoryDate(dateStr) {
+            // dateStr format: "2026-02-15"
+            if (currentLang === 'fa') {
+                const parts = dateStr.split('-');
+                const [jy, jm, jd] = toJalali(parseInt(parts[0]), parseInt(parts[1]), parseInt(parts[2]));
+                const t = T['fa'];
+                return `${jd} ${t.months[jm-1]} ${jy}`;
+            } else if (currentLang === 'ar') {
+                const parts = dateStr.split('-');
+                const d = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+                return `${d.getDate()} ${T['ar'].months[d.getMonth()]}`;
+            } else {
+                const parts = dateStr.split('-');
+                const d = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+                return `${T['en'].months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+            }
+        }
+
         function showHistory() {
             const list = document.getElementById('historyList');
             if (!stats.sessionHistory || stats.sessionHistory.length === 0) {
                 list.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:30px;">No sessions yet!<br>Complete your first session.</div>';
             } else {
-                list.innerHTML = stats.sessionHistory.map((s, i) => `
+                list.innerHTML = stats.sessionHistory.map((s) => `
                     <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid #f1f5f9;">
                         <div>
-                            <div style="font-weight:600; color:#1e293b;">${s.date}</div>
+                            <div style="font-weight:600; color:#1e293b;">${formatHistoryDate(s.date)}</div>
                             <div style="font-size:13px; color:#94a3b8;">${s.time}</div>
                         </div>
                         <div style="background:#f0f9ff; color:#0284c7; padding:6px 14px; border-radius:20px; font-weight:bold;">
-                            ⏱️ ${s.minutes} min
+                            ⏱️ ${s.minutes} ${T[currentLang].min}
                         </div>
                     </div>
                 `).join('');
@@ -690,6 +716,7 @@
             document.getElementById('lblToday').innerText = t.today;
             document.getElementById('lblWeek').innerText = t.week;
             document.getElementById('lblStreak').innerText = t.streak;
+            document.getElementById('lblTotal').innerText = t.total;
             const ip = localStorage.getItem('isPremium')==='true';
             document.getElementById('statToday').innerText = ip ? `${stats.todayMin} ${t.min} 👑` : `${stats.todayMin} ${t.min} (${stats.sessionsToday}/15 ${t.sessions})`;
             document.getElementById('statWeek').innerText = `${wt} ${t.min}`;
@@ -706,6 +733,8 @@
             document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('btn'+lang.charAt(0).toUpperCase()+lang.slice(1)).classList.add('active');
             updateUI();
+            updateDate();
+            updateLevel();
         }
 
         function stopAlarm() {
