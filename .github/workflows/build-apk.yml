@@ -46,6 +46,27 @@ jobs:
           if [ ! -d "android" ]; then npx cap add android; fi
           npx cap sync android
 
+      - name: Fix App Name
+        run: |
+          STRINGS_FILE="android/app/src/main/res/values/strings.xml"
+          if [ -f "$STRINGS_FILE" ]; then
+            sed -i 's/<string name="app_name">.*<\/string>/<string name="app_name">Focus Champion<\/string>/g' "$STRINGS_FILE"
+            echo "✅ App name fixed to: Focus Champion"
+            cat "$STRINGS_FILE"
+          else
+            echo "⚠️ strings.xml not found, creating..."
+            mkdir -p android/app/src/main/res/values
+            cat > "$STRINGS_FILE" << 'EOF'
+          <?xml version='1.0' encoding='utf-8'?>
+          <resources>
+              <string name="app_name">Focus Champion</string>
+              <string name="title_activity_main">Focus Champion</string>
+              <string name="package_name">io.ionic.starter</string>
+              <string name="custom_url_scheme">io.ionic.starter</string>
+          </resources>
+          EOF
+          fi
+
       - name: Generate App Icons
         run: |
           python3 << 'PYEOF'
