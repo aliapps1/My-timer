@@ -49,7 +49,15 @@
         .timer-display { text-align: center; font-size: 80px; font-weight: bold; color: #0284c7; margin: 40px 0; font-family: 'Courier New', monospace; }
         .progress-bar { width: 100%; height: 10px; background: #e0e0e0; border-radius: 10px; overflow: hidden; margin-bottom: 30px; }
         .progress-fill { height: 100%; background: #0284c7; width: 0%; transition: width 0.5s; }
-        /* Level System */
+        /* Toast notification */
+        .toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: #1e293b; color: white; padding: 12px 24px;
+            border-radius: 25px; font-size: 15px; font-weight: 600;
+            z-index: 9999; opacity: 0; transition: opacity 0.3s;
+            white-space: nowrap; max-width: 90%;
+        }
+        .toast.show { opacity: 1; }
         .level-card {
             background: linear-gradient(135deg, #667eea, #764ba2);
             border-radius: 20px;
@@ -263,6 +271,7 @@
     </div>
 
     <audio id="alarm" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
+    <div id="toast" class="toast"></div>
 
     <script>
         let duration = 300, timeLeft = 300, isPaused = true, timerId = null;
@@ -341,6 +350,13 @@
 
         function restoreTimer() { if (localStorage.getItem('timer_running') === 'true') syncTimerFromStorage(); }
 
+        function showToast(msg, duration = 3000) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), duration);
+        }
+
         function getTodayString() {
             const d = new Date();
             return `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`;
@@ -352,15 +368,20 @@
             return `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`;
         }
 
-        // === Level System (بر اساس تعداد جلسات) ===
+        // === Level System (Sessions + XP ترکیبی) ===
         const LEVELS = [
-            { name: '🌱 Beginner',    sessions: 0,   badge: '🌱', desc: '0 sessions' },
-            { name: '⚡ Focused',     sessions: 5,   badge: '⚡', desc: '5 sessions' },
-            { name: '🔥 On Fire',     sessions: 15,  badge: '🔥', desc: '15 sessions' },
-            { name: '💎 Champion',    sessions: 30,  badge: '💎', desc: '30 sessions' },
-            { name: '🚀 Master',      sessions: 60,  badge: '🚀', desc: '60 sessions' },
-            { name: '👑 Legend',      sessions: 100, badge: '👑', desc: '100 sessions' },
+            { name: '🌱 Beginner',  sessions: 0,   badge: '🌱' },
+            { name: '⚡ Focused',   sessions: 5,   badge: '⚡' },
+            { name: '🔥 On Fire',   sessions: 15,  badge: '🔥' },
+            { name: '💎 Champion',  sessions: 30,  badge: '💎' },
+            { name: '🚀 Master',    sessions: 60,  badge: '🚀' },
+            { name: '👑 Legend',    sessions: 100, badge: '👑' },
         ];
+
+        function getXP() {
+            // XP = (sessions × 10) + (minutes) + (streak × 5)
+            return ((stats.totalSessions||0) * 10) + (stats.totalMinutes||0) + ((stats.streak||0) * 5);
+        }
 
         function getCurrentLevel() {
             const total = stats.totalSessions || 0;
@@ -371,27 +392,25 @@
             }
             const current = LEVELS[levelIndex];
             const next = LEVELS[levelIndex + 1] || null;
-            const sessionsInLevel = total - current.sessions;
-            const sessionsNeeded = next ? next.sessions - current.sessions : 0;
-            const pct = next ? Math.min(100, Math.floor((sessionsInLevel / sessionsNeeded) * 100)) : 100;
-            return { levelIndex, current, next, sessionsInLevel, sessionsNeeded, pct, total };
+            const pct = next ? Math.min(100, Math.floor(((total - current.sessions) / (next.sessions - current.sessions)) * 100)) : 100;
+            return { levelIndex, current, next, pct, total };
         }
 
         function updateLevel() {
-            const { levelIndex, current, next, sessionsInLevel, sessionsNeeded, pct, total } = getCurrentLevel();
-            
+            const { levelIndex, current, next, pct, total } = getCurrentLevel();
+            const xp = getXP();
+
             document.getElementById('levelName').innerText = current.name;
             document.getElementById('levelXpBar').style.width = pct + '%';
-            
+
             if (next) {
-                document.getElementById('levelXpText').innerText = 
-                    `${total} sessions · Next level: ${next.sessions - total} more`;
+                document.getElementById('levelXpText').innerText =
+                    `${total} sessions · ${next.sessions - total} more to next · XP: ${xp}`;
             } else {
-                document.getElementById('levelXpText').innerText = 
-                    `🏆 ${total} sessions · MAX LEVEL!`;
+                document.getElementById('levelXpText').innerText =
+                    `👑 ${total} sessions · MAX LEVEL! · XP: ${xp}`;
             }
 
-            // Badges کسب شده
             const earned = LEVELS.slice(0, levelIndex + 1).map(l => l.badge);
             document.getElementById('levelBadges').innerHTML =
                 earned.map(b => `<span class="badge">${b}</span>`).join('');
@@ -491,6 +510,9 @@
 
         function doStartTimer() {
             isPaused = false;
+            // ثبت زمان شروع واقعی برای Validation
+            localStorage.setItem('session_startTime', Date.now().toString());
+
             const btn = document.getElementById('startBtn');
             btn.innerText = '▶'; btn.style.background = '#16a34a';
             timerId = setInterval(function() {
@@ -522,66 +544,94 @@
         }
 
         function resetTimer() {
-            pauseTimer(); timeLeft = duration; updateDisplay();
-            localStorage.removeItem('timer_endTime'); localStorage.removeItem('timer_running'); localStorage.removeItem('timer_duration');
+            // اگر تایمر در حال اجراست، چک کن چقدر گذشته
+            if (!isPaused) {
+                const startTime = parseInt(localStorage.getItem('session_startTime')) || 0;
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const MIN_VALID = 300; // 5 دقیقه
+                if (startTime > 0 && elapsed < MIN_VALID) {
+                    const remaining = Math.ceil((MIN_VALID - elapsed) / 60);
+                    showToast(`⚠️ ${remaining} min more needed to count this session`);
+                }
+            }
+            pauseTimer();
+            timeLeft = duration;
+            updateDisplay();
+            localStorage.removeItem('timer_endTime');
+            localStorage.removeItem('timer_running');
+            localStorage.removeItem('timer_duration');
+            localStorage.removeItem('session_startTime');
         }
 
         function finishTimer() {
+            // محاسبه زمان واقعی سپری شده
+            const startTime = parseInt(localStorage.getItem('session_startTime')) || 0;
+            const elapsedSeconds = startTime > 0 ? Math.floor((Date.now() - startTime) / 1000) : duration;
+            const MIN_VALID_SECONDS = 300; // 5 دقیقه = 300 ثانیه
+            const isValidSession = elapsedSeconds >= MIN_VALID_SECONDS;
+
             pauseTimer();
-            localStorage.removeItem('timer_endTime'); localStorage.removeItem('timer_running'); localStorage.removeItem('timer_duration');
-            timeLeft = duration; updateDisplay();
+            localStorage.removeItem('timer_endTime');
+            localStorage.removeItem('timer_running');
+            localStorage.removeItem('timer_duration');
+            localStorage.removeItem('session_startTime');
+            timeLeft = duration;
+            updateDisplay();
 
             const minutes = Math.floor(duration/60);
             const today = getTodayString();
             const now = new Date();
-
-            // آمار روزانه
-            stats.todayMin += minutes;
-            stats.sessionsToday++;
-            stats.lastDate = today;
-
-            // آمار کل
-            stats.totalSessions++;
-            stats.totalMinutes += minutes;
-
-            // هفتگی
-            if (!stats.weeklyData) stats.weeklyData = {};
-            stats.weeklyData[today] = (stats.weeklyData[today]||0) + minutes;
-
-            // Streak واقعی
-            const yesterday = getYesterdayString();
-            if (stats.lastSessionDate === yesterday || stats.lastSessionDate === today) {
-                if (stats.lastSessionDate !== today) stats.streak = (stats.streak||0) + 1;
-            } else if (stats.lastSessionDate === null) {
-                stats.streak = 1;
-            } else {
-                stats.streak = 1; // ریست streak اگر روز رد شده
-            }
-            stats.lastSessionDate = today;
-
-            // Session History (آخرین ۳۰ جلسه)
-            const sessionEntry = {
-                date: today,
-                time: `${now.getHours()}:${now.getMinutes().toString().padStart(2,'0')}`,
-                minutes: minutes,
-                duration: duration
-            };
-            stats.sessionHistory.unshift(sessionEntry);
-            if (stats.sessionHistory.length > 30) stats.sessionHistory.pop();
-
-            localStorage.setItem('focusStats', JSON.stringify(stats));
-            updateUI();
-            updateLevel();
 
             if (!isMuted && currentSound !== 'none' && alarm.src) {
                 alarm.loop = true;
                 alarm.play().then(() => { setTimeout(() => { alarm.pause(); alarm.loop=false; alarm.currentTime=0; }, 15000); }).catch(()=>{});
             }
             if ('vibrate' in navigator) navigator.vibrate([400,200,400,200,400,200,400,200,400]);
-            if (Notification.permission==='granted') {
-                new Notification('🎉 Session Complete!', { body: `Great work! You completed ${minutes} minutes!`, icon: 'icon-192.png', tag: 'focus-complete', requireInteraction: true });
+
+            if (isValidSession) {
+                // ✅ جلسه معتبر - ثبت همه آمار
+                stats.todayMin += minutes;
+                stats.sessionsToday++;
+                stats.lastDate = today;
+                stats.totalSessions++;
+                stats.totalMinutes += minutes;
+                if (!stats.weeklyData) stats.weeklyData = {};
+                stats.weeklyData[today] = (stats.weeklyData[today]||0) + minutes;
+
+                // Streak واقعی
+                const yesterday = getYesterdayString();
+                if (stats.lastSessionDate === today) {
+                    // همین امروز قبلاً جلسه داشته - streak تغییر نمی‌کنه
+                } else if (stats.lastSessionDate === yesterday) {
+                    stats.streak = (stats.streak||0) + 1;
+                } else {
+                    stats.streak = 1;
+                }
+                stats.lastSessionDate = today;
+
+                // Session History
+                stats.sessionHistory.unshift({
+                    date: today,
+                    time: `${now.getHours()}:${now.getMinutes().toString().padStart(2,'0')}`,
+                    minutes: minutes
+                });
+                if (stats.sessionHistory.length > 30) stats.sessionHistory.pop();
+
+                localStorage.setItem('focusStats', JSON.stringify(stats));
+                updateUI(); updateLevel();
+
+                if (Notification.permission==='granted') {
+                    new Notification('🎉 Session Complete!', {
+                        body: `${minutes} min done! 🔥 Streak: ${stats.streak} days`,
+                        icon: 'icon-192.png', tag: 'focus-complete', requireInteraction: true
+                    });
+                }
+                alert(`🎉 Session Complete!\n\n✅ ${minutes} min recorded!\n🔥 Streak: ${stats.streak} days\n🏅 Sessions: ${stats.totalSessions}`);
+
+            } else {
+                // ❌ جلسه کمتر از ۵ دقیقه - ثبت نمیشه
+                alert(`⏱️ Session not counted!\n\nMinimum 5 minutes required.\nYou completed ${Math.floor(elapsedSeconds/60)}m ${elapsedSeconds%60}s.\n\nKeep going next time! 💪`);
             }
-            alert(`🎉 Session Complete!\n\nGreat work! You completed ${minutes} minutes!\n🔥 Streak: ${stats.streak} days`);
         }
 
         function changeSound() {
