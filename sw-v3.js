@@ -1,7 +1,5 @@
-// Focus Champion - Service Worker v4.0
-// هماهنگ با index.html v2.0
-
-const CACHE_NAME = 'focus-champion-v4';
+// Focus Champion - Service Worker v5.0
+const CACHE_NAME = 'focus-champion-v5';
 const urlsToCache = [
   '/My-timer/',
   '/My-timer/index.html',
@@ -21,9 +19,15 @@ self.addEventListener('install', event => {
 
 self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request)
-      .then(response => response || fetch(event.request))
-      .catch(() => caches.match('/My-timer/index.html'))
+    fetch(event.request)
+      .then(response => {
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+        return response;
+      })
+      .catch(() => caches.match(event.request)
+        .then(response => response || caches.match('/My-timer/index.html'))
+      )
   );
 });
 
