@@ -496,7 +496,7 @@
             var gLeap = [31,28+(gy%4==0&&(gy%100!=0||gy%400==0)?1:0),31,30,31,30,31,31,30,31,30,31];
             for (var i = 0; i < gm; i++) g_day_no += gLeap[i];
             g_day_no += gd;
-            j_day_no = g_day_no - 79;
+            j_day_no = g_day_no - 80;
             j_np = ~~(j_day_no/12053); j_day_no %= 12053;
             jy = 979 + 33*j_np + 4*~~(j_day_no/1461);
             j_day_no %= 1461;
