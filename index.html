@@ -877,7 +877,11 @@
         // === Android Background Timer Bridge ===
         window.androidTimerComplete = function() {
             try {
-                // Android Service قبلاً زنگ زده - فقط UI و session ثبت کن
+                // Android Service دقیقاً duration ثانیه اجرا کرده
+                const elapsedSeconds = duration; // از duration مستقیم استفاده کن
+                const MIN_VALID_SECONDS = 300;
+                const isValidSession = elapsedSeconds >= MIN_VALID_SECONDS;
+
                 pauseTimer();
                 localStorage.removeItem('timer_endTime');
                 localStorage.removeItem('timer_running');
@@ -885,31 +889,47 @@
                 localStorage.removeItem('session_startTime');
                 timeLeft = duration;
                 updateDisplay();
-                // فقط session رو ثبت کن بدون صدا
+
                 const minutes = Math.floor(duration/60);
                 const today = getTodayString();
                 const now = new Date();
                 const timeStr = now.toTimeString().slice(0,5);
-                if (typeof stats !== 'undefined') {
-                    stats.todayMinutes = (stats.todayMinutes||0) + minutes;
-                    stats.totalMinutes = (stats.totalMinutes||0) + minutes;
+
+                if (isValidSession) {
+                    stats.todayMin = (stats.todayMin||0) + minutes;
+                    stats.sessionsToday = (stats.sessionsToday||0) + 1;
+                    stats.lastDate = today;
                     stats.totalSessions = (stats.totalSessions||0) + 1;
+                    stats.totalMinutes = (stats.totalMinutes||0) + minutes;
+                    if (!stats.weeklyData) stats.weeklyData = {};
+                    stats.weeklyData[today] = (stats.weeklyData[today]||0) + minutes;
+
+                    const yesterday = getYesterdayString();
+                    if (stats.lastDate === yesterday || stats.streak === 0) {
+                        stats.streak = (stats.streak||0) + 1;
+                    } else if (stats.lastDate !== today) {
+                        stats.streak = 1;
+                    }
+
                     if (!stats.sessionHistory) stats.sessionHistory = [];
                     stats.sessionHistory.unshift({date: today, time: timeStr, minutes: minutes});
                     if (stats.sessionHistory.length > 30) stats.sessionHistory.pop();
-                    stats.lastSessionDate = today;
+
                     saveStats();
                     updateStats();
                     updateLevel();
+                    showToast('🎉 Session Complete!');
+                } else {
+                    showToast(`⏱️ ${minutes}m session done! (min 5m to count)`);
                 }
-                showToast('🎉 Session Complete!');
+
                 // نشون دادن دکمه خاموش کردن زنگ
                 document.getElementById('alarmStopDiv').style.display = 'block';
                 setTimeout(() => {
                     document.getElementById('alarmStopDiv').style.display = 'none';
                     try { if (window.Android) Android.stopTimer(); } catch(e) {}
                 }, 15000);
-            } catch(e) {}
+            } catch(e) { console.log('androidTimerComplete error:', e); }
         };
         window.androidSyncTime = function(s) {
             try {
