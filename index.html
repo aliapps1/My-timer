@@ -617,11 +617,12 @@
         }
 
         function finishTimer() {
-            // محاسبه زمان واقعی سپری شده
+            // وقتی تایمر طبیعی تموم میشه، کل duration گذشته
             const startTime = parseInt(localStorage.getItem('session_startTime')) || 0;
-            const elapsedSeconds = startTime > 0 ? Math.floor((Date.now() - startTime) / 1000) : duration;
-            const MIN_VALID_SECONDS = 300; // 5 دقیقه = 300 ثانیه
-            const isValidSession = elapsedSeconds >= MIN_VALID_SECONDS;
+            const elapsedSeconds = startTime > 0 ? Math.round((Date.now() - startTime) / 1000) : duration;
+            const MIN_VALID_SECONDS = 300;
+            // 2 ثانیه tolerance برای drift
+            const isValidSession = elapsedSeconds >= (MIN_VALID_SECONDS - 2);
 
             pauseTimer();
             localStorage.removeItem('timer_endTime');
