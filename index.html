@@ -35,7 +35,7 @@
         .lang-btn { padding: 10px 25px; border: 2px solid #cbd5e1; background: #f1f5f9; border-radius: 25px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s; color: #475569; }
         .lang-btn:hover { border-color: #0284c7; color: #0284c7; }
         .lang-btn.active { background: #0284c7; color: white; border-color: #0284c7; }
-        .mute-btn { position: absolute; top: 20px; right: 20px; background: white; border: 2px solid #e0e0e0; border-radius: 50%; width: 50px; height: 50px; font-size: 20px; cursor: pointer; transition: all 0.3s; }
+        
         .date { text-align: center; color: #0284c7; font-size: 18px; margin-bottom: 10px; }
         h1 { text-align: center; font-size: 36px; color: #1e293b; margin-bottom: 30px; }
         .sound-selector-wrapper { margin-bottom: 30px; }
@@ -98,7 +98,6 @@
 </head>
 <body>
     <div class="container" id="mainContainer">
-        <button class="mute-btn" id="muteBtn" onclick="toggleMute()">🔊</button>
         <div class="lang-buttons">
             <button class="lang-btn active" id="btnEn" onclick="changeLang('en')">EN</button>
             <button class="lang-btn" id="btnAr" onclick="changeLang('ar')">AR</button>
@@ -292,7 +291,7 @@
 
     <script>
         let duration = 300, timeLeft = 300, isPaused = true, timerId = null;
-        let currentLang = 'en', isMuted = false, currentSound = 'melodic', wakeLock = null;
+        let currentLang = 'en', currentSound = 'melodic', wakeLock = null;
 
         let stats = JSON.parse(localStorage.getItem('focusStats')) || {
             todayMin: 0, weeklyData: {}, sessionsToday: 0, lastDate: null,
@@ -632,7 +631,7 @@
             const today = getTodayString();
             const now = new Date();
 
-            if (!isMuted && currentSound !== 'none' && alarm.src) {
+            if (currentSound !== 'none' && alarm.src) {
                 alarm.loop = true;
                 alarm.play().then(() => {
                     // نشون دادن دکمه توقف زنگ
@@ -693,7 +692,7 @@
             currentSound = document.getElementById('soundSelect').value;
             alarm.src = soundUrls[currentSound] || '';
             localStorage.setItem('preferredSound', currentSound);
-            if (currentSound !== 'none' && !isMuted) alarm.play().catch(()=>{});
+            if (currentSound !== 'none') alarm.play().catch(()=>{});
         }
 
         function getWeekTotal() {
@@ -744,11 +743,7 @@
             document.getElementById('alarmStopDiv').style.display = 'none';
         }
 
-        function toggleMute() {
-            isMuted = !isMuted;
-            document.getElementById('muteBtn').innerText = isMuted ? '🔇' : '🔊';
-            if (isMuted) stopAlarm();
-        }
+        
 
         // FIX: Share Modal با WhatsApp و Telegram
         let currentShareText = '';
