@@ -635,16 +635,14 @@
             const today = getTodayString();
             const now = new Date();
 
-            if (currentSound !== 'none' && alarm.src) {
+            if (currentSound !== 'none' && alarm.src && !window.Android) {
                 alarm.loop = true;
                 alarm.play().then(() => {
-                    // نشون دادن دکمه توقف زنگ
                     document.getElementById('alarmStopDiv').style.display = 'block';
-                    // بعد از 15 ثانیه خودکار قطع بشه اگر کسی نزد
                     setTimeout(() => stopAlarm(), 15000);
                 }).catch(()=>{});
             }
-            if ('vibrate' in navigator) navigator.vibrate([400,200,400,200,400,200,400,200,400]);
+            if ('vibrate' in navigator && !window.Android) navigator.vibrate([400,200,400,200,400,200,400,200,400]);
 
             if (isValidSession) {
                 // ✅ جلسه معتبر - ثبت همه آمار
@@ -745,6 +743,8 @@
             alarm.loop = false;
             alarm.currentTime = 0;
             document.getElementById('alarmStopDiv').style.display = 'none';
+            // خاموش کردن زنگ Android هم
+            try { if (window.Android) Android.stopTimer(); } catch(e) {}
         }
 
         
@@ -876,7 +876,40 @@
 
         // === Android Background Timer Bridge ===
         window.androidTimerComplete = function() {
-            try { finishTimer(); } catch(e) {}
+            try {
+                // Android Service قبلاً زنگ زده - فقط UI و session ثبت کن
+                pauseTimer();
+                localStorage.removeItem('timer_endTime');
+                localStorage.removeItem('timer_running');
+                localStorage.removeItem('timer_duration');
+                localStorage.removeItem('session_startTime');
+                timeLeft = duration;
+                updateDisplay();
+                // فقط session رو ثبت کن بدون صدا
+                const minutes = Math.floor(duration/60);
+                const today = getTodayString();
+                const now = new Date();
+                const timeStr = now.toTimeString().slice(0,5);
+                if (typeof stats !== 'undefined') {
+                    stats.todayMinutes = (stats.todayMinutes||0) + minutes;
+                    stats.totalMinutes = (stats.totalMinutes||0) + minutes;
+                    stats.totalSessions = (stats.totalSessions||0) + 1;
+                    if (!stats.sessionHistory) stats.sessionHistory = [];
+                    stats.sessionHistory.unshift({date: today, time: timeStr, minutes: minutes});
+                    if (stats.sessionHistory.length > 30) stats.sessionHistory.pop();
+                    stats.lastSessionDate = today;
+                    saveStats();
+                    updateStats();
+                    updateLevel();
+                }
+                showToast('🎉 Session Complete!');
+                // نشون دادن دکمه خاموش کردن زنگ
+                document.getElementById('alarmStopDiv').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('alarmStopDiv').style.display = 'none';
+                    try { if (window.Android) Android.stopTimer(); } catch(e) {}
+                }, 15000);
+            } catch(e) {}
         };
         window.androidSyncTime = function(s) {
             try {
