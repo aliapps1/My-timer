@@ -635,6 +635,7 @@
             const today = getTodayString();
             const now = new Date();
 
+            // Android زنگ رو هندل میکنه در همه حالت‌ها
             if (currentSound !== 'none' && alarm.src && !window.Android) {
                 alarm.loop = true;
                 alarm.play().then(() => {
@@ -642,7 +643,7 @@
                     setTimeout(() => stopAlarm(), 15000);
                 }).catch(()=>{});
             }
-            if ('vibrate' in navigator && !window.Android) navigator.vibrate([400,200,400,200,400,200,400,200,400]);
+            if ('vibrate' in navigator && !window.Android) navigator.vibrate([400,200,400,200,400]);
 
             if (isValidSession) {
                 // ✅ جلسه معتبر - ثبت همه آمار
