@@ -50,281 +50,38 @@ jobs:
         run: |
           STRINGS_FILE="android/app/src/main/res/values/strings.xml"
           if [ -f "$STRINGS_FILE" ]; then
-            sed -i 's/<string name="app_name">.*<\/string>/<string name="app_name">Focus Champion<\/string>/g' "$STRINGS_FILE"
-            echo "✅ App name fixed to: Focus Champion"
-            cat "$STRINGS_FILE"
-          else
-            echo "⚠️ strings.xml not found, creating..."
-            mkdir -p android/app/src/main/res/values
-            cat > "$STRINGS_FILE" << 'EOF'
-          <?xml version='1.0' encoding='utf-8'?>
-          <resources>
-              <string name="app_name">Focus Champion</string>
-              <string name="title_activity_main">Focus Champion</string>
-              <string name="package_name">io.ionic.starter</string>
-              <string name="custom_url_scheme">io.ionic.starter</string>
-          </resources>
-          EOF
+            sed -i 's|<string name="app_name">.*</string>|<string name="app_name">Focus Champion</string>|g' "$STRINGS_FILE"
           fi
 
       - name: Add Background Timer Service
         run: |
           JAVA_DIR="android/app/src/main/java/com/focuschampion/app"
+
+          # Write TimerForegroundService.java from base64
+          echo "cGFja2FnZSBjb20uZm9jdXNjaGFtcGlvbi5hcHA7CmltcG9ydCBhbmRyb2lkLmFwcC5Ob3RpZmljYXRpb247CmltcG9ydCBhbmRyb2lkLmFwcC5Ob3RpZmljYXRpb25DaGFubmVsOwppbXBvcnQgYW5kcm9pZC5hcHAuTm90aWZpY2F0aW9uTWFuYWdlcjsKaW1wb3J0IGFuZHJvaWQuYXBwLlBlbmRpbmdJbnRlbnQ7CmltcG9ydCBhbmRyb2lkLmFwcC5TZXJ2aWNlOwppbXBvcnQgYW5kcm9pZC5jb250ZW50LkludGVudDsKaW1wb3J0IGFuZHJvaWQubWVkaWEuUmluZ3RvbmVNYW5hZ2VyOwppbXBvcnQgYW5kcm9pZC5uZXQuVXJpOwppbXBvcnQgYW5kcm9pZC5vcy5CdWlsZDsKaW1wb3J0IGFuZHJvaWQub3MuQ291bnREb3duVGltZXI7CmltcG9ydCBhbmRyb2lkLm9zLklCaW5kZXI7CmltcG9ydCBhbmRyb2lkLm9zLlZpYnJhdGlvbkVmZmVjdDsKaW1wb3J0IGFuZHJvaWQub3MuVmlicmF0b3I7CmltcG9ydCBhbmRyb2lkeC5jb3JlLmFwcC5Ob3RpZmljYXRpb25Db21wYXQ7CnB1YmxpYyBjbGFzcyBUaW1lckZvcmVncm91bmRTZXJ2aWNlIGV4dGVuZHMgU2VydmljZSB7CiAgICBwdWJsaWMgc3RhdGljIGZpbmFsIFN0cmluZyBDSEFOTkVMX0lEICAgID0gIkZvY3VzVGltZXJDaGFubmVsIjsKICAgIHB1YmxpYyBzdGF0aWMgZmluYWwgU3RyaW5nIEFDVElPTl9TVEFSVCAgPSAiU1RBUlRfVElNRVIiOwogICAgcHVibGljIHN0YXRpYyBmaW5hbCBTdHJpbmcgQUNUSU9OX1NUT1AgICA9ICJTVE9QX1RJTUVSIjsKICAgIHB1YmxpYyBzdGF0aWMgZmluYWwgU3RyaW5nIEVYVFJBX1NFQ09ORFMgPSAic2Vjb25kcyI7CiAgICBwcml2YXRlIENvdW50RG93blRpbWVyIGNvdW50RG93blRpbWVyOwogICAgcHJpdmF0ZSBOb3RpZmljYXRpb25NYW5hZ2VyIG5vdGlmTWFuYWdlcjsKICAgIEBPdmVycmlkZSBwdWJsaWMgdm9pZCBvbkNyZWF0ZSgpIHsKICAgICAgICBzdXBlci5vbkNyZWF0ZSgpOwogICAgICAgIG5vdGlmTWFuYWdlciA9IChOb3RpZmljYXRpb25NYW5hZ2VyKSBnZXRTeXN0ZW1TZXJ2aWNlKE5PVElGSUNBVElPTl9TRVJWSUNFKTsKICAgICAgICBpZiAoQnVpbGQuVkVSU0lPTi5TREtfSU5UID49IEJ1aWxkLlZFUlNJT05fQ09ERVMuTykgewogICAgICAgICAgICBOb3RpZmljYXRpb25DaGFubmVsIGNoID0gbmV3IE5vdGlmaWNhdGlvbkNoYW5uZWwoQ0hBTk5FTF9JRCwgIkZvY3VzIFRpbWVyIiwgTm90aWZpY2F0aW9uTWFuYWdlci5JTVBPUlRBTkNFX0xPVyk7CiAgICAgICAgICAgIGNoLnNldERlc2NyaXB0aW9uKCJUaW1lciBydW5uaW5nIGluIGJhY2tncm91bmQiKTsKICAgICAgICAgICAgY2guc2V0U291bmQobnVsbCwgbnVsbCk7CiAgICAgICAgICAgIG5vdGlmTWFuYWdlci5jcmVhdGVOb3RpZmljYXRpb25DaGFubmVsKGNoKTsKICAgICAgICB9CiAgICB9CiAgICBAT3ZlcnJpZGUgcHVibGljIGludCBvblN0YXJ0Q29tbWFuZChJbnRlbnQgaW50ZW50LCBpbnQgZmxhZ3MsIGludCBzdGFydElkKSB7CiAgICAgICAgaWYgKGludGVudCA9PSBudWxsKSByZXR1cm4gU1RBUlRfTk9UX1NUSUNLWTsKICAgICAgICBpZiAoQUNUSU9OX1NUQVJULmVxdWFscyhpbnRlbnQuZ2V0QWN0aW9uKCkpKSB7CiAgICAgICAgICAgIHN0YXJ0VGltZXIoaW50ZW50LmdldEludEV4dHJhKEVYVFJBX1NFQ09ORFMsIDMwMCkpOwogICAgICAgIH0gZWxzZSBpZiAoQUNUSU9OX1NUT1AuZXF1YWxzKGludGVudC5nZXRBY3Rpb24oKSkpIHsKICAgICAgICAgICAgc3RvcFRpbWVyKCk7CiAgICAgICAgfQogICAgICAgIHJldHVybiBTVEFSVF9OT1RfU1RJQ0tZOwogICAgfQogICAgcHJpdmF0ZSB2b2lkIHN0YXJ0VGltZXIoaW50IHRvdGFsU2VjKSB7CiAgICAgICAgaWYgKGNvdW50RG93blRpbWVyICE9IG51bGwpIGNvdW50RG93blRpbWVyLmNhbmNlbCgpOwogICAgICAgIHN0YXJ0Rm9yZWdyb3VuZCgxLCBidWlsZE5vdGlmKHRvdGFsU2VjKSk7CiAgICAgICAgY291bnREb3duVGltZXIgPSBuZXcgQ291bnREb3duVGltZXIodG90YWxTZWMgKiAxMDAwTCwgMTAwMCkgewogICAgICAgICAgICBwdWJsaWMgdm9pZCBvblRpY2sobG9uZyBtcykgewogICAgICAgICAgICAgICAgaW50IHMgPSAoaW50KShtcyAvIDEwMDApOwogICAgICAgICAgICAgICAgbm90aWZNYW5hZ2VyLm5vdGlmeSgxLCBidWlsZE5vdGlmKHMpKTsKICAgICAgICAgICAgICAgIEludGVudCBiID0gbmV3IEludGVudCgiVElNRVJfVElDSyIpOwogICAgICAgICAgICAgICAgYi5wdXRFeHRyYSgic2Vjb25kcyIsIHMpOwogICAgICAgICAgICAgICAgc2VuZEJyb2FkY2FzdChiKTsKICAgICAgICAgICAgfQogICAgICAgICAgICBwdWJsaWMgdm9pZCBvbkZpbmlzaCgpIHsKICAgICAgICAgICAgICAgIHBsYXlBbGFybSgpOwogICAgICAgICAgICAgICAgc2VuZEJyb2FkY2FzdChuZXcgSW50ZW50KCJUSU1FUl9DT01QTEVURSIpKTsKICAgICAgICAgICAgICAgIG5vdGlmTWFuYWdlci5ub3RpZnkoMSwgYnVpbGREb25lTm90aWYoKSk7CiAgICAgICAgICAgICAgICBzdG9wRm9yZWdyb3VuZChmYWxzZSk7CiAgICAgICAgICAgICAgICBzdG9wU2VsZigpOwogICAgICAgICAgICB9CiAgICAgICAgfS5zdGFydCgpOwogICAgfQogICAgcHJpdmF0ZSB2b2lkIHN0b3BUaW1lcigpIHsKICAgICAgICBpZiAoY291bnREb3duVGltZXIgIT0gbnVsbCkgeyBjb3VudERvd25UaW1lci5jYW5jZWwoKTsgY291bnREb3duVGltZXIgPSBudWxsOyB9CiAgICAgICAgc3RvcEZvcmVncm91bmQodHJ1ZSk7CiAgICAgICAgc3RvcFNlbGYoKTsKICAgIH0KICAgIHByaXZhdGUgTm90aWZpY2F0aW9uIGJ1aWxkTm90aWYoaW50IHMpIHsKICAgICAgICBTdHJpbmcgdCA9IFN0cmluZy5mb3JtYXQoIiVkOiUwMmQiLCBzLzYwLCBzJTYwKTsKICAgICAgICBJbnRlbnQgaSA9IG5ldyBJbnRlbnQodGhpcywgTWFpbkFjdGl2aXR5LmNsYXNzKTsKICAgICAgICBQZW5kaW5nSW50ZW50IHBpID0gUGVuZGluZ0ludGVudC5nZXRBY3Rpdml0eSh0aGlzLCAwLCBpLCBQZW5kaW5nSW50ZW50LkZMQUdfSU1NVVRBQkxFKTsKICAgICAgICBJbnRlbnQgc2kgPSBuZXcgSW50ZW50KHRoaXMsIFRpbWVyRm9yZWdyb3VuZFNlcnZpY2UuY2xhc3MpOwogICAgICAgIHNpLnNldEFjdGlvbihBQ1RJT05fU1RPUCk7CiAgICAgICAgUGVuZGluZ0ludGVudCBzcGkgPSBQZW5kaW5nSW50ZW50LmdldFNlcnZpY2UodGhpcywgMCwgc2ksIFBlbmRpbmdJbnRlbnQuRkxBR19JTU1VVEFCTEUpOwogICAgICAgIHJldHVybiBuZXcgTm90aWZpY2F0aW9uQ29tcGF0LkJ1aWxkZXIodGhpcywgQ0hBTk5FTF9JRCkKICAgICAgICAgICAgLnNldENvbnRlbnRUaXRsZSgiRm9jdXMgQ2hhbXBpb24iKQogICAgICAgICAgICAuc2V0Q29udGVudFRleHQodCArICIgcmVtYWluaW5nIikKICAgICAgICAgICAgLnNldFNtYWxsSWNvbihhbmRyb2lkLlIuZHJhd2FibGUuaWNfZGlhbG9nX2luZm8pCiAgICAgICAgICAgIC5zZXRDb250ZW50SW50ZW50KHBpKQogICAgICAgICAgICAuYWRkQWN0aW9uKGFuZHJvaWQuUi5kcmF3YWJsZS5pY19tZWRpYV9wYXVzZSwgIlN0b3AiLCBzcGkpCiAgICAgICAgICAgIC5zZXRPbmdvaW5nKHRydWUpLnNldFNpbGVudCh0cnVlKS5idWlsZCgpOwogICAgfQogICAgcHJpdmF0ZSBOb3RpZmljYXRpb24gYnVpbGREb25lTm90aWYoKSB7CiAgICAgICAgSW50ZW50IGkgPSBuZXcgSW50ZW50KHRoaXMsIE1haW5BY3Rpdml0eS5jbGFzcyk7CiAgICAgICAgUGVuZGluZ0ludGVudCBwaSA9IFBlbmRpbmdJbnRlbnQuZ2V0QWN0aXZpdHkodGhpcywgMCwgaSwgUGVuZGluZ0ludGVudC5GTEFHX0lNTVVUQUJMRSk7CiAgICAgICAgcmV0dXJuIG5ldyBOb3RpZmljYXRpb25Db21wYXQuQnVpbGRlcih0aGlzLCBDSEFOTkVMX0lEKQogICAgICAgICAgICAuc2V0Q29udGVudFRpdGxlKCJTZXNzaW9uIENvbXBsZXRlISIpCiAgICAgICAgICAgIC5zZXRDb250ZW50VGV4dCgiR3JlYXQgd29yayEgWW91ciBmb2N1cyBzZXNzaW9uIGlzIGRvbmUuIikKICAgICAgICAgICAgLnNldFNtYWxsSWNvbihhbmRyb2lkLlIuZHJhd2FibGUuaWNfZGlhbG9nX2luZm8pCiAgICAgICAgICAgIC5zZXRDb250ZW50SW50ZW50KHBpKS5zZXRBdXRvQ2FuY2VsKHRydWUpLmJ1aWxkKCk7CiAgICB9CiAgICBwcml2YXRlIHZvaWQgcGxheUFsYXJtKCkgewogICAgICAgIHRyeSB7CiAgICAgICAgICAgIFVyaSB1cmkgPSBSaW5ndG9uZU1hbmFnZXIuZ2V0RGVmYXVsdFVyaShSaW5ndG9uZU1hbmFnZXIuVFlQRV9BTEFSTSk7CiAgICAgICAgICAgIGlmICh1cmkgPT0gbnVsbCkgdXJpID0gUmluZ3RvbmVNYW5hZ2VyLmdldERlZmF1bHRVcmkoUmluZ3RvbmVNYW5hZ2VyLlRZUEVfTk9USUZJQ0FUSU9OKTsKICAgICAgICAgICAgYW5kcm9pZC5tZWRpYS5SaW5ndG9uZSByID0gUmluZ3RvbmVNYW5hZ2VyLmdldFJpbmd0b25lKHRoaXMsIHVyaSk7CiAgICAgICAgICAgIGlmIChyICE9IG51bGwpIHIucGxheSgpOwogICAgICAgIH0gY2F0Y2ggKEV4Y2VwdGlvbiBlKSB7fQogICAgICAgIHRyeSB7CiAgICAgICAgICAgIFZpYnJhdG9yIHYgPSAoVmlicmF0b3IpIGdldFN5c3RlbVNlcnZpY2UoVklCUkFUT1JfU0VSVklDRSk7CiAgICAgICAgICAgIGlmICh2ICE9IG51bGwpIHsKICAgICAgICAgICAgICAgIGxvbmdbXSBwID0gezAsIDUwMCwgMjAwLCA1MDAsIDIwMCwgNTAwfTsKICAgICAgICAgICAgICAgIGlmIChCdWlsZC5WRVJTSU9OLlNES19JTlQgPj0gQnVpbGQuVkVSU0lPTl9DT0RFUy5PKSB7CiAgICAgICAgICAgICAgICAgICAgdi52aWJyYXRlKFZpYnJhdGlvbkVmZmVjdC5jcmVhdGVXYXZlZm9ybShwLCAtMSkpOwogICAgICAgICAgICAgICAgfSBlbHNlIHsgdi52aWJyYXRlKHAsIC0xKTsgfQogICAgICAgICAgICB9CiAgICAgICAgfSBjYXRjaCAoRXhjZXB0aW9uIGUpIHt9CiAgICB9CiAgICBAT3ZlcnJpZGUgcHVibGljIElCaW5kZXIgb25CaW5kKEludGVudCBpbnRlbnQpIHsgcmV0dXJuIG51bGw7IH0KICAgIEBPdmVycmlkZSBwdWJsaWMgdm9pZCBvbkRlc3Ryb3koKSB7CiAgICAgICAgaWYgKGNvdW50RG93blRpbWVyICE9IG51bGwpIGNvdW50RG93blRpbWVyLmNhbmNlbCgpOwogICAgICAgIHN1cGVyLm9uRGVzdHJveSgpOwogICAgfQp9Cg==" | base64 -d > "$JAVA_DIR/TimerForegroundService.java"
+          echo "✅ TimerForegroundService.java created"
+
+          # Write MainActivity.java from base64
+          echo "cGFja2FnZSBjb20uZm9jdXNjaGFtcGlvbi5hcHA7CmltcG9ydCBhbmRyb2lkLmNvbnRlbnQuQnJvYWRjYXN0UmVjZWl2ZXI7CmltcG9ydCBhbmRyb2lkLmNvbnRlbnQuQ29udGV4dDsKaW1wb3J0IGFuZHJvaWQuY29udGVudC5JbnRlbnQ7CmltcG9ydCBhbmRyb2lkLmNvbnRlbnQuSW50ZW50RmlsdGVyOwppbXBvcnQgYW5kcm9pZC5vcy5CdWlsZDsKaW1wb3J0IGFuZHJvaWQub3MuQnVuZGxlOwppbXBvcnQgYW5kcm9pZC53ZWJraXQuSmF2YXNjcmlwdEludGVyZmFjZTsKaW1wb3J0IGFuZHJvaWQud2Via2l0LldlYlZpZXc7CmltcG9ydCBjb20uZ2V0Y2FwYWNpdG9yLkJyaWRnZUFjdGl2aXR5OwpwdWJsaWMgY2xhc3MgTWFpbkFjdGl2aXR5IGV4dGVuZHMgQnJpZGdlQWN0aXZpdHkgewogICAgcHJpdmF0ZSBCcm9hZGNhc3RSZWNlaXZlciB0aW1lclJlY2VpdmVyOwogICAgQE92ZXJyaWRlIHB1YmxpYyB2b2lkIG9uQ3JlYXRlKEJ1bmRsZSBzYXZlZEluc3RhbmNlU3RhdGUpIHsgc3VwZXIub25DcmVhdGUoc2F2ZWRJbnN0YW5jZVN0YXRlKTsgfQogICAgQE92ZXJyaWRlIHByb3RlY3RlZCB2b2lkIG9uUmVzdW1lKCkgewogICAgICAgIHN1cGVyLm9uUmVzdW1lKCk7CiAgICAgICAgdHJ5IHsKICAgICAgICAgICAgV2ViVmlldyB3diA9IGdldEJyaWRnZSgpLmdldFdlYlZpZXcoKTsKICAgICAgICAgICAgaWYgKHd2ICE9IG51bGwpIHd2LmFkZEphdmFzY3JpcHRJbnRlcmZhY2UobmV3IEJyaWRnZSgpLCAiQW5kcm9pZCIpOwogICAgICAgIH0gY2F0Y2ggKEV4Y2VwdGlvbiBlKSB7fQogICAgICAgIHRpbWVyUmVjZWl2ZXIgPSBuZXcgQnJvYWRjYXN0UmVjZWl2ZXIoKSB7CiAgICAgICAgICAgIEBPdmVycmlkZSBwdWJsaWMgdm9pZCBvblJlY2VpdmUoQ29udGV4dCBjdHgsIEludGVudCBpbnRlbnQpIHsKICAgICAgICAgICAgICAgIFN0cmluZyBhY3Rpb24gPSBpbnRlbnQuZ2V0QWN0aW9uKCk7CiAgICAgICAgICAgICAgICBpZiAoIlRJTUVSX0NPTVBMRVRFIi5lcXVhbHMoYWN0aW9uKSkgewogICAgICAgICAgICAgICAgICAgIHJ1bk9uVWlUaHJlYWQoKCkgLT4gZXZhbEpTKCJpZih3aW5kb3cuYW5kcm9pZFRpbWVyQ29tcGxldGUpYW5kcm9pZFRpbWVyQ29tcGxldGUoKTsiKSk7CiAgICAgICAgICAgICAgICB9IGVsc2UgaWYgKCJUSU1FUl9USUNLIi5lcXVhbHMoYWN0aW9uKSkgewogICAgICAgICAgICAgICAgICAgIGludCBzID0gaW50ZW50LmdldEludEV4dHJhKCJzZWNvbmRzIiwgMCk7CiAgICAgICAgICAgICAgICAgICAgcnVuT25VaVRocmVhZCgoKSAtPiBldmFsSlMoImlmKHdpbmRvdy5hbmRyb2lkU3luY1RpbWUpYW5kcm9pZFN5bmNUaW1lKCIrcysiKTsiKSk7CiAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgIH0KICAgICAgICB9OwogICAgICAgIEludGVudEZpbHRlciBmID0gbmV3IEludGVudEZpbHRlcigpOwogICAgICAgIGYuYWRkQWN0aW9uKCJUSU1FUl9DT01QTEVURSIpOwogICAgICAgIGYuYWRkQWN0aW9uKCJUSU1FUl9USUNLIik7CiAgICAgICAgaWYgKEJ1aWxkLlZFUlNJT04uU0RLX0lOVCA+PSBCdWlsZC5WRVJTSU9OX0NPREVTLlRJUkFNSVNVKSB7CiAgICAgICAgICAgIHJlZ2lzdGVyUmVjZWl2ZXIodGltZXJSZWNlaXZlciwgZiwgQ29udGV4dC5SRUNFSVZFUl9OT1RfRVhQT1JURUQpOwogICAgICAgIH0gZWxzZSB7CiAgICAgICAgICAgIHJlZ2lzdGVyUmVjZWl2ZXIodGltZXJSZWNlaXZlciwgZik7CiAgICAgICAgfQogICAgfQogICAgQE92ZXJyaWRlIHByb3RlY3RlZCB2b2lkIG9uUGF1c2UoKSB7CiAgICAgICAgc3VwZXIub25QYXVzZSgpOwogICAgICAgIHRyeSB7IGlmICh0aW1lclJlY2VpdmVyICE9IG51bGwpIHVucmVnaXN0ZXJSZWNlaXZlcih0aW1lclJlY2VpdmVyKTsgfSBjYXRjaCAoRXhjZXB0aW9uIGUpIHt9CiAgICB9CiAgICBwcml2YXRlIHZvaWQgZXZhbEpTKFN0cmluZyBqcykgewogICAgICAgIHRyeSB7IGdldEJyaWRnZSgpLmdldFdlYlZpZXcoKS5ldmFsdWF0ZUphdmFzY3JpcHQoanMsIG51bGwpOyB9IGNhdGNoIChFeGNlcHRpb24gZSkge30KICAgIH0KICAgIGNsYXNzIEJyaWRnZSB7CiAgICAgICAgQEphdmFzY3JpcHRJbnRlcmZhY2UgcHVibGljIHZvaWQgc3RhcnRUaW1lcihpbnQgc2Vjb25kcykgewogICAgICAgICAgICBJbnRlbnQgaSA9IG5ldyBJbnRlbnQoTWFpbkFjdGl2aXR5LnRoaXMsIFRpbWVyRm9yZWdyb3VuZFNlcnZpY2UuY2xhc3MpOwogICAgICAgICAgICBpLnNldEFjdGlvbigiU1RBUlRfVElNRVIiKTsKICAgICAgICAgICAgaS5wdXRFeHRyYSgic2Vjb25kcyIsIHNlY29uZHMpOwogICAgICAgICAgICBpZiAoQnVpbGQuVkVSU0lPTi5TREtfSU5UID49IEJ1aWxkLlZFUlNJT05fQ09ERVMuTykgewogICAgICAgICAgICAgICAgc3RhcnRGb3JlZ3JvdW5kU2VydmljZShpKTsKICAgICAgICAgICAgfSBlbHNlIHsgc3RhcnRTZXJ2aWNlKGkpOyB9CiAgICAgICAgfQogICAgICAgIEBKYXZhc2NyaXB0SW50ZXJmYWNlIHB1YmxpYyB2b2lkIHN0b3BUaW1lcigpIHsKICAgICAgICAgICAgSW50ZW50IGkgPSBuZXcgSW50ZW50KE1haW5BY3Rpdml0eS50aGlzLCBUaW1lckZvcmVncm91bmRTZXJ2aWNlLmNsYXNzKTsKICAgICAgICAgICAgaS5zZXRBY3Rpb24oIlNUT1BfVElNRVIiKTsKICAgICAgICAgICAgc3RhcnRTZXJ2aWNlKGkpOwogICAgICAgIH0KICAgIH0KfQo=" | base64 -d > "$JAVA_DIR/MainActivity.java"
+          echo "✅ MainActivity.java created"
+
+          # Add permissions to AndroidManifest.xml
           MANIFEST="android/app/src/main/AndroidManifest.xml"
-          WEB_DIR="android/app/src/main/assets/public"
+          if ! grep -q "FOREGROUND_SERVICE" "$MANIFEST"; then
+            sed -i 's|</manifest>|    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>\n    <uses-permission android:name="android.permission.VIBRATE"/>\n    <uses-permission android:name="android.permission.WAKE_LOCK"/>\n</manifest>|' "$MANIFEST"
+          fi
+          if ! grep -q "TimerForegroundService" "$MANIFEST"; then
+            sed -i 's|</application>|        <service android:name=".TimerForegroundService" android:foregroundServiceType="specialUse" android:exported="false"/>\n    </application>|' "$MANIFEST"
+          fi
+          echo "✅ AndroidManifest updated"
 
-          # ==========================================
-          # 1. Create TimerForegroundService.java
-          # ==========================================
-          cat > "$JAVA_DIR/TimerForegroundService.java" << 'JAVAEOF'
-package com.focuschampion.app;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.Service;
-import android.content.Intent;
-import android.media.RingtoneManager;
-import android.net.Uri;
-import android.os.Build;
-import android.os.CountDownTimer;
-import android.os.IBinder;
-import android.os.VibrationEffect;
-import android.os.Vibrator;
-import androidx.core.app.NotificationCompat;
-public class TimerForegroundService extends Service {
-    public static final String CHANNEL_ID    = "FocusTimerChannel";
-    public static final String ACTION_START  = "START_TIMER";
-    public static final String ACTION_STOP   = "STOP_TIMER";
-    public static final String EXTRA_SECONDS = "seconds";
-    private CountDownTimer countDownTimer;
-    private NotificationManager notifManager;
-    @Override public void onCreate() {
-        super.onCreate();
-        notifManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel ch = new NotificationChannel(CHANNEL_ID, "Focus Timer", NotificationManager.IMPORTANCE_LOW);
-            ch.setDescription("Timer running in background");
-            ch.setSound(null, null);
-            notifManager.createNotificationChannel(ch);
-        }
-    }
-    @Override public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent == null) return START_NOT_STICKY;
-        if (ACTION_START.equals(intent.getAction())) {
-            startTimer(intent.getIntExtra(EXTRA_SECONDS, 300));
-        } else if (ACTION_STOP.equals(intent.getAction())) {
-            stopTimer();
-        }
-        return START_NOT_STICKY;
-    }
-    private void startTimer(int totalSec) {
-        if (countDownTimer != null) countDownTimer.cancel();
-        startForeground(1, buildNotif(totalSec));
-        countDownTimer = new CountDownTimer(totalSec * 1000L, 1000) {
-            public void onTick(long ms) {
-                int s = (int)(ms / 1000);
-                notifManager.notify(1, buildNotif(s));
-                Intent b = new Intent("TIMER_TICK");
-                b.putExtra("seconds", s);
-                sendBroadcast(b);
-            }
-            public void onFinish() {
-                playAlarm();
-                sendBroadcast(new Intent("TIMER_COMPLETE"));
-                notifManager.notify(1, buildDoneNotif());
-                stopForeground(false);
-                stopSelf();
-            }
-        }.start();
-    }
-    private void stopTimer() {
-        if (countDownTimer != null) { countDownTimer.cancel(); countDownTimer = null; }
-        stopForeground(true);
-        stopSelf();
-    }
-    private Notification buildNotif(int s) {
-        String t = String.format("%d:%02d", s/60, s%60);
-        Intent i = new Intent(this, MainActivity.class);
-        PendingIntent pi = PendingIntent.getActivity(this, 0, i, PendingIntent.FLAG_IMMUTABLE);
-        Intent si = new Intent(this, TimerForegroundService.class);
-        si.setAction(ACTION_STOP);
-        PendingIntent spi = PendingIntent.getService(this, 0, si, PendingIntent.FLAG_IMMUTABLE);
-        return new NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("⏱️ Focus Champion")
-            .setContentText(t + " remaining")
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentIntent(pi)
-            .addAction(android.R.drawable.ic_media_pause, "Stop", spi)
-            .setOngoing(true).setSilent(true).build();
-    }
-    private Notification buildDoneNotif() {
-        Intent i = new Intent(this, MainActivity.class);
-        PendingIntent pi = PendingIntent.getActivity(this, 0, i, PendingIntent.FLAG_IMMUTABLE);
-        return new NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("🎉 Session Complete!")
-            .setContentText("Great work! Your focus session is done.")
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentIntent(pi).setAutoCancel(true).build();
-    }
-    private void playAlarm() {
-        try {
-            Uri uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-            if (uri == null) uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-            android.media.Ringtone r = RingtoneManager.getRingtone(this, uri);
-            if (r != null) r.play();
-        } catch (Exception e) {}
-        try {
-            Vibrator v = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-            if (v != null) {
-                long[] p = {0, 500, 200, 500, 200, 500};
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    v.vibrate(VibrationEffect.createWaveform(p, -1));
-                } else { v.vibrate(p, -1); }
-            }
-        } catch (Exception e) {}
-    }
-    @Override public IBinder onBind(Intent intent) { return null; }
-    @Override public void onDestroy() {
-        if (countDownTimer != null) countDownTimer.cancel();
-        super.onDestroy();
-    }
-}
-JAVAEOF
-
-          # ==========================================
-          # 2. Replace MainActivity.java
-          # ==========================================
-          cat > "$JAVA_DIR/MainActivity.java" << 'JAVAEOF'
-package com.focuschampion.app;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.Build;
-import android.os.Bundle;
-import android.webkit.JavascriptInterface;
-import android.webkit.WebView;
-import com.getcapacitor.BridgeActivity;
-public class MainActivity extends BridgeActivity {
-    private BroadcastReceiver timerReceiver;
-    @Override public void onCreate(Bundle savedInstanceState) { super.onCreate(savedInstanceState); }
-    @Override protected void onResume() {
-        super.onResume();
-        try {
-            WebView wv = getBridge().getWebView();
-            if (wv != null) wv.addJavascriptInterface(new Bridge(), "Android");
-        } catch (Exception e) {}
-        timerReceiver = new BroadcastReceiver() {
-            @Override public void onReceive(Context ctx, Intent intent) {
-                String action = intent.getAction();
-                if ("TIMER_COMPLETE".equals(action)) {
-                    runOnUiThread(() -> evalJS("if(window.androidTimerComplete)androidTimerComplete();"));
-                } else if ("TIMER_TICK".equals(action)) {
-                    int s = intent.getIntExtra("seconds", 0);
-                    runOnUiThread(() -> evalJS("if(window.androidSyncTime)androidSyncTime("+s+");"));
-                }
-            }
-        };
-        IntentFilter f = new IntentFilter();
-        f.addAction("TIMER_COMPLETE");
-        f.addAction("TIMER_TICK");
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(timerReceiver, f, Context.RECEIVER_NOT_EXPORTED);
-        } else {
-            registerReceiver(timerReceiver, f);
-        }
-    }
-    @Override protected void onPause() {
-        super.onPause();
-        try { if (timerReceiver != null) unregisterReceiver(timerReceiver); } catch (Exception e) {}
-    }
-    private void evalJS(String js) {
-        try { getBridge().getWebView().evaluateJavascript(js, null); } catch (Exception e) {}
-    }
-    class Bridge {
-        @JavascriptInterface public void startTimer(int seconds) {
-            Intent i = new Intent(MainActivity.this, TimerForegroundService.class);
-            i.setAction("START_TIMER");
-            i.putExtra("seconds", seconds);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(i);
-            } else { startService(i); }
-        }
-        @JavascriptInterface public void stopTimer() {
-            Intent i = new Intent(MainActivity.this, TimerForegroundService.class);
-            i.setAction("STOP_TIMER");
-            startService(i);
-        }
-    }
-}
-JAVAEOF
-
-          # ==========================================
-          # 3. Add permissions + service to AndroidManifest.xml
-          # ==========================================
-          sed -i 's|</manifest>|    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>\n    <uses-permission android:name="android.permission.VIBRATE"/>\n    <uses-permission android:name="android.permission.WAKE_LOCK"/>\n</manifest>|' "$MANIFEST"
-
-          sed -i 's|</application>|        <service android:name=".TimerForegroundService" android:foregroundServiceType="specialUse" android:exported="false"/>\n    </application>|' "$MANIFEST"
-
-          echo "✅ AndroidManifest updated!"
-
-          # ==========================================
-          # 4. Inject JS bridge into index.html
-          # ==========================================
-          python3 << 'PYEOF'
-import os
-
-bridge = """
-<script>
-// ===== ANDROID BACKGROUND TIMER BRIDGE =====
-(function() {
-    window.androidTimerComplete = function() {
-        try { if(window.Android) Android.stopTimer(); finishTimer(); } catch(e) {}
-    };
-    window.androidSyncTime = function(s) {
-        try {
-            if(typeof isRunning !== 'undefined' && isRunning && typeof timeLeft !== 'undefined') {
-                timeLeft = s;
-                if(typeof updateDisplay === 'function') updateDisplay();
-                if(typeof updateProgress === 'function') updateProgress();
-            }
-        } catch(e) {}
-    };
-    function patchFunctions() {
-        if (typeof doStartTimer === 'undefined') { setTimeout(patchFunctions, 300); return; }
-        var origStart = window.doStartTimer;
-        var origReset = window.resetTimer;
-        window.doStartTimer = function() {
-            origStart.apply(this, arguments);
-            try { if(window.Android) Android.startTimer(timeLeft); } catch(e) {}
-        };
-        window.resetTimer = function() {
-            origReset.apply(this, arguments);
-            try { if(window.Android) Android.stopTimer(); } catch(e) {}
-        };
-    }
-    document.addEventListener('DOMContentLoaded', function() { setTimeout(patchFunctions, 500); });
-})();
-</script>
-"""
-
-web_dir = "android/app/src/main/assets/public"
-html_path = os.path.join(web_dir, "index.html")
-
-if os.path.exists(html_path):
-    with open(html_path, 'r', encoding='utf-8') as f:
-        content = f.read()
-    if 'androidTimerComplete' not in content:
-        content = content.replace('</body>', bridge + '\n</body>')
-        with open(html_path, 'w', encoding='utf-8') as f:
-            f.write(content)
-        print("✅ JS bridge injected into index.html!")
-    else:
-        print("⚠️ Bridge already exists, skipping.")
-else:
-    print("⚠️ index.html not found at:", html_path)
-PYEOF
+          # Inject JS bridge into index.html
+          HTML="android/app/src/main/assets/public/index.html"
+          if [ -f "$HTML" ] && ! grep -q "androidTimerComplete" "$HTML"; then
+            BRIDGE='<script>(function(){window.androidTimerComplete=function(){try{if(window.Android)Android.stopTimer();if(typeof finishTimer==="function")finishTimer();}catch(e){}};window.androidSyncTime=function(s){try{if(typeof isRunning!=="undefined"&&isRunning){timeLeft=s;if(typeof updateDisplay==="function")updateDisplay();if(typeof updateProgress==="function")updateProgress();}}catch(e){}};function patch(){if(typeof doStartTimer==="undefined"){setTimeout(patch,300);return;}var oS=window.doStartTimer,oR=window.resetTimer;window.doStartTimer=function(){oS.apply(this,arguments);try{if(window.Android)Android.startTimer(timeLeft);}catch(e){}};window.resetTimer=function(){oR.apply(this,arguments);try{if(window.Android)Android.stopTimer();}catch(e){}};}document.addEventListener("DOMContentLoaded",function(){setTimeout(patch,500);});})();<\/script>'
+            sed -i "s|</body>|$BRIDGE\n</body>|" "$HTML"
+            echo "✅ JS bridge injected"
+          fi
 
       - name: Generate App Icons
         run: |
@@ -367,10 +124,8 @@ PYEOF
         run: |
           python3 << 'PYEOF'
           import re
-
           VERSION_CODE = 1
           VERSION_NAME = "1.0.0"
-
           gradle = open("android/app/build.gradle").read()
           gradle = re.sub(r'versionCode\s+\d+', f'versionCode {VERSION_CODE}', gradle)
           gradle = re.sub(r'versionName\s+"[^"]+"', f'versionName "{VERSION_NAME}"', gradle)
