@@ -512,7 +512,7 @@
             const now = new Date(), t = T[currentLang], dn = t.days[now.getDay()];
             if (currentLang === 'fa') {
                 const [jy,jm,jd] = toJalali(now.getFullYear(), now.getMonth()+1, now.getDate());
-                document.getElementById('currentDate').innerText = `${dn}، ${jd} ${t.months[jm-1]} ${jy}`;
+                document.getElementById('currentDate').innerText = `${dn}، ${jd} ${t.months[jm-1]}`;
             } else if (currentLang === 'ar') {
                 document.getElementById('currentDate').innerText = `${dn}، ${now.getDate()} ${t.months[now.getMonth()]}`;
             } else {
