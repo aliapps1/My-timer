@@ -559,19 +559,23 @@
 
         function doStartTimer() {
             isPaused = false;
-            // ثبت زمان شروع واقعی برای Validation
             localStorage.setItem('session_startTime', Date.now().toString());
-
-            // Android Foreground Service - پس‌زمینه
-            try { if (window.Android) Android.startTimer(timeLeft); } catch(e) {}
 
             const btn = document.getElementById('startBtn');
             btn.innerText = '▶'; btn.style.background = '#16a34a';
+
+            if (window.Android) {
+                // Android همه چیز رو هندل میکنه - فقط UI آپدیت میکنیم
+                try { Android.startTimer(timeLeft); } catch(e) {}
+                localStorage.setItem('timer_endTime', (Date.now() + timeLeft*1000).toString());
+                localStorage.setItem('timer_running', 'true');
+                localStorage.setItem('timer_duration', duration.toString());
+                return; // JS interval لازم نیست
+            }
+
+            // حالت PWA بدون Android
             timerId = setInterval(function() {
                 timeLeft--; updateDisplay();
-                if (timeLeft%60===0 && timeLeft>0 && Notification.permission==='granted') {
-                    new Notification('⏱️ Focus Champion', { body: `${Math.floor(timeLeft/60)} min remaining`, tag: 'focus-timer' });
-                }
                 if (timeLeft <= 0) finishTimer();
             }, 1000);
             const endTime = Date.now() + (timeLeft*1000);
@@ -579,7 +583,6 @@
             localStorage.setItem('timer_running', 'true');
             localStorage.setItem('timer_duration', duration.toString());
             if (Notification.permission === 'default') Notification.requestPermission();
-            if ('wakeLock' in navigator) navigator.wakeLock.request('screen').then(l => { wakeLock=l; }).catch(()=>{});
         }
 
         function resetStartBtn() {
@@ -587,12 +590,15 @@
             if (btn) { btn.innerText = T[currentLang].start || 'Start'; btn.style.background = '#f59e0b'; }
         }
 
-        function pauseTimer() {
+        function pauseTimer(stopAndroid = true) {
             isPaused = true;
             if (timerId) { clearInterval(timerId); timerId = null; }
-            try { if (window.Android) Android.stopTimer(); } catch(e) {}
+            if (stopAndroid) {
+                try { if (window.Android) Android.stopTimer(); } catch(e) {}
+            }
             resetStartBtn();
-            localStorage.removeItem('timer_endTime'); localStorage.removeItem('timer_running');
+            localStorage.removeItem('timer_endTime');
+            localStorage.removeItem('timer_running');
             if (wakeLock) { wakeLock.release().catch(()=>{}); wakeLock = null; }
         }
 
@@ -884,7 +890,7 @@
                 const MIN_VALID_SECONDS = 300;
                 const isValidSession = elapsedSeconds >= MIN_VALID_SECONDS;
 
-                pauseTimer();
+                pauseTimer(false); // Android قبلاً تموم کرده، نیاز به stopTimer نیست
                 localStorage.removeItem('timer_endTime');
                 localStorage.removeItem('timer_running');
                 localStorage.removeItem('timer_duration');
@@ -937,6 +943,11 @@
             try {
                 timeLeft = s;
                 updateDisplay();
+                if (isPaused) {
+                    isPaused = false;
+                    const btn = document.getElementById('startBtn');
+                    if (btn) { btn.innerText = '▶'; btn.style.background = '#16a34a'; }
+                }
             } catch(e) {}
         };
 
