@@ -68,10 +68,10 @@ jobs:
           # Add permissions to AndroidManifest.xml
           MANIFEST="android/app/src/main/AndroidManifest.xml"
           if ! grep -q "FOREGROUND_SERVICE" "$MANIFEST"; then
-            sed -i 's|</manifest>|    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>\n    <uses-permission android:name="android.permission.VIBRATE"/>\n    <uses-permission android:name="android.permission.WAKE_LOCK"/>\n</manifest>|' "$MANIFEST"
+            sed -i 's|</manifest>|    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>\n        <uses-permission android:name="android.permission.VIBRATE"/>\n    <uses-permission android:name="android.permission.WAKE_LOCK"/>\n</manifest>|' "$MANIFEST"
           fi
           if ! grep -q "TimerForegroundService" "$MANIFEST"; then
-            sed -i 's|</application>|        <service android:name=".TimerForegroundService" android:foregroundServiceType="specialUse" android:exported="false"/>\n    </application>|' "$MANIFEST"
+            sed -i 's|</application>|        <service android:name=".TimerForegroundService" android:foregroundServiceType="dataSync" android:exported="false"/>\n    </application>|' "$MANIFEST"
           fi
           echo "✅ AndroidManifest updated"
 
