@@ -562,6 +562,9 @@
             // ثبت زمان شروع واقعی برای Validation
             localStorage.setItem('session_startTime', Date.now().toString());
 
+            // Android Foreground Service - پس‌زمینه
+            try { if (window.Android) Android.startTimer(timeLeft); } catch(e) {}
+
             const btn = document.getElementById('startBtn');
             btn.innerText = '▶'; btn.style.background = '#16a34a';
             timerId = setInterval(function() {
@@ -587,6 +590,7 @@
         function pauseTimer() {
             isPaused = true;
             if (timerId) { clearInterval(timerId); timerId = null; }
+            try { if (window.Android) Android.stopTimer(); } catch(e) {}
             resetStartBtn();
             localStorage.removeItem('timer_endTime'); localStorage.removeItem('timer_running');
             if (wakeLock) { wakeLock.release().catch(()=>{}); wakeLock = null; }
@@ -870,7 +874,30 @@
         function trackPayment(m) { alert('After payment, you will receive an activation code.\nEnter it in "I have an activation code".'); }
         function isPremiumUser() { return localStorage.getItem('isPremium')==='true'; }
 
-        if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+        // === Android Background Timer Bridge ===
+        window.androidTimerComplete = function() {
+            try { finishTimer(); } catch(e) {}
+        };
+        window.androidSyncTime = function(s) {
+            try {
+                timeLeft = s;
+                updateDisplay();
+            } catch(e) {}
+        };
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').then(reg => {
+                reg.update(); // همیشه آپدیت چک کن
+            }).catch(()=>{});
+
+            // پاک کردن Cache قدیمی
+            if ('caches' in window) {
+                caches.keys().then(keys => {
+                    keys.filter(k => k !== 'focus-champion-v5')
+                        .forEach(k => caches.delete(k));
+                });
+            }
+        }
         window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); });
         console.log('✅ Focus Champion Ready!');
     </script>
