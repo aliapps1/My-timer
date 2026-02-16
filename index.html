@@ -123,11 +123,11 @@
 
         <!-- دکمه توقف زنگ - فقط وقتی زنگ میزنه نشون داده میشه -->
         <div id="alarmStopDiv" style="display:none; margin-bottom:15px;">
-            <button onclick="stopAlarm()" style="
+            <button id="stopAlarmBtn" onclick="stopAlarm()" style="
                 width:100%; padding:18px; background:#ef4444; color:white;
                 border:none; border-radius:20px; font-size:20px; font-weight:700;
                 cursor:pointer; animation: pulse 0.8s infinite alternate;">
-                🔔 Stop Alarm
+                🔕 Stop Alarm
             </button>
         </div>
         <style>
@@ -197,10 +197,11 @@
 
     <!-- Share Modal -->
     <div id="shareModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:999; justify-content:center; align-items:flex-end;">
-        <div style="background:white; border-radius:30px 30px 0 0; padding:30px; width:100%; max-width:500px;">
-            <div style="text-align:center; font-size:22px; font-weight:bold; color:#1e293b; margin-bottom:20px;">📤 Share Result</div>
+        <div style="background:white; border-radius:30px 30px 0 0; padding:30px; width:100%; max-width:500px; position:relative;">
+            <button onclick="closeShareModal()" style="position:absolute; top:15px; right:20px; background:none; border:none; font-size:28px; cursor:pointer; color:#94a3b8; line-height:1;">✕</button>
+            <div id="shareModalTitle" style="text-align:center; font-size:22px; font-weight:bold; color:#1e293b; margin-bottom:20px;">📤 Share Result</div>
             <div id="shareText" style="background:#f0f9ff; border-radius:15px; padding:15px; font-size:16px; color:#1e293b; margin-bottom:20px; line-height:1.8;"></div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:15px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
                 <button onclick="shareVia('whatsapp')" style="background:#25D366; color:white; border:none; border-radius:15px; padding:15px; font-size:16px; font-weight:bold; cursor:pointer;">
                     💬 WhatsApp
                 </button>
@@ -214,9 +215,6 @@
                     📱 More...
                 </button>
             </div>
-            <button onclick="closeShareModal()" style="width:100%; background:#f1f5f9; color:#64748b; border:none; border-radius:15px; padding:15px; font-size:16px; font-weight:bold; cursor:pointer;">
-                Cancel
-            </button>
         </div>
     </div>
 
@@ -301,9 +299,9 @@
         if (!stats.sessionHistory) stats.sessionHistory = [];
 
         const T = {
-            en: { title:"Focus Champion", start:"Start", pause:"Pause", reset:"Reset", share:"Share Result", today:"📅 Today:", week:"📈 This Week:", streak:"🔥 Streak:", total:"🏆 Total Sessions:", min:"min", day:"days", sessions:"sessions", days:["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"], months:["January","February","March","April","May","June","July","August","September","October","November","December"] },
-            fa: { title:"قهرمان تمرکز", start:"شروع", pause:"توقف", reset:"بازنشانی", share:"اشتراک‌گذاری", today:"📅 امروز:", week:"📈 این هفته:", streak:"🔥 زنجیره:", total:"🏆 کل جلسات:", min:"دقیقه", day:"روز", sessions:"جلسه", days:["یکشنبه","دوشنبه","سه‌شنبه","چهارشنبه","پنج‌شنبه","جمعه","شنبه"], months:["فروردین","اردیبهشت","خرداد","تیر","مرداد","شهریور","مهر","آبان","آذر","دی","بهمن","اسفند"] },
-            ar: { title:"بطل التركيز", start:"بدء", pause:"إيقاف", reset:"إعادة ضبط", share:"مشاركة", today:"📅 اليوم:", week:"📈 هذا الأسبوع:", streak:"🔥 متسلسل:", total:"🏆 إجمالي الجلسات:", min:"دقيقة", day:"يوم", sessions:"جلسات", days:["الأحد","الإثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"], months:["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"] }
+            en: { title:"Focus Champion", start:"Start", pause:"Pause", reset:"Reset", share:"Share Result", stopAlarm:"🔕 Stop Alarm", today:"📅 Today:", week:"📈 This Week:", streak:"🔥 Streak:", total:"🏆 Total Sessions:", min:"min", day:"days", sessions:"sessions", days:["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"], months:["January","February","March","April","May","June","July","August","September","October","November","December"] },
+            fa: { title:"قهرمان تمرکز", start:"شروع", pause:"توقف", reset:"بازنشانی", share:"اشتراک‌گذاری", stopAlarm:"🔕 خاموش کردن زنگ", today:"📅 امروز:", week:"📈 این هفته:", streak:"🔥 زنجیره:", total:"🏆 کل جلسات:", min:"دقیقه", day:"روز", sessions:"جلسه", days:["یکشنبه","دوشنبه","سه‌شنبه","چهارشنبه","پنج‌شنبه","جمعه","شنبه"], months:["فروردین","اردیبهشت","خرداد","تیر","مرداد","شهریور","مهر","آبان","آذر","دی","بهمن","اسفند"] },
+            ar: { title:"بطل التركيز", start:"بدء", pause:"إيقاف", reset:"إعادة ضبط", share:"مشاركة", stopAlarm:"🔕 إيقاف المنبه", today:"📅 اليوم:", week:"📈 هذا الأسبوع:", streak:"🔥 متسلسل:", total:"🏆 إجمالي الجلسات:", min:"دقيقة", day:"يوم", sessions:"جلسات", days:["الأحد","الإثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"], months:["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"] }
         };
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -373,12 +371,12 @@
 
         // === Level System (Sessions + XP ترکیبی) ===
         const LEVELS = [
-            { name: '🌱 Beginner',  sessions: 0,   badge: '🌱' },
-            { name: '⚡ Focused',   sessions: 5,   badge: '⚡' },
-            { name: '🔥 On Fire',   sessions: 15,  badge: '🔥' },
-            { name: '💎 Champion',  sessions: 30,  badge: '💎' },
-            { name: '🚀 Master',    sessions: 60,  badge: '🚀' },
-            { name: '👑 Legend',    sessions: 100, badge: '👑' },
+            { en: '🌱 Beginner',  fa: '🌱 مبتدی',       ar: '🌱 مبتدئ',     sessions: 0,   badge: '🌱' },
+            { en: '⚡ Focused',   fa: '⚡ متمرکز',       ar: '⚡ مركّز',     sessions: 5,   badge: '⚡' },
+            { en: '🔥 On Fire',   fa: '🔥 در اوج',       ar: '🔥 في الذروة', sessions: 15,  badge: '🔥' },
+            { en: '💎 Champion',  fa: '💎 قهرمان',       ar: '💎 بطل',       sessions: 30,  badge: '💎' },
+            { en: '🚀 Master',    fa: '🚀 استاد',        ar: '🚀 محترف',     sessions: 60,  badge: '🚀' },
+            { en: '👑 Legend',    fa: '👑 افسانه',       ar: '👑 أسطورة',    sessions: 100, badge: '👑' },
         ];
 
         function getXP() {
@@ -401,12 +399,12 @@
 
         function updateLevel() {
             const { levelIndex, current, next, pct, total } = getCurrentLevel();
-            const xp = getXP();
-
-            document.getElementById('levelName').innerText = current.name;
+            const levelName = current[currentLang] || current.en;
+            document.getElementById('levelName').innerText = levelName;
+            document.getElementById('levelTitle').innerText =
+                currentLang === 'fa' ? '🏅 سطح شما' :
+                currentLang === 'ar' ? '🏅 مستواك' : '🏅 YOUR LEVEL';
             document.getElementById('levelXpBar').style.width = pct + '%';
-
-            // متن XP بدون عدد در ابتدا تا RTL مشکل نداشته باشه
             if (next) {
                 const remaining = next.sessions - total;
                 document.getElementById('levelXpText').innerText =
@@ -552,13 +550,17 @@
             btn.innerText = '▶'; btn.style.background = '#16a34a';
 
             if (window.Android) {
-                // Android همه چیز رو هندل میکنه - فقط UI آپدیت میکنیم
-                try { Android.startTimer(timeLeft, isMuted); } catch(e) {}
-                window.androidServiceStarted = true;
-                localStorage.setItem('timer_endTime', (Date.now() + timeLeft*1000).toString());
-                localStorage.setItem('timer_running', 'true');
-                localStorage.setItem('timer_duration', duration.toString());
-                return; // JS interval لازم نیست
+                try {
+                    Android.startTimer(timeLeft, isMuted);
+                    window.androidServiceStarted = true;
+                    localStorage.setItem('timer_endTime', (Date.now() + timeLeft*1000).toString());
+                    localStorage.setItem('timer_running', 'true');
+                    localStorage.setItem('timer_duration', duration.toString());
+                    return; // Android هندل میکنه
+                } catch(e) {
+                    // Android شروع نشد، JS interval ادامه میده
+                    window.androidServiceStarted = false;
+                }
             }
 
             // حالت PWA بدون Android
@@ -695,13 +697,19 @@
         function updateMuteBtn() {
             const btn = document.getElementById('muteBtn');
             if (!btn) return;
+            const labels = {
+                en: { on: '🔔 Alarm On',  off: '🔕 Alarm Off' },
+                fa: { on: '🔔 زنگ روشن', off: '🔕 زنگ خاموش' },
+                ar: { on: '🔔 التنبيه شغّال', off: '🔕 التنبيه مطفي' }
+            };
+            const l = labels[currentLang] || labels.en;
             if (isMuted) {
-                btn.innerHTML = '🔕 زنگ خاموش';
+                btn.innerHTML = l.off;
                 btn.style.background = '#fef2f2';
                 btn.style.borderColor = '#ef4444';
                 btn.style.color = '#ef4444';
             } else {
-                btn.innerHTML = '🔔 زنگ روشن';
+                btn.innerHTML = l.on;
                 btn.style.background = '#f0f9ff';
                 btn.style.borderColor = '#0284c7';
                 btn.style.color = '#0284c7';
@@ -724,6 +732,8 @@
             document.getElementById('pauseBtn').innerText = t.pause;
             document.getElementById('resetBtn').innerText = t.reset;
             document.getElementById('shareBtn').innerText = t.share;
+            const sab = document.getElementById('stopAlarmBtn');
+            if (sab) sab.innerText = t.stopAlarm;
             document.getElementById('lblToday').innerText = t.today;
             document.getElementById('lblWeek').innerText = t.week;
             document.getElementById('lblStreak').innerText = t.streak;
@@ -746,6 +756,7 @@
             updateUI();
             updateDate();
             updateLevel();
+            updateMuteBtn();
         }
 
         function stopAlarm() {
@@ -761,8 +772,8 @@
         function shareStats() {
             const t = T[currentLang], wt = getWeekTotal();
             currentShareText = `🎯 ${t.title}\n${t.today} ${stats.todayMin} ${t.min}\n${t.week} ${wt} ${t.min}\n\nhttps://aliapps1.github.io/My-timer/`;
-            
             document.getElementById('shareText').innerText = currentShareText;
+            document.getElementById('shareModalTitle').innerText = '📤 ' + t.share;
             document.getElementById('shareModal').style.display = 'flex';
         }
 
@@ -924,9 +935,11 @@
                     saveStats();
                     updateStats();
                     updateLevel();
-                    showToast('🎉 Session Complete!');
+                    const doneMsg = currentLang==='fa' ? '🎉 جلسه تموم شد!' : currentLang==='ar' ? '🎉 انتهت الجلسة!' : '🎉 Session Complete!';
+                    showToast(doneMsg);
                 } else {
-                    showToast(`⏱️ ${minutes}m session done! (min 5m to count)`);
+                    const skipMsg = currentLang==='fa' ? `⏱️ حداقل ۵ دقیقه لازمه` : currentLang==='ar' ? '⏱️ يلزم ٥ دقائق على الأقل' : `⏱️ Min 5 min needed`;
+                    showToast(skipMsg);
                 }
 
                 // نشون دادن دکمه Stop Alarm
