@@ -3,7 +3,7 @@
   "version": "2.0.0",
   "description": "Focus Champion - Gamified Pomodoro Timer",
   "scripts": {
-    "build": "echo ready"
+    "build": "mkdir -p www && cp index.html manifest.json sw.js icon-192.png icon-512.png www/ 2>/dev/null || cp index.html manifest.json sw.js *.png www/"
   },
   "dependencies": {
     "@capacitor/android": "5.7.0",
