@@ -409,3 +409,16 @@ if ('Notification' in window && Notification.permission === 'default') {
 console.log('✅ Focus Champion ready');
 console.log('Stats:', stats);
 console.log('Profile:', userProfile);
+function shareApp() {
+    if (navigator.share) {
+        navigator.share({
+            title: 'Focus Champion',
+            text: 'Check out this app:',
+            url: window.location.href
+        });
+    } else {
+        navigator.clipboard.writeText(window.location.href);
+        alert("Link copied!");
+    }
+}
+
