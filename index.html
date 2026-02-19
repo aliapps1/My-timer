@@ -211,7 +211,8 @@
                 </button>
                 <button onclick="shareVia('copy')" style="background:#6366f1; color:white; border:none; border-radius:15px; padding:15px; font-size:16px; font-weight:bold; cursor:pointer;">
                     📋 Copy Text
-                <button onclick="shareApp()" style="background:#f59e0b; color:white; border:none; border-radius:10px; padding:12px; cursor:pointer; width:100%;">📱 More...</button>
+                <button onclick="if(navigator.share){navigator.share({title:'Focus Champion',url:window.location.href})}else{alert('Link copied!')}" style="background:#f59e0b; color:white; border:none; border-radius:10px; padding:12px; cursor:pointer; width:100%;">📱 More...</button>
+
 
             </div>
         </div>
