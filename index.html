@@ -212,9 +212,9 @@
                 <button onclick="shareVia('copy')" style="background:#6366f1; color:white; border:none; border-radius:15px; padding:15px; font-size:16px; font-weight:bold; cursor:pointer;">
                     📋 Copy Text
                 </button>
-                <button onclick="if(navigator.share){navigator.share({title:'Focus Champion',url:window.location.href})}else{window.open('https://t.me/share/url?url='+encodeURIComponent(window.location.href))}" style="background:#f59e0b; color:white; border:none; border-radius:10px; padding:12px; cursor:pointer; width:100%;">📱 More Options </button>
-
-
+                <button onclick="if(navigator.share){navigator.share({title:'Focus Champion',url:window.location.href})}else{window.open('https://t.me/share/url?url='+encodeURIComponent(window.location.href))}" style="background:#f59e0b; color:white; border:none; border-radius:10px; padding:12px; cursor:pointer; flex:1; display:flex; align-items:center; justify-content:center; gap:8px; font-size:14px; white-space:nowrap;">
+    📱 More Options
+</button>
 
             </div>
         </div>
