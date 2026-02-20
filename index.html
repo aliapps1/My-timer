@@ -806,25 +806,21 @@
                     });
                 } catch(e) { alert(currentShareText); }
             } else if (method === 'more') {
-    // اول سعی کن navigator.share
+    alert('More button clicked!'); // تست 1
+    
     if (navigator.share) {
+        alert('navigator.share exists!'); // تست 2
         navigator.share({
             title: 'Focus Champion',
             text: currentShareText,
             url: 'https://aliapps1.github.io/My-timer/'
-        }).catch(() => {
-            // اگه fail شد، از Android Intent استفاده کن
-            useAndroidIntent();
+        }).then(() => {
+            alert('Share completed!'); // تست 3
+        }).catch((error) => {
+            alert('Share failed: ' + error); // تست 4
         });
     } else {
-        // مستقیم Android Intent
-        useAndroidIntent();
-    }
-    
-    function useAndroidIntent() {
-        // Android Intent برای Share (کار می‌کنه در APK)
-        const intent = `intent:#Intent;action=android.intent.action.SEND;type=text/plain;S.android.intent.extra.SUBJECT=Focus Champion;S.android.intent.extra.TEXT=${encodeURIComponent(currentShareText + '\n\nhttps://aliapps1.github.io/My-timer/')};end`;
-        window.location.href = intent;
+        alert('navigator.share NOT available'); // تست 5
     }
             }
 
