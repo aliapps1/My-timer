@@ -783,45 +783,28 @@
         }
 
         function shareVia(method) {
-    const text = document.getElementById('shareText').innerText;
-    const encoded = encodeURIComponent(text);
-    
+    const encoded = encodeURIComponent(currentShareText);
     closeShareModal();
     
     if (method === 'whatsapp') {
-        window.location.href = `whatsapp://send?text=${encoded}`;
-    } 
+        window.open(`https://wa.me/?text=${encoded}`);
+    }
     else if (method === 'telegram') {
-        window.location.href = `tg://msg?text=${encoded}`;
-    } 
+        window.open(`https://t.me/share/url?url=...`);
+    }
     else if (method === 'copy') {
-        try {
-            navigator.clipboard.writeText(text).then(() => {
-                alert(currentLang==='fa'?'✅ کپی شد!':currentLang==='ar'?'✅ تم النسخ!':'✅ Copied!');
-            }).catch(() => {
-                // fallback برای APK
-                const ta = document.createElement('textarea');
-                ta.value = text;
-                document.body.appendChild(ta);
-                ta.select();
-                document.execCommand('copy');
-                document.body.removeChild(ta);
-                alert('✅ Copied!');
-            });
-        } catch(e) { 
-            alert(text); 
-        }
-    } 
-    else if (method === 'more') {
+        navigator.clipboard.writeText(currentShareText);
+    }
+    else if (method === 'more') {  // ✅ اینجا اضافه کن!
         if (navigator.share) {
             navigator.share({
                 title: 'Focus Champion',
-                text: text,
+                text: currentShareText,
                 url: 'https://aliapps1.github.io/My-timer/'
             }).catch(() => {});
         }
     }
-        
+        } 
 
         const PREMIUM_CODES = ['FOCUS2024','CHAMPION99','PREMIUM01','VIP2024'];
 
