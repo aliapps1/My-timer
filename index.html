@@ -805,7 +805,7 @@
                         alert('✅ Copied!');
                     });
                 } catch(e) { alert(currentShareText); }
-            } else if (method === 'native') {
+            } else if (method === 'more') {
                 // در APK از Android Intent استفاده می‌کنیم
                 if (navigator.share) {
                     navigator.share({ title: T[currentLang].title, text: currentShareText }).catch(() => {});
