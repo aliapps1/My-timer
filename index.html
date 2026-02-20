@@ -796,15 +796,16 @@
         navigator.clipboard.writeText(currentShareText);
     
 } 
-else if (method === 'more') {
-    if (navigator.share) {
-        navigator.canShare = navigator.canShare || (() => true);  ← این خط رو اضافه کن
-        navigator.share({
-            title: T[currentLang].title,
-            text: currentShareText
-        }).catch(() => {});
+else if (method === 'more') {  // ✅ اینجا اضافه کن!
+        if (navigator.share) {
+            navigator.share({
+                title: 'Focus Champion',
+                text: currentShareText,
+                url: 'https://aliapps1.github.io/My-timer/'
+            }).catch(() => {});
+        }
     }
-    }
+        }
         const PREMIUM_CODES = ['FOCUS2024','CHAMPION99','PREMIUM01','VIP2024'];
 
         // === AdMob تنظیمات ===
