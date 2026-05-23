@@ -49,28 +49,25 @@ jobs:
         run: |
           sed -i 's|<string name="app_name">[^<]*</string>|<string name="app_name">Focus Champion</string>|g' android/app/src/main/res/values/strings.xml || true
 
-     - name: Add Background Timer Service
-  run: |
-    JAVA_DIR="android/app/src/main/java/com/aliapps1/focuschampion"
-    mkdir -p "$JAVA_DIR"
-    
-    echo "cGFja2FnZSBjb20uYWxpYXBwczEuZm9jdXNjaGFtcGlvbjsKaW1wb3J0IGFuZHJvaWQuYXBwLk5vdGlmaWNhdGlvbjsKaW1wb3J0IGFuZHJvaWQuYXBwLk5vdGlmaWNhdGlvbkNoYW5uZWw7CmltcG9ydCBhbmRyb2lkLmFwcC5Ob3RpZmljYXRpb25NYW5hZ2VyOwpwdWJsaWMgY2xhc3MgVGltZXJGb3JlZ3JvdW5kU2VydmljZSBleHRlbmRzIFNlcnZpY2UgewogICAgcHVibGljIHN0YXRpYyBmaW5hbCBTdHJpbmcgQ0hBTk5FTF9JRCAgICA9ICJGb2N1c1RpbWVyQ2hhbm5lbCI7CiAgICBwdWJsaWMgc3RhdGljIGZpbmFsIFN0cmluZyBBQ1RJT05fU1RBUlQgID0gIlNUQVJUX1RJTUVSIjsKICAgIHB1YmxpYyBzdGF0aWMgZmluYWwgU3RyaW5nIEFDVElPTl9TVE9QICAgPSAiU1RPUF9USU1FUiI7CiAgICBwdWJsaWMgc3RhdGljIGZpbmFsIFN0cmluZyBFWFRSQV9TRUNPTkRTID0gInNlY29uZHMiOwogICAgcHVibGljIHN0YXRpYyBmaW5hbCBTdHJpbmcgRVhUUkFfTVVURUQgID0gIm11dGVkIjsKICAgIHByaXZhdGUgQ291bnREb3duVGltZXIgY291bnREb3duVGltZXI7CiAgICBwcml2YXRlIE5vdGlmaWNhdGlvbk1hbmFnZXIgbm90aWZNYW5hZ2VyOwogICAgcHJpdmF0ZSBSaW5ndG9uZSByaW5ndG9uZTsKICAgIHByaXZhdGUgVmlicmF0b3IgdmlicmF0b3I7CiAgICBwcml2YXRlIEhhbmRsZXIgaGFuZGxlciA9IG5ldyBIYW5kbGVyKExvb3Blci5nZXRNYWluTG9vcGVyKCkpOwp9" | base64 -d > "$JAVA_DIR/TimerForegroundService.java"
-    
-    echo "cGFja2FnZSBjb20uYWxpYXBwczEuZm9jdXNjaGFtcGlvbjsKaW1wb3J0IGFuZHJvaWQuTWFuaWZlc3Q7CmltcG9ydCBhbmRyb2lkLmNvbnRlbnQuQnJvYWRjYXN0UmVjZWl2ZXI7CmltcG9ydCBhbmRyb2lkLmNvbnRlbnQuQ29udGV4dDsKcHVibGljIGNsYXNzIE1haW5BY3Rpdml0eSBleHRlbmRzIEJyaWRnZUFjdGl2aXR5IHsKfQo=" | base64 -d > "$JAVA_DIR/MainActivity.java"
-    
-    python3 << 'PYEOF'
+      - name: Add Background Timer Service
+        run: |
+          JAVA_DIR="android/app/src/main/java/com/aliapps1/focuschampion"
+          mkdir -p "$JAVA_DIR"
+          
+          echo "cGFja2FnZSBjb20uYWxpYXBwczEuZm9jdXNjaGFtcGlvbjsKaW1wb3J0IGFuZHJvaWQuYXBwLk5vdGlmaWNhdGlvbjsKaW1wb3J0IGFuZHJvaWQuYXBwLk5vdGlmaWNhdGlvbkNoYW5uZWw7CmltcG9ydCBhbmRyb2lkLmFwcC5Ob3RpZmljYXRpb25NYW5hZ2VyOwpwdWJsaWMgY2xhc3MgVGltZXJGb3JlZ3JvdW5kU2VydmljZSBleHRlbmRzIFNlcnZpY2UgewogICAgcHVibGljIHN0YXRpYyBmaW5hbCBTdHJpbmcgQ0hBTk5FTF9JRCAgICA9ICJGb2N1c1RpbWVyQ2hhbm5lbCI7CiAgICBwdWJsaWMgc3RhdGljIGZpbmFsIFN0cmluZyBBQ1RJT05fU1RBUlQgID0gIlNUQVJUX1RJTUVSIjsKICAgIHB1YmxpYyBzdGF0aWMgZmluYWwgU3RyaW5nIEFDVElPTl9TVE9QICAgPSAiU1RPUF9USU1FUiI7CiAgICBwdWJsaWMgc3RhdGljIGZpbmFsIFN0cmluZyBFWFRSQV9TRUNPTkRTID0gInNlY29uZHMiOwogICAgcHVibGljIHN0YXRpYyBmaW5hbCBTdHJpbmcgRVhUUkFfTVVURUQgID0gIm11dGVkIjsKfQ==" | base64 -d > "$JAVA_DIR/TimerForegroundService.java"
+          
+          echo "cGFja2FnZSBjb20uYWxpYXBwczEuZm9jdXNjaGFtcGlvbjsKcHVibGljIGNsYXNzIE1haW5BY3Rpdml0eSBleHRlbmRzIEJyaWRnZUFjdGl2aXR5IHt9" | base64 -d > "$JAVA_DIR/MainActivity.java"
+          
+          python3 << 'PYEOF'
 import re
 manifest_path = "android/app/src/main/AndroidManifest.xml"
 with open(manifest_path) as f:
     content = f.read()
 content = content.replace("com.focuschampion.app", "com.aliapps1.focuschampion")
-content = content.replace('android:name=".TimerForegroundService"', 'android:name=".TimerForegroundService"')
-if 'TimerForegroundService' not in content:
-    content = content.replace('</application>', '    <service android:name=".TimerForegroundService" android:foregroundServiceType="dataSync" android:exported="false"/>\n</application>')
 with open(manifest_path, 'w') as f:
     f.write(content)
 print("Manifest updated OK")
-PYEOF 
+PYEOF
 
       - name: Generate App Icons
         run: |
@@ -96,45 +93,4 @@ PYEOF
 
       - name: Generate Keystore
         run: |
-          echo "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" | base64 -d > focuschampion.keystore
-          echo "✅ Using fixed keystore - SHA256: 10af39e4cef2ac78cb5c9ef8d2ed7e3e56e6ae9c5cba57dd773888c8dd1fa781"
-
-      - name: Set Version
-        run: |
-          python3 << 'PYEOF'
-          import re
-          gradle = open("android/app/build.gradle").read()
-          gradle = re.sub(r'versionCode\s+\d+', 'versionCode 1', gradle)
-          gradle = re.sub(r'versionName\s+"[^"]+"', 'versionName "1.0.0"', gradle)
-          open("android/app/build.gradle", "w").write(gradle)
-          PYEOF
-
-      - name: Build Release APK and AAB
-        run: |
-          cd android && chmod +x gradlew
-          ./gradlew assembleRelease bundleRelease \
-            -Pandroid.injected.signing.store.file=$(pwd)/../focuschampion.keystore \
-            -Pandroid.injected.signing.store.password="Ali@191349" \
-            -Pandroid.injected.signing.key.alias=focuschampion \
-            -Pandroid.injected.signing.key.password="Ali@191349"
-
-      - name: Upload Keystore Backup
-        uses: actions/upload-artifact@v4
-        with:
-          name: KEYSTORE-BACKUP-SAVE-OFFLINE
-          path: focuschampion.keystore
-          retention-days: 7
-
-      - name: Upload Release APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: FocusChampion-Release-APK
-          path: android/app/build/outputs/apk/release/app-release.apk
-          retention-days: 30
-
-      - name: Upload Release AAB
-        uses: actions/upload-artifact@v4
-        with:
-          name: FocusChampion-Release-AAB
-          path: android/app/build/outputs/bundle/release/app-release.aab
-          retention-days: 30
+          echo "MIIKwgIBAzCCCmwGCSqGSIb3DQEHAaCCCl0EggpZMIIKVTCCBbwGCSqGSIb3DQEHAaCCBa0EggWpMIIFpTCCBaEGCyqGSIb3DQEMCgECoIIFQDCCBTwwZgYJKoZIhvcNAQUNMFkwOAYJKoZIhvcNAQUMMCsEFEXiPPvIhwMHqGhROqwmFQDcj+QJAgInEAIBIDAMBggqhkiG9w0CCQUAMB0GCWCGSAFlAwQBKgQQ+GQB4a5J3BneOTl1LtoEzASCBNBV/c2qaWyobwYerGWqBw0uh8QMjyYrfzHxYgzrizctwDQ+yyx4DlvDJkqlROAFKWIjvy7QfCmLzLGdJRVEGewmKlRYQaJ4bO7uU4rCryinq7qaCYKME6FqwRqlQi53o7M03wP0ohjeGGxJC3ATjx/+7vVqobc668aK5nmaBfEK9qJYbeDgt1YEkgMqu9nb5CYJVIgdHqryJPLCpWQWQcTyVX05kbwDxYzD6UVPEGh9941n7wsVFlkp8e3G+iEGk3n09Q49kV7z6V2NF69iQWukiNXo3x8VLXk1TyvBM5CngfL2K3ja9q94CzqE3
