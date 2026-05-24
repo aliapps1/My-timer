@@ -55,45 +55,45 @@ jobs:
           mkdir -p "$JAVA_DIR"
           
           cat > "$JAVA_DIR/TimerForegroundService.java" << 'EOF'
-package com.aliapps1.focuschampion;
-import android.app.Service;
-import android.content.Intent;
-import android.os.IBinder;
-public class TimerForegroundService extends Service {
-    public static final String CHANNEL_ID = "FocusTimerChannel";
-    public IBinder onBind(Intent intent) { return null; }
-}
-EOF
+          package com.aliapps1.focuschampion;
+          import android.app.Service;
+          import android.content.Intent;
+          import android.os.IBinder;
+          public class TimerForegroundService extends Service {
+              public static final String CHANNEL_ID = "FocusTimerChannel";
+              public IBinder onBind(Intent intent) { return null; }
+          }
+          EOF
           
           cat > "$JAVA_DIR/MainActivity.java" << 'EOF'
-package com.aliapps1.focuschampion;
-import com.getcapacitor.BridgeActivity;
-public class MainActivity extends BridgeActivity {}
-EOF
+          package com.aliapps1.focuschampion;
+          import com.getcapacitor.BridgeActivity;
+          public class MainActivity extends BridgeActivity {}
+          EOF
           
           sed -i 's/com.focuschampion.app/com.aliapps1.focuschampion/g' android/app/src/main/AndroidManifest.xml
 
       - name: Generate App Icons
         run: |
           python3 << 'PYEOF'
-from PIL import Image
-import os
-src = "icon-512.png" if os.path.exists("icon-512.png") else "icon-192.png"
-img = Image.open(src).convert("RGBA")
-sizes = {
-    "android/app/src/main/res/mipmap-mdpi": 48,
-    "android/app/src/main/res/mipmap-hdpi": 72,
-    "android/app/src/main/res/mipmap-xhdpi": 96,
-    "android/app/src/main/res/mipmap-xxhdpi": 144,
-    "android/app/src/main/res/mipmap-xxxhdpi": 192,
-}
-for folder, size in sizes.items():
-    os.makedirs(folder, exist_ok=True)
-    r = img.resize((size, size), Image.LANCZOS)
-    r.save(f"{folder}/ic_launcher.png")
-    r.save(f"{folder}/ic_launcher_round.png")
-    r.save(f"{folder}/ic_launcher_foreground.png")
-PYEOF
+          from PIL import Image
+          import os
+          src = "icon-512.png" if os.path.exists("icon-512.png") else "icon-192.png"
+          img = Image.open(src).convert("RGBA")
+          sizes = {
+              "android/app/src/main/res/mipmap-mdpi": 48,
+              "android/app/src/main/res/mipmap-hdpi": 72,
+              "android/app/src/main/res/mipmap-xhdpi": 96,
+              "android/app/src/main/res/mipmap-xxhdpi": 144,
+              "android/app/src/main/res/mipmap-xxxhdpi": 192,
+          }
+          for folder, size in sizes.items():
+              os.makedirs(folder, exist_ok=True)
+              r = img.resize((size, size), Image.LANCZOS)
+              r.save(f"{folder}/ic_launcher.png")
+              r.save(f"{folder}/ic_launcher_round.png")
+              r.save(f"{folder}/ic_launcher_foreground.png")
+          PYEOF
 
       - name: Generate Keystore
         run: |
