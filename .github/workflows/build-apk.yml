@@ -96,10 +96,8 @@ for folder, size in sizes.items():
 PYEOF
 
       - name: Generate Keystore
-        env:
-          KEYSTORE_BASE64: "MIIKwgIBAzCCCmwGCSqGSIb3DQEHAaCCCl0EggpZMIIKVTCCBbwGCSqGSIb3DQEHAaCCBa0EggWpMIIFpTCCBaEGCyqGSIb3DQEMCgECoIIFQDCCBTwwZgYJKoZIhvcNAQUNMFkwOAYJKoZIhvcNAQUMMCsEFEXiPPvIhwMHqGhROqwmFQDcj+QJAgInEAIBIDAMBggqhkiG9w0CCQUAMB0GCWCGSAFlAwQBKgQQ+GQB4a5J3BneOTl1LtoEzASCBNBV/c2qaWyobwYerGWqBw0uh8QMjyYrfzHxYgzrizctwDQ+yyx4DlvDJkqlROAFKWIjvy7QfCmLzLGdJRVEGewmKlRYQaJ4bO7uU4rCryinq7qaCYKME6FqwRqlQi53o7M03wP0ohjeGGxJC3ATjx/+7vVqobc668aK5nmaBfEK9qJYbeDgt1YEkgMqu9nb5CYJVIgdHqryJPLCpWQWQcTyVX05kbwDxYzD6UVPEGh9941n7wsVFlkp8e3G+iEGk3n09Q49kV7z6V2NF69iQWukiNXo3x8VLXk1TyvBM5CngfL2K3ja9q94CzqE3YdrO3/n2O3f1AuLdrjdQbYceklcMzSaMYhZx33iISFxyQQ7fmPQJY+VrHoraHznCOp88CDJeFmBM5AJsFZzY90FUcR4xUWXtSE/6YQfMikIiXn32xFhiVInpb84gDy8bI7oeDpKhKIlI2qC73r2Oq8mkEeXLy2+Aqru5iEt0avL2Qp1sEfsGCtVo5gh1kvCq8DIod+AnpeG9nvPYAL6jZ8EgBqLZ5/YHrGqToiQjXvAXnOwf1A/eKAWR35l1lifNw+acX07dxXm7Gp7yuAz5Llsdp4PJcZJxKyK6V7bU5VIlhUO8vLCAjfedMG+7uLEKxV07N7p13bszSX2tDTnenWgW7AcuvXOUmIoUNLOMY5sDKI3mqFwDIzGwvTVWjX78F2tA7YP9C1f8cthax++JvOe/6ZZRyaQrVGA8diNOdlvbN28xgX4jhtAMHCndtjLT+xFyXfBAe92KD7ccR3OehpMCCyMZAd4RzG0dq2CKUYGguhQPt7EedOQbbG+5+ZNrDrrettZViaNotcUU49aDUM/j/4jRPzjmTYSMAhcKDUlVg7b5c6obITP/KNjr5r6RD2aPSC2ifcRi+EWSijIysJyqsTVMWDHYAQ2iri0FfGPvtsuhm5QG6U//S/Z1jMCZ3sZZ2WMheXfMrW7FyyoNmzM/oR/O6E5JdqFKRxz/uG921StejgA5HjaqZBbmCNnddPb1lJj5Igk++dy3SZ18Zt88AOMyCEUM4WXnSMpGBX+G+ra3JW4ocj9r4iMgPxytZcj/JLQClGRDmeJ2itaTa5Lk9NOaAZxHO+nDOxwputbYomx5ZPN/A+tp+1J1wBbHgzXbecRWK"
         run: |
-          echo "$KEYSTORE_BASE64" | base64 -d > android/app/release.keystore
+          echo "${{ secrets.MY_KEYSTORE_BASE64 }}" | base64 -d > android/app/release.keystore
 
       - name: Build Android Release
         run: |
