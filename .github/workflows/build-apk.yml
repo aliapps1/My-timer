@@ -105,7 +105,7 @@ jobs:
           ./gradlew assembleRelease bundleRelease
 
       - name: Upload Artifacts
-        uses: actions/artifacts@v4
+        uses: actions/upload-artifact@v4
         with:
           name: focus-champion-builds
           path: |
